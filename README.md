@@ -1,6 +1,6 @@
 # Worker-Fall-Detection Project
 
-Team Members: Johnathan Miller, Evan Grukhley, Malcom Troy, Allen Basil, Benjamin Aleman
+Team Members: Johnathan Miller, Evan Gruhlkey, Malcom Troy, Allen Basil, Benjamin Aleman
 
 Sponsor: Maksym Pryporov - Maksym_Pryporov@oxy.com
 
