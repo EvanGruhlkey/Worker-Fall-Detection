@@ -1,2 +1,3 @@
-data/input/*.mp4
-data/output/*.mp4
+data/input/*
+data/output/*
+.venv/
