@@ -51,14 +51,23 @@ def process_video(input_video, model_path, output_video, output_json, image_size
             if not ok:
                 break
 
-            result = model(frame, imgsz=image_size, verbose=False)[0]
+            result = model.track(
+                frame,
+                persist=True,
+                tracker="bytetrack.yaml",
+                imgsz=image_size,
+                verbose=False,
+            )[0]
 
-            # Ultralytics draws its own boxes, keypoints, and skeletons
-            # labels=False, conf=False to get rid of person and conf like in demo 1
-            writer.write(result.plot(labels=False, conf=False))
-
-            # [x1, y1, x2, y2, confidence, class]
-            boxes = result.boxes.data.cpu().tolist()
+            # Read tracked box fields individually because tracking adds an ID
+            # column to the raw box data.
+            boxes = result.boxes.xyxy.cpu().tolist()
+            confidences = result.boxes.conf.cpu().tolist()
+            track_ids = (
+                result.boxes.id.int().cpu().tolist()
+                if result.boxes.id is not None
+                else [None] * len(boxes)
+            )
 
             # 17 [x, y, confidence] keypoints
             keypoints = []
@@ -66,20 +75,61 @@ def process_video(input_video, model_path, output_video, output_json, image_size
                 keypoints = result.keypoints.data.cpu().tolist()
 
             people = []
-            for box, person_keypoints in zip(boxes, keypoints):
+            for box, confidence, track_id, person_keypoints in zip(
+                boxes, confidences, track_ids, keypoints
+            ):
                 if len(person_keypoints) != 17:
                     raise ValueError("Model must output exactly 17 COCO keypoints")
 
                 people.append(
                     {
-                        "bbox": box[:4],
-                        "confidence": box[4],
+                        "track_id": track_id,
+                        "bbox": box,
+                        "confidence": confidence,
                         "keypoints": [
                             {"x": point[0], "y": point[1], "confidence": point[2]}
                             for point in person_keypoints
                         ],
                     }
                 )
+
+            # Draw the pose results without class/confidence labels, then add a
+            # high-contrast tracking ID above each person's bounding box.
+            annotated_frame = result.plot(labels=False, conf=False)
+            for box, track_id in zip(boxes, track_ids):
+                if track_id is None:
+                    continue
+
+                x1, y1 = int(box[0]), int(box[1])
+                label = f"ID {track_id}"
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                font_scale = 0.8
+                thickness = 2
+                (text_width, text_height), baseline = cv2.getTextSize(
+                    label, font, font_scale, thickness
+                )
+                text_x = max(0, min(x1, width - text_width - 8))
+                text_y = max(text_height + 8, y1 - 8)
+
+                cv2.rectangle(
+                    annotated_frame,
+                    (text_x, text_y - text_height - 8),
+                    (text_x + text_width + 8, text_y + baseline),
+                    (0, 0, 0),
+                    -1,
+                )
+                cv2.putText(
+                    annotated_frame,
+                    label,
+                    (text_x + 4, text_y - 4),
+                    font,
+                    font_scale,
+                    (0, 255, 255),
+                    thickness,
+                    cv2.LINE_AA,
+                )
+
+            writer.write(annotated_frame)
 
             frames.append({"frame_index": frame_index, "people": people})
             frame_index += 1
@@ -117,7 +167,6 @@ def parse_args():
 def main():
     args = parse_args()
     input_video = Path(args.input)
-    # 001.mp4 becomes data/output/001.mp4 and data/output/001.json.
     repo_root = Path(__file__).resolve().parents[1]
     output_dir = repo_root / "data" / "output"
     output_video = output_dir / f"{input_video.stem}.mp4"
