@@ -1,0 +1,27 @@
+[project]
+name = "worker-fall-detection"
+version = "0.1.0"
+description = "Computer vision safety software to detect worker falls (YOLO Pose + ByteTrack)"
+readme = "README.md"
+# PyTorch's last macOS x86_64 (Intel) wheels are torch 2.2.2, which supports
+# Python 3.8-3.12. Pinning to 3.12 keeps every machine on a version PyTorch
+# actually ships wheels for.
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "ultralytics>=8.3",
+    "opencv-python>=4.10",
+    "lap>=0.5.12",
+    # torch 2.2.2 (the newest build for Intel Macs) was compiled against
+    # NumPy 1.x and fails at runtime with NumPy 2.
+    "numpy<2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+]
+
+[tool.uv]
+# This is a collection of scripts, not an installable package.
+package = false
+# Make the lockfile include a torch/torchvision version that has wheels for
+# Intel Macs (torch 2.2.2 / torchvision 0.17.2). Other platforms (Apple
+# Silicon, Linux, Windows) still resolve to the newest release.
+required-environments = [
+    "sys_platform == 'darwin' and platform_machine == 'x86_64'",
+]

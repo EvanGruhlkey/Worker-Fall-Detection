@@ -12,26 +12,36 @@ Runs pose detection and person tracking on either a live OpenCV camera feed or a
 
 ### Setup
 
-You can create a virtual env if you want.
+This project uses [uv](https://docs.astral.sh/uv/) to manage Python and dependencies. It pins Python 3.12 because PyTorch's last builds for Intel Macs only support up to 3.12, and it locks every dependency in `uv.lock` so everyone gets the same working versions.
 
-Install dependencies:
+Install uv (once):
 
 ```bash
-pip install -r requirements.txt
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
+Then from the project root:
+
+```bash
+uv sync
+```
+
+This downloads Python 3.12 if needed, creates `.venv`, and installs the locked dependencies. You do not need to activate the virtual env; prefix commands with `uv run` instead.
+
+To add a dependency, use `uv add <package>` (this updates `pyproject.toml` and `uv.lock`). Commit both files.
 
 ### Live camera
 
 From the project root, run:
 
 ```bash
-python src/yolo_pose.py --model models/yolo11n-pose.pt
+uv run src/yolo_pose.py --model models/yolo11n-pose.pt
 ```
 
 This opens camera `0`. Press `Q` or `Esc` to stop. To select another camera or request a particular resolution:
 
 ```bash
-python src/yolo_pose.py --model models/yolo11n-pose.pt --camera 1 --width 1280 --height 720
+uv run src/yolo_pose.py --model models/yolo11n-pose.pt --camera 1 --width 1280 --height 720
 ```
 
 On first use, your operating system may ask for camera access for Terminal or Python.
@@ -41,7 +51,7 @@ On first use, your operating system may ask for camera access for Terminal or Py
 Supply your own video. From the project root, run:
 
 ```bash
-python src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-pose.pt
+uv run src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-pose.pt
 ```
 
 Outputs are saved as `data/output/YourVideo.mp4` and `data/output/YourVideo.json`.
