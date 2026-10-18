@@ -56,9 +56,19 @@ uv run src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-
 
 Outputs are saved as `data/output/YourVideo.mp4` and `data/output/YourVideo.json`.
 
+### Sliding window
+
+`src/sliding_window.py` keeps the last 30 frames of keypoints for each tracked person and turns them into a normalized `(30, 51)` window, the input for the temporal classifier. See [docs/features/10-18-2026-sliding-window.md](docs/features/10-18-2026-sliding-window.md).
+
+### Tests
+
+```bash
+uv run pytest tests -v
+```
+
 ### Incomplete
 
-Fall classification and alarms are not implemented yet. <br><br>
+The temporal classifier, fall alarms, and the X-CLIP verifier are not implemented yet. <br><br>
 
 Team Members: Johnathan Miller, Evan Gruhlkey, Malcom Troy, Allen Basil, Benjamin Aleman
 
