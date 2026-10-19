@@ -3,3 +3,7 @@ data/output/*
 .venv/
 .DS_Store
 __pycache__/
+.pytest_cache/
+pytest-cache-files-*/
+data/events/
+data/falls.db*
