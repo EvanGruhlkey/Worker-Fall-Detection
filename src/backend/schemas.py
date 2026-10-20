@@ -1,16 +1,28 @@
 """Request and response models for the API."""
 
 from datetime import datetime
+from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
-from .db import JobKind, JobStatus, ReviewStatus
+from .db import EventType, JobKind, JobStatus, ReviewStatus
+
+# Status names as the dashboard shows them (ui/src/types.ts EventStatus).
+STATUS_LABELS = {
+    ReviewStatus.unacknowledged: "Unacknowledged",
+    ReviewStatus.needs_review: "Needs review",
+    ReviewStatus.resolved: "Resolved",
+    ReviewStatus.false_alarm: "False alarm",
+}
 
 
 class JobRead(BaseModel):
     id: int
     kind: JobKind
     name: str
+    label: str | None
+    location: str | None
+    coords: str | None
     status: JobStatus
     frames_processed: int
     total_frames: int | None
@@ -32,6 +44,9 @@ class CameraStart(BaseModel):
         description="Camera index (e.g. '0') or a stream URL such as rtsp://...",
     )
     name: str | None = None
+    label: str | None = Field(None, description="Short description, e.g. 'Loading dock'")
+    location: str | None = Field(None, description="Overrides FALL_SITE_LOCATION")
+    coords: str | None = Field(None, description="Overrides FALL_SITE_COORDS")
     width: int | None = Field(None, gt=0)
     height: int | None = Field(None, gt=0)
 
@@ -40,6 +55,10 @@ class EventRead(BaseModel):
     id: int
     job_id: int
     job_name: str | None = None
+    event_type: EventType
+    camera_name: str | None
+    location: str | None
+    coords: str | None
     track_id: int | None
     frame_index: int
     video_time: float
@@ -59,6 +78,15 @@ class EventReview(BaseModel):
     reviewer: str | None = Field(None, max_length=100)
     notes: str | None = Field(None, max_length=2000)
 
+    @field_validator("status", mode="before")
+    @classmethod
+    def _accept_dashboard_labels(cls, value):
+        """Accept "Needs review" as well as "needs_review"."""
+        for status, label in STATUS_LABELS.items():
+            if value == label:
+                return status
+        return value
+
 
 class EventPage(BaseModel):
     items: list[EventRead]
@@ -67,8 +95,65 @@ class EventPage(BaseModel):
 
 class Stats(BaseModel):
     total_events: int
-    pending: int
-    confirmed: int
+    unacknowledged: int
+    needs_review: int
+    resolved: int
     false_alarm: int
     active_cameras: int
     running_jobs: int
+
+
+# Dashboard models: the same shapes as ui/src/types.ts, so the frontend can use
+# them without converting. Extra fields are additions the UI can ignore.
+
+Tone = Literal["red", "green", "default"]
+
+
+class DashboardLocation(BaseModel):
+    name: str
+    coords: str
+
+
+class DashboardStat(BaseModel):
+    label: str
+    value: str
+    note: str
+    tone: Tone
+    icon: str
+
+
+class DashboardCamera(BaseModel):
+    id: str
+    name: str
+    label: str
+    fps: float
+    online: bool
+    job_id: int | None = None
+    health: str = "offline"
+    stream_url: str | None = None
+
+
+class DashboardEvent(BaseModel):
+    id: int
+    time: str = Field(description="Local time of detection, e.g. '10:42:11 AM'")
+    name: str
+    icon: str
+    color: str
+    confidence: int | None = Field(description="Percent")
+    status: Literal["Unacknowledged", "Needs review", "Resolved", "False alarm"]
+    # Additions beyond ui/src/types.ts FallEvent:
+    detected_at: datetime
+    camera: str | None
+    location: str | None
+    coords: str | None
+    track_id: int | None
+    reason: str
+    snapshot_url: str | None
+    clip_url: str | None
+
+
+class Dashboard(BaseModel):
+    location: DashboardLocation
+    stats: list[DashboardStat]
+    camera: DashboardCamera
+    events: list[DashboardEvent]

@@ -7,3 +7,6 @@ __pycache__/
 pytest-cache-files-*/
 data/events/
 data/falls.db*
+
+# Local settings (copy from .env.example)
+.env

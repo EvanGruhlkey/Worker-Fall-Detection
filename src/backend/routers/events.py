@@ -62,12 +62,12 @@ def get_event(event_id: int, session: Session = Depends(get_session)):
 
 @router.patch("/events/{event_id}", response_model=EventRead)
 def review_event(event_id: int, review: EventReview, session: Session = Depends(get_session)):
-    """Mark a fall as confirmed or a false alarm (or reset it to pending)."""
+    """Move a fall through review: needs_review, resolved or false_alarm."""
     event = _get_event(session, event_id)
     event.status = review.status
     event.reviewer = review.reviewer
     event.notes = review.notes
-    event.reviewed_at = None if review.status == ReviewStatus.pending else utc_now()
+    event.reviewed_at = None if review.status == ReviewStatus.unacknowledged else utc_now()
     session.add(event)
     session.commit()
     session.refresh(event)
@@ -97,8 +97,9 @@ def stats(session: Session = Depends(get_session), manager=Depends(get_manager))
     ).one()
     return Stats(
         total_events=sum(counts.values()),
-        pending=counts.get(ReviewStatus.pending, 0),
-        confirmed=counts.get(ReviewStatus.confirmed, 0),
+        unacknowledged=counts.get(ReviewStatus.unacknowledged, 0),
+        needs_review=counts.get(ReviewStatus.needs_review, 0),
+        resolved=counts.get(ReviewStatus.resolved, 0),
         false_alarm=counts.get(ReviewStatus.false_alarm, 0),
         active_cameras=len(manager.active_cameras()),
         running_jobs=running,

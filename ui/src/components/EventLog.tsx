@@ -1,4 +1,3 @@
-import { LOCATION } from "../data/mock";
 import type { EventStatus, FallEvent } from "../types";
 import Icon from "./Icon";
 
@@ -29,6 +28,9 @@ export default function EventLog({ events }: { events: FallEvent[] }) {
             <tr><th>Time</th><th>Event</th><th>Camera / Location</th><th>Confidence</th><th>Status</th></tr>
           </thead>
           <tbody>
+            {events.length === 0 && (
+              <tr><td colSpan={5}><small>No events today</small></td></tr>
+            )}
             {events.map((e) => (
               <tr key={e.id}>
                 <td className="time">{e.time}</td>
@@ -38,7 +40,7 @@ export default function EventLog({ events }: { events: FallEvent[] }) {
                     {e.name}
                   </span>
                 </td>
-                <td>Camera 01<small>{LOCATION.name}</small></td>
+                <td>{e.camera ?? "—"}<small>{e.location}</small></td>
                 <td>{e.confidence === null ? "—" : `${e.confidence}%`}</td>
                 <td><span className={`pill ${PILL[e.status]}`}>{e.status}</span></td>
               </tr>

@@ -30,7 +30,7 @@ def to_job_read(job, manager=None):
         stream_url = f"/api/cameras/{job.id}/stream"
 
     return JobRead(
-        **job.model_dump(exclude={"source", "output_video", "output_json"}),
+        **job.model_dump(exclude={"source", "output_video", "output_json", "last_frame_at"}),
         progress=progress,
         output_video_url=f"/api/jobs/{job.id}/video" if job.output_video else None,
         output_json_url=f"/api/jobs/{job.id}/json" if job.output_json else None,
@@ -110,26 +110,15 @@ def job_json(job_id: int, session: Session = Depends(get_session), settings=Depe
 
 
 @router.post("/cameras", response_model=JobRead, status_code=201)
-def start_camera(
-    body: CameraStart,
-    session: Session = Depends(get_session),
-    manager=Depends(get_manager),
-):
+def start_camera(body: CameraStart, manager=Depends(get_manager)):
     """Start live fall detection on a camera index or stream URL."""
-    source = body.source.strip()
-    for worker in manager.active_cameras().values():
-        if worker.source == source:
-            raise HTTPException(409, f"Camera {source} is already running")
-
-    job = Job(
-        kind=JobKind.camera,
-        name=body.name or (f"Camera {source}" if source.isdigit() else source),
-        source=source,
-    )
-    session.add(job)
-    session.commit()
-    session.refresh(job)
-    manager.start_camera(job.id, source, body.width, body.height)
+    try:
+        job = manager.create_camera(
+            body.source, name=body.name, label=body.label, location=body.location,
+            coords=body.coords, width=body.width, height=body.height,
+        )
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from error
     return to_job_read(job, manager)
 
 

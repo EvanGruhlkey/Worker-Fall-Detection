@@ -8,7 +8,11 @@
 
 ### Currently Working
 
-Runs pose detection and person tracking on either a live OpenCV camera feed or a prerecorded video. The live view shows skeletons, tracking IDs, FPS, and the number of detected people.
+- **Pose detection and tracking** on a live camera or a prerecorded video. The live view shows skeletons, tracking IDs, FPS, and the number of detected people.
+- **Backend server** (`src/backend/`). Runs the camera through the models and a placeholder fall detector. Each detected fall is saved to a database with its time, camera, location, confidence, a snapshot and a short clip.
+- **Dashboard** (`ui/`). Live annotated camera feed, stat cards (active incidents, cameras online, uptime, camera health), and an event log that updates every few seconds.
+
+**Full guide to running and testing everything: [docs/running-and-testing.md](docs/running-and-testing.md)**
 
 ### Setup
 
@@ -29,6 +33,25 @@ uv sync
 This downloads Python 3.12 if needed, creates `.venv`, and installs the locked dependencies. You do not need to activate the virtual env; prefix commands with `uv run` instead.
 
 To add a dependency, use `uv add <package>` (this updates `pyproject.toml` and `uv.lock`). Commit both files.
+
+The dashboard also needs [Node.js](https://nodejs.org) 18 or newer. Install its packages once:
+
+```bash
+cd ui
+npm install
+```
+
+### Dashboard (backend + frontend)
+
+One command from the project root starts the backend and the dashboard and opens the dashboard in your browser:
+
+```bash
+uv run run.py
+```
+
+Allow location access when the browser asks, so events are stamped with where the laptop is. Press Ctrl+C to stop both.
+
+Settings (which camera to use, fallback location) are in `.env`, created from `.env.example` on the first run. See [docs/running-and-testing.md](docs/running-and-testing.md) for every setting, a step-by-step test of each feature with the expected results, and troubleshooting. API reference: [docs/backend-api.md](docs/backend-api.md).
 
 ### Live camera
 
@@ -66,9 +89,11 @@ Outputs are saved as `data/output/YourVideo.mp4` and `data/output/YourVideo.json
 uv run pytest tests -v
 ```
 
+Expected: `63 passed`. To check that the dashboard compiles, run `npm run build` in `ui/`.
+
 ### Incomplete
 
-The temporal classifier, fall alarms, and the X-CLIP verifier are not implemented yet. <br><br>
+The temporal classifier and the X-CLIP verifier are not implemented yet. Until the classifier is ready, falls are flagged by a simple rule in `src/backend/fall_detector.py`. The dashboard's filter, export, settings and review buttons are not connected yet. Alerts appear only on the dashboard (no sound, SMS or email). <br><br>
 
 Team Members: Johnathan Miller, Evan Gruhlkey, Malcom Troy, Allen Basil, Benjamin Aleman
 

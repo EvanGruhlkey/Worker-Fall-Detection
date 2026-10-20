@@ -20,12 +20,31 @@ from yolo_pose import load_pose_model, process_frame
 
 from .db import FallEvent, Job, JobStatus, get_engine, update_row, utc_now
 from .fall_detector import FallDetector
+from .location import current_site_location
 from .media import VideoWriter, encode_jpeg, write_clip
 
 log = logging.getLogger(__name__)
 
 ALERT_SECONDS = 3.0
 FALL_COLOR = (0, 0, 255)
+
+# Camera health checks run on every HEALTH_EVERY-th frame.
+HEALTH_EVERY = 15
+# A covered or pointed-at-a-wall lens gives an almost uniform image.
+OBSTRUCTED_MAX_STD = 10.0
+# Variance of the Laplacian; low values mean few edges, i.e. out of focus.
+BLURRY_MAX_SHARPNESS = 25.0
+
+
+def assess_frame(frame):
+    """Rough camera health from one raw frame: good, blurry or obstructed."""
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = cv2.resize(gray, (320, max(1, round(320 * gray.shape[0] / gray.shape[1]))))
+    if float(gray.std()) < OBSTRUCTED_MAX_STD:
+        return "obstructed"
+    if float(cv2.Laplacian(gray, cv2.CV_64F).var()) < BLURRY_MAX_SHARPNESS:
+        return "blurry"
+    return "good"
 
 
 class _PendingClip:
@@ -103,8 +122,13 @@ class FrameProcessor:
 
     def _record_event(self, detection, frame_index, timestamp, jpeg):
         with Session(get_engine()) as session:
+            job = session.get(Job, self.job_id)
+            site_name, site_coords = current_site_location(self.settings, session)
             event = FallEvent(
                 job_id=self.job_id,
+                camera_name=job.name,
+                location=job.location or site_name,
+                coords=job.coords or site_coords,
                 track_id=detection.track_id,
                 frame_index=frame_index,
                 video_time=round(timestamp, 3),
@@ -120,7 +144,6 @@ class FrameProcessor:
             event.snapshot_path = self._relative(snapshot)
             session.add(event)
 
-            job = session.get(Job, self.job_id)
             job.fall_count += 1
             session.add(job)
             session.commit()
@@ -243,6 +266,8 @@ class CameraWorker(threading.Thread):
         self.settings = settings
         self.width, self.height = width, height
         self.fps = 0.0
+        # "starting" until the first frame is checked; see assess_frame().
+        self.health = "starting"
         self._stop_event = threading.Event()
         self._frame_ready = threading.Condition()
         self._processor = None
@@ -285,6 +310,8 @@ class CameraWorker(threading.Thread):
                 if not ok:
                     raise RuntimeError(f"Lost connection to camera {self.source}")
                 now = time.monotonic()
+                if frame_index % HEALTH_EVERY == 0:
+                    self.health = assess_frame(frame)
                 self._processor.process(frame, frame_index, now - start)
 
                 elapsed = now - previous
@@ -301,6 +328,7 @@ class CameraWorker(threading.Thread):
                     update_row(
                         Job, self.job_id,
                         frames_processed=frame_index, fps=round(self.fps, 1),
+                        last_frame_at=utc_now(),
                     )
         except Exception as exc:
             log.exception("Camera job %s failed", self.job_id)

@@ -39,7 +39,7 @@ def test_cors_allows_separate_frontend(client):
 def test_event_review_flow(client):
     job_id, event_id = add_event()
 
-    page = client.get("/api/events", params={"status": "pending"}).json()
+    page = client.get("/api/events", params={"status": "unacknowledged"}).json()
     assert page["total"] == 1
     assert page["items"][0]["job_name"] == "site.mp4"
 
@@ -53,17 +53,17 @@ def test_event_review_flow(client):
     assert event["reviewer"] == "Sam"
     assert event["reviewed_at"] is not None
 
-    assert client.get("/api/events", params={"status": "pending"}).json()["total"] == 0
+    assert client.get("/api/events", params={"status": "unacknowledged"}).json()["total"] == 0
     stats = client.get("/api/stats").json()
-    assert stats["false_alarm"] == 1 and stats["pending"] == 0
+    assert stats["false_alarm"] == 1 and stats["unacknowledged"] == 0
 
-    reset = client.patch(f"/api/events/{event_id}", json={"status": "pending"}).json()
+    reset = client.patch(f"/api/events/{event_id}", json={"status": "unacknowledged"}).json()
     assert reset["reviewed_at"] is None
 
 
 def test_missing_resources_return_404(client):
     assert client.get("/api/events/999").status_code == 404
-    assert client.patch("/api/events/999", json={"status": "confirmed"}).status_code == 404
+    assert client.patch("/api/events/999", json={"status": "resolved"}).status_code == 404
     assert client.get("/api/jobs/999").status_code == 404
     _, event_id = add_event()
     # Event exists but its clip hasn't been written.
@@ -155,6 +155,10 @@ def test_detected_fall_creates_event_with_snapshot_and_clip(client, settings):
     event = page["items"][0]
     assert event["reason"] == "stub"
     assert event["frame_index"] == 15
+    # Camera and site location are stored on the event itself.
+    assert event["camera_name"] == "stub"
+    assert event["location"] == settings.site_location
+    assert event["coords"] == settings.site_coords
     assert client.get(event["snapshot_url"]).headers["content-type"] == "image/jpeg"
     clip = client.get(event["clip_url"])
     assert clip.status_code == 200 and len(clip.content) > 1000

@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import Settings
 from .db import init_db
 from .manager import JobManager
-from .routers import events, jobs
+from .routers import dashboard, events, jobs, location
 
 
 def create_app(settings=None):
@@ -32,6 +32,7 @@ def create_app(settings=None):
         manager.warm_up()
         app.state.settings = settings
         app.state.manager = manager
+        manager.start_configured_camera()
         yield
         manager.shutdown()
 
@@ -54,6 +55,8 @@ def create_app(settings=None):
 
     app.include_router(jobs.router)
     app.include_router(events.router)
+    app.include_router(dashboard.router)
+    app.include_router(location.router)
 
     @app.get("/api/health", tags=["system"])
     def health():

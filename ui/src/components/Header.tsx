@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LOCATION } from "../data/mock";
+import type { Location } from "../types";
 import Icon from "./Icon";
 
 function useClock(): string {
@@ -26,14 +26,14 @@ export function TitleBar() {
   );
 }
 
-export function TopBar() {
+export function TopBar({ location }: { location: Location }) {
   const clock = useClock();
   return (
     <header className="topbar">
       <div className="loc">
         <Icon name="pin" />
-        <span>{LOCATION.name}</span>
-        <span className="coords">{LOCATION.coords}</span>
+        <span>{location.name}</span>
+        <span className="coords">{location.coords}</span>
       </div>
       <div className="right">
         <div className="clock"><Icon name="clock" />{clock}</div>

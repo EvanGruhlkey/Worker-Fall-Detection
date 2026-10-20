@@ -9,7 +9,7 @@ from sqlmodel import Session, select
 
 from yolo_pose import load_pose_model, process_frame
 
-from .db import Job, JobStatus, get_engine, utc_now
+from .db import Job, JobKind, JobStatus, get_engine, utc_now
 from .pipeline import CameraWorker, run_video_job
 
 log = logging.getLogger(__name__)
@@ -52,12 +52,53 @@ class JobManager:
             for job in jobs:
                 job.status = JobStatus.failed
                 job.error = "Interrupted by server restart"
-                job.finished_at = utc_now()
+                # The real stop time is the last frame seen, not now; using now
+                # would count the time the server was down as uptime.
+                job.finished_at = job.last_frame_at or job.started_at or utc_now()
                 session.add(job)
             session.commit()
 
     def submit_video(self, job_id):
         self._videos.submit(run_video_job, job_id, self.settings)
+
+    def create_camera(
+        self, source, name=None, label=None, location=None, coords=None,
+        width=None, height=None,
+    ):
+        """Record a new camera session and start processing it; returns the job."""
+        source = source.strip()
+        for worker in self.active_cameras().values():
+            if worker.source == source:
+                raise ValueError(f"Camera {source} is already running")
+
+        with Session(get_engine()) as session:
+            job = Job(
+                kind=JobKind.camera,
+                name=name or (f"Camera {source}" if source.isdigit() else source),
+                source=source,
+                label=label,
+                location=location,
+                coords=coords,
+            )
+            session.add(job)
+            session.commit()
+            session.refresh(job)
+        self.start_camera(job.id, source, width, height)
+        return job
+
+    def start_configured_camera(self):
+        """Start the camera named by FALL_CAMERA_SOURCE, if any."""
+        if not self.settings.camera_source:
+            return None
+        try:
+            return self.create_camera(
+                self.settings.camera_source,
+                name=self.settings.camera_name,
+                label=self.settings.camera_label,
+            )
+        except Exception:
+            log.exception("Could not start camera %s", self.settings.camera_source)
+            return None
 
     def start_camera(self, job_id, source, width=None, height=None):
         worker = CameraWorker(job_id, source, self.settings, width, height)

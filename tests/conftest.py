@@ -13,6 +13,10 @@ def settings(tmp_path, monkeypatch):
         model_path=REPO_ROOT / "models" / "yolo11n-pose.pt",
         clip_pre_seconds=0.5,
         clip_post_seconds=0.5,
+        site_location="Plant 2, Houston, TX",
+        site_coords="29.7604, -95.3698",
+        camera_source=None,
+        reverse_geocode=False,
     )
 
 

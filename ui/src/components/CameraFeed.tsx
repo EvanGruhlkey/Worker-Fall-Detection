@@ -1,19 +1,24 @@
-import { LOCATION } from "../data/mock";
-import type { CameraInfo } from "../types";
+import type { CameraInfo, Location } from "../types";
 import Icon from "./Icon";
 
-/** Placeholder only: no webcam access yet. Swap with the YOLO model withbounding boxes */
-export default function CameraFeed({ camera }: { camera: CameraInfo }) {
+/** Live feed from the backend, with pose skeletons, track IDs and fall alerts drawn on. */
+export default function CameraFeed({ camera, location }: { camera: CameraInfo; location: Location }) {
+  const live = camera.online && camera.stream_url;
   return (
     <article className="camera">
       <div className="video">
+        {live ? (
+          // MJPEG stream; keyed by URL so a new camera session reconnects.
+          <img key={camera.stream_url} className="stream" src={camera.stream_url!} alt={`${camera.name} live feed`} />
+        ) : (
+          <div className="placeholder">
+            <Icon name="cam" size={40} className="big" />
+            <span>Camera offline</span>
+          </div>
+        )}
         <span className="badge live-badge"><i className="dot" />LOCAL CAM</span>
-        <span className="badge fps">LIVE · {camera.fps} FPS</span>
-        <div className="placeholder">
-          <Icon name="cam" size={40} className="big" />
-          <span>Camera preview placeholder</span>
-        </div>
-        <span className="badge loc-badge"><Icon name="pin" />{LOCATION.name}</span>
+        <span className="badge fps">{live ? `LIVE · ${camera.fps} FPS` : "OFFLINE"}</span>
+        <span className="badge loc-badge"><Icon name="pin" />{location.name}</span>
       </div>
       <div className="cam-info">
         <div>
