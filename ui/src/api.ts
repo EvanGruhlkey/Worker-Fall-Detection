@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import type { Dashboard, Stat } from "./types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { Dashboard, EventStatus, Stat, Upload } from "./types";
 
 const POLL_MS = 2500;
 const LOCATION_REFRESH_MS = 10 * 60 * 1000;
@@ -20,6 +20,7 @@ function placeholder(note: string): Dashboard {
     stats: placeholderStats(note),
     camera: { id: "—", name: "No camera", label: note, fps: 0, online: false },
     events: [],
+    uploads: [],
   };
 }
 
@@ -65,28 +66,42 @@ export function useReportLocation(): void {
   }, []);
 }
 
-/** Dashboard data from the backend, refreshed every few seconds. */
-export function useDashboard(): Dashboard {
+/**
+ * Dashboard data from the backend, refreshed every few seconds.
+ * Call `refresh()` after changing something to show it without waiting.
+ */
+export function useDashboard(): { data: Dashboard; refresh: () => void } {
   const [data, setData] = useState<Dashboard>(() => placeholder("Connecting to backend…"));
+  const loadRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     let cancelled = false;
     let timer: number | undefined;
+    // Only the newest request may update the page, so a slow older response
+    // can't overwrite a newer one.
+    let latest = 0;
 
     async function load() {
+      const request = ++latest;
       try {
         const response = await fetch("/api/dashboard");
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const body = (await response.json()) as Dashboard;
-        if (!cancelled) setData(body);
+        if (!cancelled && request === latest) setData(body);
       } catch {
         // Keep the last known events on screen, but don't show stale live status.
-        if (!cancelled) setData((prev) => ({ ...placeholder("Backend offline"), events: prev.events }));
+        if (!cancelled && request === latest) {
+          setData((prev) => ({ ...placeholder("Backend offline"), events: prev.events, uploads: prev.uploads }));
+        }
       } finally {
-        if (!cancelled) timer = window.setTimeout(load, POLL_MS);
+        if (!cancelled && request === latest) {
+          window.clearTimeout(timer);
+          timer = window.setTimeout(load, POLL_MS);
+        }
       }
     }
 
+    loadRef.current = load;
     load();
     return () => {
       cancelled = true;
@@ -94,5 +109,35 @@ export function useDashboard(): Dashboard {
     };
   }, []);
 
-  return data;
+  const refresh = useCallback(() => loadRef.current(), []);
+  return { data, refresh };
+}
+
+async function errorMessage(response: Response): Promise<string> {
+  try {
+    const body = await response.json();
+    if (typeof body.detail === "string") return body.detail;
+  } catch {
+    // not JSON
+  }
+  return `Request failed (HTTP ${response.status})`;
+}
+
+/** Upload a recorded video; the backend queues it for fall detection. */
+export async function uploadVideo(file: File): Promise<Upload> {
+  const form = new FormData();
+  form.append("file", file);
+  const response = await fetch("/api/videos", { method: "POST", body: form });
+  if (!response.ok) throw new Error(await errorMessage(response));
+  return response.json();
+}
+
+/** Set an event's review status (and optional notes). */
+export async function reviewEvent(id: number, status: EventStatus, notes?: string | null): Promise<void> {
+  const response = await fetch(`/api/events/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status, notes: notes || null }),
+  });
+  if (!response.ok) throw new Error(await errorMessage(response));
 }

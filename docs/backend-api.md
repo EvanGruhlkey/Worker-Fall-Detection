@@ -136,6 +136,8 @@ Run the tests with `uv run pytest`.
 }
 ```
 
+`uploads` lists the 5 most recent uploaded videos: `{"id", "name", "status", "progress", "fall_count", "error", "created_at", "output_video_url"}`. Each event also has `source` (`"camera"` or `"video"`), `job_id`, `video_time` (seconds into the video), `reviewer`, `notes` and `reviewed_at`.
+
 How the stat cards are worked out:
 
 - **Active incidents**: events still `unacknowledged` or `needs_review`, across all days. Red while any are open.

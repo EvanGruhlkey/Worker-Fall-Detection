@@ -268,3 +268,51 @@ def test_assess_frame():
     assert assess_frame(photo) == "good"
     assert assess_frame(cv2.GaussianBlur(photo, (51, 51), 0)) == "blurry"
     assert assess_frame(np.full((480, 640, 3), 20, np.uint8)) == "obstructed"
+
+
+def test_uploads_show_progress_and_results(client):
+    add_job(kind=JobKind.video, name="queued.mp4", source="q.mp4")
+    add_job(
+        kind=JobKind.video, name="running.mp4", source="r.mp4", status=JobStatus.running,
+        frames_processed=30, total_frames=120,
+    )
+    add_job(
+        kind=JobKind.video, name="done.mp4", source="d.mp4", status=JobStatus.completed,
+        fall_count=2, output_video="output/done.mp4",
+    )
+    add_job()  # camera sessions are not uploads
+
+    uploads = client.get("/api/dashboard").json()["uploads"]
+    assert [u["name"] for u in uploads] == ["done.mp4", "running.mp4", "queued.mp4"]
+    done, running, queued = uploads
+    assert done["progress"] == 1.0 and done["fall_count"] == 2
+    assert done["output_video_url"] == f"/api/jobs/{done['id']}/video"
+    assert running["progress"] == 0.25 and running["status"] == "running"
+    assert queued["progress"] is None and queued["output_video_url"] is None
+
+
+def test_events_say_whether_they_came_from_an_upload(client):
+    video = add_job(kind=JobKind.video, name="site.mp4", source="site.mp4")
+    add_event(video.id, camera_name="site.mp4", video_time=12.5)
+    camera = add_job()
+    add_event(camera.id)
+
+    events = client.get("/api/dashboard").json()["events"]
+    by_source = {e["source"]: e for e in events}
+    assert by_source["video"]["camera"] == "site.mp4"
+    assert by_source["video"]["video_time"] == 12.5
+    assert by_source["video"]["job_id"] == video.id
+    assert by_source["camera"]["job_id"] == camera.id
+
+
+def test_review_from_dashboard_is_reflected(client):
+    job = add_job()
+    event = add_event(job.id)
+    client.patch(
+        f"/api/events/{event.id}",
+        json={"status": "False alarm", "notes": "Kneeling to tie boot"},
+    )
+    shown = client.get("/api/dashboard").json()["events"][0]
+    assert shown["status"] == "False alarm"
+    assert shown["notes"] == "Kneeling to tie boot"
+    assert shown["reviewed_at"] is not None

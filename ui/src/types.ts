@@ -1,6 +1,6 @@
 export type IconName =
   | "alert" | "cam" | "pulse" | "shield" | "fall" | "warn" | "ok" | "eye"
-  | "pin" | "clock" | "gear" | "chevron" | "download" | "wifi";
+  | "pin" | "clock" | "gear" | "chevron" | "download" | "upload" | "wifi" | "close";
 
 export type Tone = "red" | "green" | "default";
 
@@ -24,6 +24,33 @@ export interface FallEvent {
   status: EventStatus;
   camera?: string | null;
   location?: string | null;
+  // Extra details from the backend, used by the review panel.
+  detected_at?: string; // ISO 8601, UTC
+  source?: "camera" | "video";
+  job_id?: number;
+  coords?: string | null;
+  video_time?: number; // seconds into the video / camera session
+  track_id?: number | null;
+  reason?: string;
+  reviewer?: string | null;
+  notes?: string | null;
+  reviewed_at?: string | null;
+  snapshot_url?: string | null;
+  clip_url?: string | null;
+}
+
+export type UploadStatus = "queued" | "running" | "completed" | "stopped" | "failed";
+
+/** An uploaded video being (or already) checked for falls. */
+export interface Upload {
+  id: number;
+  name: string;
+  status: UploadStatus;
+  progress: number | null; // 0 to 1
+  fall_count: number;
+  error: string | null;
+  created_at: string;
+  output_video_url: string | null;
 }
 
 export interface CameraInfo {
@@ -46,4 +73,5 @@ export interface Dashboard {
   stats: Stat[];
   camera: CameraInfo;
   events: FallEvent[];
+  uploads: Upload[];
 }

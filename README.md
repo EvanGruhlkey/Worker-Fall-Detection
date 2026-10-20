@@ -10,7 +10,7 @@
 
 - **Pose detection and tracking** on a live camera or a prerecorded video. The live view shows skeletons, tracking IDs, FPS, and the number of detected people.
 - **Backend server** (`src/backend/`). Runs the camera through the models and a placeholder fall detector. Each detected fall is saved to a database with its time, camera, location, confidence, a snapshot and a short clip.
-- **Dashboard** (`ui/`). Live annotated camera feed, stat cards (active incidents, cameras online, uptime, camera health), and an event log that updates every few seconds.
+- **Dashboard** (`ui/`). Live annotated camera feed, stat cards (active incidents, cameras online, uptime, camera health), and an event log that updates every few seconds. Click an event to see its clip and confirm it or mark it a false alarm. Upload a recorded video to check it for falls; a test video is in `data/samples/`.
 
 **Full guide to running and testing everything: [docs/running-and-testing.md](docs/running-and-testing.md)**
 
@@ -89,11 +89,11 @@ Outputs are saved as `data/output/YourVideo.mp4` and `data/output/YourVideo.json
 uv run pytest tests -v
 ```
 
-Expected: `63 passed`. To check that the dashboard compiles, run `npm run build` in `ui/`.
+Expected: `69 passed`. To check that the dashboard compiles, run `npm run build` in `ui/`.
 
 ### Incomplete
 
-The temporal classifier and the X-CLIP verifier are not implemented yet. Until the classifier is ready, falls are flagged by a simple rule in `src/backend/fall_detector.py`. The dashboard's filter, export, settings and review buttons are not connected yet. Alerts appear only on the dashboard (no sound, SMS or email). <br><br>
+The temporal classifier and the X-CLIP verifier are not implemented yet. Until the classifier is ready, falls are flagged by a simple rule in `src/backend/fall_detector.py`. The dashboard's filter, export and settings buttons are not connected yet. Alerts appear only on the dashboard (no sound, SMS or email). <br><br>
 
 Team Members: Johnathan Miller, Evan Gruhlkey, Malcom Troy, Allen Basil, Benjamin Aleman
 

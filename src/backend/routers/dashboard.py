@@ -15,13 +15,13 @@ from fastapi.responses import Response
 from sqlmodel import Session, func, select
 
 from ..db import (
-    EventType, FallEvent, Job, JobKind, ReviewStatus, as_utc, get_session,
+    EventType, FallEvent, Job, JobKind, JobStatus, ReviewStatus, as_utc, get_session,
 )
 from ..deps import get_manager, get_settings
 from ..location import current_site_location
 from ..schemas import (
     STATUS_LABELS, Dashboard, DashboardCamera, DashboardEvent, DashboardLocation,
-    DashboardStat,
+    DashboardStat, DashboardUpload,
 )
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
@@ -43,6 +43,7 @@ HEALTH_LABELS = {
 HEALTH_SEVERITY = ["obstructed", "blurry", "starting", "good"]
 
 UPTIME_WINDOW = timedelta(hours=24)
+RECENT_UPLOADS = 5
 
 
 class Scope(str, Enum):
@@ -61,7 +62,7 @@ def start_of_today(now):
     return local.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
 
 
-def to_dashboard_event(event):
+def to_dashboard_event(event, source):
     fallback = (EventType(event.event_type).value.replace("_", " ").capitalize(), "alert", "var(--muted)")
     name, icon, color = EVENT_DISPLAY.get(event.event_type, fallback)
     if event.status == ReviewStatus.false_alarm:
@@ -75,18 +76,29 @@ def to_dashboard_event(event):
         confidence=None if event.confidence is None else round(event.confidence * 100),
         status=STATUS_LABELS[event.status],
         detected_at=as_utc(event.detected_at),
+        source=source,
+        job_id=event.job_id,
         camera=event.camera_name,
         location=event.location,
         coords=event.coords,
+        video_time=event.video_time,
         track_id=event.track_id,
         reason=event.reason,
+        reviewer=event.reviewer,
+        notes=event.notes,
+        reviewed_at=as_utc(event.reviewed_at),
         snapshot_url=f"/api/events/{event.id}/snapshot" if event.snapshot_path else None,
         clip_url=f"/api/events/{event.id}/clip" if event.clip_path else None,
     )
 
 
 def query_events(session, scope, status, limit, now):
-    query = select(FallEvent).order_by(FallEvent.detected_at.desc(), FallEvent.id.desc())
+    """(event, source kind) pairs, newest first."""
+    query = (
+        select(FallEvent, Job.kind)
+        .join(Job, Job.id == FallEvent.job_id)
+        .order_by(FallEvent.detected_at.desc(), FallEvent.id.desc())
+    )
     if scope == Scope.today:
         query = query.where(FallEvent.detected_at >= start_of_today(now))
     if status:
@@ -247,6 +259,25 @@ def _camera_id(job):
     return f"CAM-{int(job.source):02d}" if job.source.isdigit() else f"CAM-{job.id:02d}"
 
 
+def build_uploads(session):
+    jobs = session.exec(
+        select(Job).where(Job.kind == JobKind.video).order_by(Job.id.desc()).limit(RECENT_UPLOADS)
+    ).all()
+    uploads = []
+    for job in jobs:
+        progress = None
+        if job.status == JobStatus.completed:
+            progress = 1.0
+        elif job.total_frames:
+            progress = min(1.0, job.frames_processed / job.total_frames)
+        uploads.append(DashboardUpload(
+            id=job.id, name=job.name, status=job.status, progress=progress,
+            fall_count=job.fall_count, error=job.error, created_at=as_utc(job.created_at),
+            output_video_url=f"/api/jobs/{job.id}/video" if job.output_video else None,
+        ))
+    return uploads
+
+
 def build_location(settings, session, camera_job):
     site_name, site_coords = current_site_location(settings, session)
     return DashboardLocation(
@@ -277,13 +308,15 @@ def dashboard(
             health_stat(active),
         ],
         camera=build_camera(active, latest),
-        events=[to_dashboard_event(e) for e in query_events(session, scope, status, limit, now)],
+        events=[to_dashboard_event(e, kind) for e, kind in query_events(session, scope, status, limit, now)],
+        uploads=build_uploads(session),
     )
 
 
 CSV_COLUMNS = [
     "id", "detected_at_utc", "local_time", "event", "camera", "location", "coords",
     "confidence_percent", "status", "track_id", "reason", "reviewer", "notes", "reviewed_at_utc",
+    "source", "video_time_seconds",
 ]
 
 
@@ -298,13 +331,14 @@ def export_events(
     buffer = io.StringIO()
     writer = csv.writer(buffer)
     writer.writerow(CSV_COLUMNS)
-    for event in query_events(session, scope, status, None, now):
-        row = to_dashboard_event(event)
+    for event, kind in query_events(session, scope, status, None, now):
+        row = to_dashboard_event(event, kind)
         reviewed = as_utc(event.reviewed_at)
         writer.writerow([
             event.id, row.detected_at.isoformat(), row.time, row.name, row.camera,
             row.location, row.coords, row.confidence, row.status, row.track_id,
             row.reason, event.reviewer, event.notes, reviewed.isoformat() if reviewed else None,
+            kind.value, event.video_time,
         ])
     filename = f"fall-events-{now.astimezone():%Y-%m-%d}.csv"
     return Response(

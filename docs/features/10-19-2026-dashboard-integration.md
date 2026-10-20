@@ -52,15 +52,25 @@ The location is no longer a fixed setting. It's wherever the laptop running the 
 - **Stopping:** Ctrl+C stops both. If either program exits on its own, the other is stopped too. On Windows, `taskkill /T` also ends uvicorn's reload worker. Uses only the Python standard library and runs on Windows and macOS.
 - **`.env`**: settings now live in a file instead of terminal variables. `src/backend/config.py` reads it on startup, so the manual `uvicorn` command uses it too. Variables already set in the terminal take precedence. `.env` is gitignored; `.env.example` is committed.
 
+## Recorded video upload and event review (10-20-2026)
+
+- **Upload panel** (`ui/src/components/VideoUpload.tsx`), under the camera feed. Sends the file to the existing `POST /api/videos`. The backend runs it through the same `yolo_pose.process_frame` (YOLO pose + ByteTrack) and fall detector as the live camera. The panel shows queued, progress %, falls found, errors, and a link to the analyzed video. Recent uploads come from the new `uploads` field of `/api/dashboard`.
+- **Review panel** (`ui/src/components/EventReview.tsx`). Opens when an event-log row is clicked. It shows the clip (or the snapshot until the clip is ready) and the details: time, source, location, confidence, track ID and reason. It has a notes box and **Confirm real fall** (Resolved) / **False alarm** buttons, which call `PATCH /api/events/{id}`. Opening an Unacknowledged event marks it Needs review.
+- **Backend**: dashboard events now include `source` (camera or uploaded video), `job_id`, `video_time`, `notes`, `reviewer` and `reviewed_at`. The CSV export gains `source` and `video_time_seconds` columns.
+- **Fall detector fix: tracker ID switches.** Testing with a video showed that ByteTrack gives a falling person a new ID mid-fall, when their box changes from tall to wide. The new ID had no history, so it looked like someone already lying down, and the fall was missed. `FallDetector` now passes a vanished track's history to a new track that appears within 1 s and within one body height of it. This affects live cameras too.
+- **Test video**: `data/samples/synthetic_fall.mp4` (H.264, 6 s), made by `scripts/make_synthetic_fall.py` from ultralytics' sample photo.
+- `ui/src/api.ts`: `useDashboard()` now also returns `refresh()`, so changes show immediately. A request counter stops a slow older response from overwriting a newer one. Added the `uploadVideo()` and `reviewEvent()` helpers.
+
 ## Tests
 
 - `tests/test_dashboard.py`, 15 new tests: response shapes match the UI types, all four stat cards, uptime math, the "today" filter, the status filter, CSV export, review with UI labels, saving camera labels and locations, crash recovery, the database upgrade and the health check.
 - `tests/test_api.py` updated for the new statuses, and now checks that location is saved on events.
 - `tests/test_location.py`, 9 tests: browser location saved and named, name reused for small moves, retry after a failed lookup, geocoding turned off, invalid coordinates rejected, events stamped with the location, `.env` reading.
-- Full suite: `uv run pytest` → 63 passed. `npm run build` in `ui/` passes the type check.
+- `tests/test_dashboard.py` +3 (uploads, event source, review shown) and `tests/test_fall_detector.py` +3 (ID switch handled; far-away or late new IDs not merged).
+- Full suite: `uv run pytest` → 69 passed. `npm run build` in `ui/` passes the type check.
 
 ## Not done yet
 
-- The "All events" filter, "Export log", "Settings" and review buttons on the dashboard aren't connected. The backend already supports the first three actions it needs: filtering (`?status=`), CSV export, and review (`PATCH /api/events/{id}`).
+- The "All events" filter, "Export log" and "Settings" buttons on the dashboard aren't connected. The backend already supports filtering (`?status=`) and CSV export.
 - The dashboard shows one camera. The backend can run several.
 - Falls are still detected by the placeholder rule in `fall_detector.py`, not the temporal classifier.

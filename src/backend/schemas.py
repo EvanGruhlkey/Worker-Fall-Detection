@@ -143,13 +143,32 @@ class DashboardEvent(BaseModel):
     status: Literal["Unacknowledged", "Needs review", "Resolved", "False alarm"]
     # Additions beyond ui/src/types.ts FallEvent:
     detected_at: datetime
-    camera: str | None
+    source: JobKind = Field(description="'camera' (live) or 'video' (uploaded)")
+    job_id: int
+    camera: str | None = Field(description="Camera name, or the file name for uploads")
     location: str | None
     coords: str | None
+    video_time: float = Field(description="Seconds into the video / camera session")
     track_id: int | None
     reason: str
+    reviewer: str | None
+    notes: str | None
+    reviewed_at: datetime | None
     snapshot_url: str | None
     clip_url: str | None
+
+
+class DashboardUpload(BaseModel):
+    """An uploaded video and its processing progress."""
+
+    id: int
+    name: str
+    status: JobStatus
+    progress: float | None = Field(description="0 to 1, while running")
+    fall_count: int
+    error: str | None
+    created_at: datetime
+    output_video_url: str | None
 
 
 class Dashboard(BaseModel):
@@ -157,3 +176,4 @@ class Dashboard(BaseModel):
     stats: list[DashboardStat]
     camera: DashboardCamera
     events: list[DashboardEvent]
+    uploads: list[DashboardUpload] = Field(description="Most recent uploads, newest first")

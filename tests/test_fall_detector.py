@@ -59,3 +59,33 @@ def test_brief_dip_that_recovers_is_not_a_fall():
 def test_untracked_people_are_ignored():
     frames = [[{**person(1, 300 + i * 10), "track_id": None}] for i in range(FPS * 2)]
     assert run(FallDetector(), frames) == []
+
+
+def test_fall_is_detected_when_the_tracker_switches_id():
+    # ByteTrack often gives a falling person a new ID when their box turns wide.
+    standing = [[person(1, 300)] for _ in range(FPS)]
+    falling = [[person(1, 300 + i * 25)] for i in range(6)]
+    lying = [[person(7, 560, torso_angle_horizontal=True)] for _ in range(FPS * 2)]
+
+    detections = run(FallDetector(), standing + falling + lying)
+
+    assert len(detections) == 1
+    assert detections[0].track_id == 7
+
+
+def test_new_id_far_away_does_not_inherit_history():
+    standing = [[person(1, 300)] for _ in range(FPS)]
+    # A different person, already lying down, appears across the frame.
+    far = person(7, 560, torso_angle_horizontal=True)
+    far["bbox"] = [far["bbox"][0] + 2000, far["bbox"][1], far["bbox"][2] + 2000, far["bbox"][3]]
+    for kp in far["keypoints"]:
+        kp["x"] += 2000
+    lying = [[far] for _ in range(FPS * 2)]
+    assert run(FallDetector(), standing + lying) == []
+
+
+def test_new_id_long_after_does_not_inherit_history():
+    standing = [[person(1, 300)] for _ in range(FPS)]
+    gap = [[] for _ in range(FPS * 2)]  # nobody seen for 2 s
+    lying = [[person(7, 560, torso_angle_horizontal=True)] for _ in range(FPS * 2)]
+    assert run(FallDetector(), standing + gap + lying) == []

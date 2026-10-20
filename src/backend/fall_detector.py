@@ -10,6 +10,12 @@ works end to end. It flags a fall when a tracked person
 
 Replace or extend ``FallDetector.update`` with a trained classifier later; the
 pipeline only relies on its signature and the ``FallDetection`` it returns.
+
+Tracker ID switches: during a fall the person's box changes from tall to wide
+within a fraction of a second, and ByteTrack often loses the match and gives
+them a new ID. On its own, the new ID would look like someone who was already
+lying down. So when a new ID appears where another ID vanished moments
+earlier, it takes over that ID's history (see ``_inherit_history``).
 """
 
 import math
@@ -35,6 +41,7 @@ class _Sample:
     height: float
     torso_angle: float | None
     aspect: float
+    center: tuple[float, float]
 
 
 @dataclass
@@ -66,6 +73,7 @@ class FallDetector:
         cooldown_seconds=10.0,
         forget_seconds=3.0,
         min_keypoint_confidence=0.3,
+        handoff_seconds=1.0,
     ):
         self.descent_window = descent_window
         self.drop_ratio = drop_ratio
@@ -75,6 +83,9 @@ class FallDetector:
         self.cooldown_seconds = cooldown_seconds
         self.forget_seconds = forget_seconds
         self.min_keypoint_confidence = min_keypoint_confidence
+        # A new ID within this many seconds of another vanishing nearby is
+        # treated as the same person.
+        self.handoff_seconds = handoff_seconds
         self._history_seconds = descent_window + down_seconds + 1.0
         self._tracks = {}
 
@@ -97,7 +108,8 @@ class FallDetector:
                 torso_angle = math.degrees(math.atan2(abs(dx), dy))
 
         hip_y = hips[1] if hips else (y1 + y2) / 2
-        return _Sample(timestamp, hip_y, height, torso_angle, width / height)
+        center = ((x1 + x2) / 2, (y1 + y2) / 2)
+        return _Sample(timestamp, hip_y, height, torso_angle, width / height, center)
 
     def _is_down(self, sample):
         if sample.torso_angle is not None and sample.torso_angle >= self.down_angle:
@@ -107,15 +119,18 @@ class FallDetector:
     def update(self, people, timestamp):
         """Feed one frame of tracked people; return any new falls."""
         detections = []
+        present = {p.get("track_id") for p in people}
 
         for person in people:
             track_id = person.get("track_id")
             if track_id is None:
                 continue
 
+            sample = self._sample(person, timestamp)
+            if track_id not in self._tracks:
+                self._inherit_history(track_id, sample, present, timestamp)
             state = self._tracks.setdefault(track_id, _TrackState())
             state.last_seen = timestamp
-            sample = self._sample(person, timestamp)
             state.samples.append(sample)
             while state.samples and timestamp - state.samples[0].time > self._history_seconds:
                 state.samples.popleft()
@@ -147,6 +162,24 @@ class FallDetector:
             del self._tracks[track_id]
 
         return detections
+
+    def _inherit_history(self, track_id, sample, present, timestamp):
+        """Give a new track the history of a track that just vanished nearby."""
+        best, best_distance = None, None
+        for old_id, old in self._tracks.items():
+            if old_id in present or not old.samples:
+                continue
+            if timestamp - old.last_seen > self.handoff_seconds:
+                continue
+            last = old.samples[-1]
+            distance = math.dist(last.center, sample.center)
+            # Within roughly one body height of where the old track was last seen.
+            if distance <= max(s.height for s in old.samples) and (
+                best_distance is None or distance < best_distance
+            ):
+                best, best_distance = old_id, distance
+        if best is not None:
+            self._tracks[track_id] = self._tracks.pop(best)
 
     def _check_descent(self, track_id, state, current):
         window_start = state.down_since - self.descent_window

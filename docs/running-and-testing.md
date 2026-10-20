@@ -31,7 +31,7 @@ There are two programs, and they run in separate terminals:
 
 1. **Pose estimation** (`src/yolo_pose.py`). The YOLO11 pose model finds every person in the frame and places 17 body keypoints on each one (shoulders, hips, knees, and so on).
 2. **Tracking** (ByteTrack, inside the same call). Each person gets an ID number that stays the same from frame to frame ("ID 3"), so the system can follow one person's movement over time.
-3. **Fall detection** (`src/backend/fall_detector.py`). For each tracked person, the detector checks whether their **hips dropped by at least 30% of their body height within 1.5 seconds** and they then **stayed roughly horizontal for 0.5 seconds**. If both are true, it reports a fall with a confidence score. This is a simple placeholder rule. It will be replaced by the trained temporal classifier (see [What is not built yet](#what-is-not-built-yet)).
+3. **Fall detection** (`src/backend/fall_detector.py`). For each tracked person, the detector checks whether their **hips dropped by at least 30% of their body height within 1.5 seconds** and they then **stayed roughly horizontal for 0.5 seconds**. If both are true, it reports a fall with a confidence score. ByteTrack often gives a person a new ID in the middle of a fall, because their box suddenly turns from tall to wide. So when a new ID appears where another vanished less than a second earlier, the detector carries the old ID's history over. This is a simple placeholder rule. It will be replaced by the trained temporal classifier (see [What is not built yet](#what-is-not-built-yet)).
 4. **Recording the event** (`src/backend/pipeline.py`). When a fall is detected, the backend:
    - saves a row in the database (`data/falls.db`) with the time, camera, location, coordinates, confidence, and the reason ("hip dropped 46% of body height in 0.7s; torso 74 deg from vertical"),
    - saves a **snapshot** JPEG of that moment,
@@ -49,7 +49,8 @@ There are two programs, and they run in separate terminals:
 | **Detection uptime** | Share of the last 24 hours that at least one camera was running. Green at 95% or above, red below 80%. |
 | **Camera health** | The image check described above: Good / Blurry / Obstructed / Offline |
 | **Camera feed** | The live video, with skeletons, IDs and fall alerts drawn by the backend |
-| **Event log** | Today's events, newest first: time, event, camera and location, confidence, status |
+| **Event log** | Today's events, newest first: time, event, camera and location, confidence, status. Click a row to review it. |
+| **Analyze a recorded video** (under the camera) | Upload a video file. The backend runs the same pose, tracking and fall detection as for the live camera, shows the progress, then lists how many falls it found and links to the analyzed video. Falls found go into the event log. |
 
 Every event moves through these review statuses:
 
@@ -58,7 +59,7 @@ Unacknowledged ──▶ Needs review ──▶ Resolved      (a real fall, hand
   (new alert)       (someone saw it) └▶ False alarm (not a real fall)
 ```
 
-The dashboard has no review buttons yet. Statuses are changed through the API for now (see [Test 7](#test-7-review-an-event)).
+Click any event in the log to open its **review panel**. It shows the clip, the details, and buttons to confirm the fall or mark it a false alarm (see [Test 7](#test-7-review-an-event)). Opening an *Unacknowledged* event moves it to *Needs review* automatically.
 
 ---
 
@@ -168,13 +169,13 @@ Then open **http://localhost:5173**. The dashboard sends every request that star
 uv run pytest -v
 ```
 
-**Expected:** `63 passed`. The first run takes about 20–40 seconds, because some tests run the real YOLO model.
+**Expected:** `69 passed`. The first run takes about 20–40 seconds, because some tests run the real YOLO model.
 
 | Test file | Tests | What it checks |
 |---|---|---|
 | `tests/test_api.py` | 9 | Core API: health, video upload processed end to end, fall events saved with snapshot, clip and location, review flow, error handling |
-| `tests/test_dashboard.py` | 15 | Dashboard data matches the UI's types, the four stat cards, uptime math, "today" filter, CSV export, camera health check, upgrading an old database |
-| `tests/test_fall_detector.py` | 5 | The fall rule: detects a sudden fall only once; ignores standing still, someone already lying down, a brief dip they recover from, and people without tracking IDs |
+| `tests/test_dashboard.py` | 18 | Dashboard data matches the UI's types, the four stat cards, uptime math, "today" filter, CSV export, camera health check, upgrading an old database, upload progress, events marked as coming from uploads, review shown on the dashboard |
+| `tests/test_fall_detector.py` | 8 | The fall rule: detects a sudden fall only once, including when the tracker switches the person's ID mid-fall; ignores standing still, someone already lying down, a brief dip they recover from, people without tracking IDs, and new IDs that appear far away or long after |
 | `tests/test_location.py` | 9 | Browser-reported location: city lookup, reusing the name for small moves, falling back to coordinates or `.env`, location saved on new events, reading `.env` |
 | `tests/test_sliding_window.py` | 25 | The sliding window buffer (see [features/10-18-2026-sliding-window.md](features/10-18-2026-sliding-window.md)) |
 
@@ -254,17 +255,18 @@ Open http://127.0.0.1:8000/api/dashboard?scope=all to see the raw data. Each eve
 
 ### Test 7: review an event
 
-The dashboard has no review buttons yet, so use the API's built-in test page:
+1. Click an event row in the event log.
+   **Expected:** a review panel opens with:
+   - the **clip** playing on a loop (from 5 s before to 5 s after the fall). Within the first 5 seconds after a live fall, it shows the snapshot instead, with a note that the clip is still being recorded.
+   - **Detected** (date and time), **Source** ("Live camera: Camera 01", or "Uploaded video: name.mp4" and the time in the video), **Location**, **Confidence**, **Person** (track ID), and **Why flagged** (e.g. "hip dropped 84% of body height in 0.7s; torso 94 deg from vertical").
+   - If the event was *Unacknowledged*, its label in the log behind the panel changes to orange **Needs review** as soon as the panel opens.
+2. Optionally type a note, then click **Confirm real fall**.
+   **Expected:** the panel closes and the row shows a green **Resolved** label. Active incidents goes down by 1.
+3. Open the event again and click **False alarm**.
+   **Expected:** a blue **False alarm** label, and the row's icon turns into an amber warning sign. You can change the decision at any time this way. Your note is saved and shown the next time you open the event.
+4. Press **Esc**, click outside the panel, or click **×** to close it without changing anything.
 
-1. Open **http://127.0.0.1:8000/docs**. This page lists every backend endpoint, and you can try each one in the browser.
-2. Find **PATCH /api/events/{event_id}**, click **Try it out**, and enter event ID `1`.
-3. Set the request body to `{"status": "Needs review", "reviewer": "Sam"}` and click **Execute**.
-
-**Expected:** response code `200`. Within about 3 seconds the row's label on the dashboard changes to an orange **Needs review**, and Active incidents shows "0 unacknowledged · 1 need review".
-
-4. Repeat with `{"status": "Resolved", "notes": "Worker OK, slipped on oil"}`.
-
-**Expected:** a green **Resolved** label, and Active incidents goes to `0` (green). `False alarm` gives a blue label, and the row's icon turns into an amber warning sign.
+The same review can be done through the API's test page at http://127.0.0.1:8000/docs (**PATCH /api/events/{event_id}**), for example `{"status": "Resolved", "notes": "..."}`.
 
 ### Test 8: camera health
 
@@ -289,18 +291,24 @@ This test needs the two parts running separately (see [Running the two parts sep
 2. Start the backend again.
    **Expected:** everything comes back on its own, including all earlier events (they're saved in `data/falls.db`). **Detection uptime** now drops below 100%, because the time the backend was stopped counts as downtime.
 
-### Test 11: process a recorded video (no webcam needed)
+### Test 11: analyze a recorded video (no webcam needed)
 
-This also works with no camera, for example to test with fall footage.
+The repo includes a test video, **`data/samples/synthetic_fall.mp4`**: a person cut out of a sample photo stands for 2 s, falls over in 0.6 s, then lies still (6 s in total). It isn't realistic footage, but it runs through the whole pipeline. Recreate it with `uv run scripts/make_synthetic_fall.py`.
 
-1. Open http://127.0.0.1:8000/docs, then **POST /api/videos**, then **Try it out**. Choose an `.mp4` file and click **Execute**.
-   **Expected:** response `201` with a job `id` and `"status": "queued"`.
-2. Run **GET /api/jobs/{job_id}** a few times.
-   **Expected:** `status` goes from `running` to `completed`, and `progress` climbs to `1.0`.
-3. When it's `completed`, open `output_video_url` (e.g. `http://127.0.0.1:8000/api/jobs/2/video`).
-   **Expected:** the whole video with skeletons, IDs and fall alerts drawn on it.
+1. In the **Analyze a recorded video** box under the camera feed, click **Upload video** and choose `data/samples/synthetic_fall.mp4` (or any `.mp4`, `.mov`, `.avi`, `.mkv`, `.m4v` or `.webm`).
+   **Expected:** the file appears in the list with "Waiting to start…", then "Analyzing… N%" and a progress bar.
+2. Wait for it to finish. The sample takes about 10 seconds on a laptop; longer videos take longer.
+   **Expected:** "Done · 1 fall found (see event log)", and a **Watch analyzed video** link. A video with no falls says "Done · no falls found".
+3. Look at the event log.
+   **Expected:** a new **Fall detected** row. The Camera / Location column shows `synthetic_fall.mp4` and "Uploaded video · at 0:02". Active incidents goes up by 1.
+4. Click **Watch analyzed video**.
+   **Expected:** the whole video in a new tab, with skeletons, IDs, and the red FALL DETECTED box when the person falls.
+5. Click the new row and review it as in [Test 7](#test-7-review-an-event).
 
-Any falls found in the video appear in the dashboard's event log, named after the video file in the Camera column.
+Notes:
+- Videos are analyzed one at a time; others wait in the list as "Waiting to start…".
+- Analyzing a video while the live camera is running slows down both, because they share the same computer.
+- Events from uploads appear in the log at the time the video was *analyzed* (the time in the video is shown separately), and use the current site location.
 
 ### Test 12: the original stand-alone script
 
@@ -335,7 +343,7 @@ uv run src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-
 ## What is not built yet
 
 - **Temporal classifier (stage 6).** `src/sliding_window.py` already turns each person's last 30 frames into the classifier's input, but no trained model exists yet. Until then, falls come from the rule in `fall_detector.py`. When the model is ready, only `FallDetector.update()` needs to change; the events, database and dashboard stay the same. Train the model at the same FPS the live system runs at. 30 frames is 6 seconds at 5 FPS, but only 1 second at 30 FPS.
-- **Dashboard buttons.** "All events" (filter), "Export log", "Settings", and changing an event's status from the dashboard aren't hooked up yet. The backend already supports filtering, CSV export and review; the buttons just need to be connected.
+- **Dashboard buttons.** "All events" (filter), "Export log" and "Settings" aren't hooked up yet. The backend already supports filtering and CSV export; the buttons just need to be connected.
 - **Alerts beyond the dashboard.** There are no sounds, push notifications, SMS or email yet. The dashboard checks for new events every 2.5 s.
 - **Several cameras on the dashboard.** The backend can run several, but the dashboard shows one.
 - **Login.** There is no authentication. Only run it on a trusted network.
