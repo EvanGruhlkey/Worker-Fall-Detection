@@ -16,7 +16,7 @@ from pathlib import Path
 import cv2
 from sqlmodel import Session
 
-from yolo_pose import load_pose_model, process_frame
+from yolo_pose import KEYPOINT_FORMAT, load_pose_model, process_frame
 
 from .db import FallEvent, Job, JobStatus, get_engine, update_row, utc_now
 from .fall_detector import FallDetector
@@ -228,7 +228,7 @@ def run_video_job(job_id, settings):
                         "height": height,
                         "fps": fps,
                         "frame_count": frame_index,
-                        "keypoint_format": "COCO-17",
+                        "keypoint_format": KEYPOINT_FORMAT,
                     },
                     "frames": frames,
                 }

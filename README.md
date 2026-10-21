@@ -81,7 +81,7 @@ Outputs are saved as `data/output/YourVideo.mp4` and `data/output/YourVideo.json
 
 ### Sliding window
 
-`src/sliding_window.py` keeps the last 30 frames of keypoints for each tracked person and turns them into a normalized `(30, 51)` window, the input for the temporal classifier. See [docs/features/10-18-2026-sliding-window.md](docs/features/10-18-2026-sliding-window.md).
+`src/sliding_window.py` keeps the last 30 frames of the 12 body keypoints for each tracked person and turns them into a normalized `(30, 36)` window, the input for the temporal classifier. The five facial keypoints (COCO indices 0-4) are discarded. See [docs/features/10-18-2026-sliding-window.md](docs/features/10-18-2026-sliding-window.md).
 
 ### Tests
 

@@ -8,6 +8,14 @@ import cv2
 from ultralytics import YOLO
 
 
+# YOLO's COCO pose model predicts 17 points. The first five are facial points
+# (nose, eyes and ears), so expose only the 12 body points at indices 5-16.
+COCO_KEYPOINT_COUNT = 17
+BODY_KEYPOINT_START = 5
+BODY_KEYPOINT_COUNT = COCO_KEYPOINT_COUNT - BODY_KEYPOINT_START
+KEYPOINT_FORMAT = "COCO-body-12"
+
+
 def load_pose_model(model_path):
     model_path = Path(model_path)
     if not model_path.is_file():
@@ -47,9 +55,10 @@ def process_frame(model, frame, image_size=640):
     for box, confidence, track_id, person_keypoints in zip(
         boxes, confidences, track_ids, keypoints
     ):
-        if len(person_keypoints) != 17:
+        if len(person_keypoints) != COCO_KEYPOINT_COUNT:
             raise ValueError("Model must output exactly 17 COCO keypoints")
 
+        body_keypoints = person_keypoints[BODY_KEYPOINT_START:]
         people.append(
             {
                 "track_id": track_id,
@@ -57,21 +66,27 @@ def process_frame(model, frame, image_size=640):
                 "confidence": confidence,
                 "keypoints": [
                     {"x": point[0], "y": point[1], "confidence": point[2]}
-                    for point in person_keypoints
+                    for point in body_keypoints
                 ],
             }
         )
 
-    # Draw the pose results without class/confidence labels, then add a
-    # high-contrast tracking ID above each person's bounding box.
+    # Hide facial points in the annotated output too. Keeping the 17 slots here
+    # lets Ultralytics draw its normal body skeleton, but zero confidence keeps
+    # points 0-4 and their connecting lines out of the frame.
+    if result.keypoints is not None and result.keypoints.data.shape[-1] >= 3:
+        plot_keypoints = result.keypoints.data.clone()
+        plot_keypoints[:, :BODY_KEYPOINT_START, 2] = 0
+        result.keypoints.data = plot_keypoints
+
+    # Draw the pose results without Ultralytics labels, then add a
+    # high-contrast tracking ID and person confidence above each box.
     annotated_frame = result.plot(labels=False, conf=False)
     frame_width = annotated_frame.shape[1]
-    for box, track_id in zip(boxes, track_ids):
-        if track_id is None:
-            continue
-
+    for box, confidence, track_id in zip(boxes, confidences, track_ids):
         x1, y1 = int(box[0]), int(box[1])
-        label = f"ID {track_id}"
+        id_label = f"ID {track_id}  " if track_id is not None else ""
+        label = f"{id_label}Conf {confidence:.0%}"
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = 0.8
         thickness = 2
@@ -220,7 +235,7 @@ def process_video(input_video, model_path, output_video, output_json, image_size
             "height": height,
             "fps": fps,
             "frame_count": frame_index,
-            "keypoint_format": "COCO-17",
+            "keypoint_format": KEYPOINT_FORMAT,
         },
         "frames": frames,
     }

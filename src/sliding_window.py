@@ -9,14 +9,14 @@ from dataclasses import dataclass
 
 import numpy as np
 
-NUM_KEYPOINTS = 17
+NUM_KEYPOINTS = 12
 
 
 @dataclass
 class Window:
     """One classifier input for one tracked person.
 
-    keypoints:    (window_size, 17, 3) normalized x, y and raw confidence
+    keypoints:    (window_size, 12, 3) normalized x, y and raw confidence
     box_features: (window_size, 2) bbox height relative to the window's
                   reference height, and bbox width / height
     mask:         (window_size,) True for real frames, False for left padding
@@ -33,7 +33,7 @@ class Window:
         return bool(self.mask.all())
 
     def flatten(self):
-        """Return keypoints as (window_size, 51), the classifier's input."""
+        """Return keypoints as (window_size, 36), the classifier's input."""
         return self.keypoints.reshape(len(self.keypoints), -1)
 
 
@@ -103,7 +103,7 @@ class TrackWindows:
                 dtype=np.float32,
             )
             if keypoints.shape != (NUM_KEYPOINTS, 3):
-                raise ValueError("Each person must have exactly 17 keypoints")
+                raise ValueError("Each person must have exactly 12 body keypoints")
             box = np.asarray(person["bbox"], dtype=np.float32)
             if box.shape != (4,):
                 raise ValueError("Each bbox must be [x1, y1, x2, y2]")
@@ -177,7 +177,7 @@ class TrackWindows:
 
 
 def normalize_window(keypoints, boxes):
-    """Normalize raw (T, 17, 3) keypoints and (T, 4) xyxy boxes.
+    """Normalize raw (T, 12, 3) keypoints and (T, 4) xyxy boxes.
 
     Every frame uses the same reference point and scale. Normalizing each frame
     by its own box would erase the drop itself: the hips stay centered in their

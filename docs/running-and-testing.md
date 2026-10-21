@@ -29,7 +29,7 @@ There are two programs, and they run in separate terminals:
 
 ### What happens to each camera frame
 
-1. **Pose estimation** (`src/yolo_pose.py`). The YOLO11 pose model finds every person in the frame and places 17 body keypoints on each one (shoulders, hips, knees, and so on).
+1. **Pose estimation** (`src/yolo_pose.py`). The YOLO11 pose model finds every person in the frame. The application discards facial points 0-4 and keeps the 12 body keypoints (shoulders through ankles).
 2. **Tracking** (ByteTrack, inside the same call). Each person gets an ID number that stays the same from frame to frame ("ID 3"), so the system can follow one person's movement over time.
 3. **Fall detection** (`src/backend/fall_detector.py`). For each tracked person, the detector checks whether their **hips dropped by at least 30% of their body height within 1.5 seconds** and they then **stayed roughly horizontal for 0.5 seconds**. If both are true, it reports a fall with a confidence score. ByteTrack often gives a person a new ID in the middle of a fall, because their box suddenly turns from tall to wide. So when a new ID appears where another vanished less than a second earlier, the detector carries the old ID's history over. This is a simple placeholder rule. It will be replaced by the trained temporal classifier (see [What is not built yet](#what-is-not-built-yet)).
 4. **Recording the event** (`src/backend/pipeline.py`). When a fall is detected, the backend:
