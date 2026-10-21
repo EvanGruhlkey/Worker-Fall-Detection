@@ -150,6 +150,7 @@ def test_live_camera_fills_camera_stats_and_location(client, live_camera):
     assert camera["fps"] == 15
     assert camera["online"] is True
     assert camera["stream_url"] == f"/api/cameras/{job.id}/stream"
+    assert camera["source"] == "0"
     assert body["location"] == {"name": "Dock A", "coords": "3, 4"}
 
     worker.health = "obstructed"
@@ -214,6 +215,19 @@ def test_camera_start_stores_label_and_location(client, monkeypatch):
     assert (job["name"], job["label"], job["location"], job["coords"]) == (
         "Bay 3", "Forklift lane", "Plant 2", "5, 6"
     )
+
+
+def test_camera_options_are_available_to_dashboard(client, monkeypatch):
+    manager = client.app.state.manager
+    monkeypatch.setattr(manager, "camera_options", lambda: ["0", "2"])
+
+    response = client.get("/api/cameras/options")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"source": "0", "label": "Camera 0"},
+        {"source": "2", "label": "Camera 2"},
+    ]
 
 
 def test_recovery_uses_last_frame_time(client, settings):

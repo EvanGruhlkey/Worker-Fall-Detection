@@ -137,7 +137,7 @@ Settings live in `.env` in the project root. `run.py` creates it from `.env.exam
 
 | Setting | What it does | Default in `.env.example` |
 |---|---|---|
-| `FALL_CAMERA_SOURCE` | Camera to start automatically: `0` is the built-in webcam, `1` the next camera, or an `rtsp://...` URL for an IP camera. Leave it empty for no camera. | `0` |
+| `FALL_CAMERA_SOURCE` | Optional camera to start automatically. Leave it empty to choose a local camera or network stream from the dashboard. | empty |
 | `FALL_CAMERA_NAME` / `FALL_CAMERA_LABEL` | Camera name and description on the dashboard | `Camera 01` / `Webcam` |
 | `FALL_SITE_LOCATION` / `FALL_SITE_COORDS` | Location used **only** until the browser reports this computer's location, or if location is blocked | `Unspecified location` / empty |
 | `FALL_REVERSE_GEOCODE` | `1` looks up the city name for the browser's coordinates with OpenStreetMap. `0` keeps the coordinates on this computer and shows them instead of a city name. | `1` |
@@ -215,6 +215,8 @@ If the cards say **"Connecting to backend…"** or **"Backend offline"**, the ba
 How it works: the browser finds the position, usually from nearby Wi-Fi networks, and the dashboard sends it to the backend when the page loads and every 10 minutes after that. The backend asks OpenStreetMap for the city name only when you've moved more than 500 m, so it doesn't look it up on every page load. Accuracy is typically 20–100 m on a laptop with Wi-Fi.
 
 ### Test 4: live camera feed
+
+Choose a source under **Camera feed** and click **Start camera**. Use **Rescan** after plugging in a new camera. To use an IP camera, choose **Network stream URL…** and enter its `rtsp://` or other OpenCV-compatible URL. You can switch or stop cameras from the same controls.
 
 **Expected:** the camera panel shows your webcam with:
 - a coloured skeleton over each person,
@@ -328,7 +330,7 @@ uv run src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-
 | Problem | Fix |
 |---|---|
 | Dashboard says "Backend offline" | The backend isn't running, or it crashed. Check the `[backend]` lines for an error, and that it printed `Application startup complete`. |
-| "Cameras online 0" / camera panel says OFFLINE | `FALL_CAMERA_SOURCE` is empty in `.env`, or another app is using the webcam. Look for `Could not open camera 0` in the terminal. Try `1` if you have more than one camera. |
+| "Cameras online 0" / camera panel says OFFLINE | Select a source in the camera picker and click **Start camera**. If no choices appear, close apps using the webcam and click **Rescan**. |
 | Camera starts, then goes offline | The terminal shows `Lost connection to camera`. Unplug and replug the camera, then restart the backend. |
 | Very low FPS | Normal on CPU (about 5 FPS). Close other heavy programs. A computer with an NVIDIA GPU runs much faster. |
 | `npm` / `node` not found | Install Node.js and open a new terminal. |

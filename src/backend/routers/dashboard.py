@@ -245,12 +245,14 @@ def build_camera(active, latest):
         return DashboardCamera(
             id=_camera_id(job), name=job.name, label=job.label or "Live camera",
             fps=round(worker.fps), online=True, job_id=job.id, health=worker.health,
+            source=job.source if job.source.isdigit() else None,
             stream_url=f"/api/cameras/{job.id}/stream",
         )
     if latest:
         return DashboardCamera(
             id=_camera_id(latest), name=latest.name, label=latest.label or "Offline",
             fps=0, online=False, job_id=latest.id,
+            source=latest.source if latest.source.isdigit() else None,
         )
     return DashboardCamera(id="—", name="No camera", label="Not connected", fps=0, online=False)
 

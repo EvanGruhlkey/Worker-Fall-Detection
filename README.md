@@ -51,7 +51,7 @@ uv run run.py
 
 Allow location access when the browser asks, so events are stamped with where the laptop is. Press Ctrl+C to stop both.
 
-Settings (which camera to use, fallback location) are in `.env`, created from `.env.example` on the first run. See [docs/running-and-testing.md](docs/running-and-testing.md) for every setting, a step-by-step test of each feature with the expected results, and troubleshooting. API reference: [docs/backend-api.md](docs/backend-api.md).
+Choose and switch cameras from the dashboard. Optional startup-camera and fallback-location settings are in `.env`, created from `.env.example` on the first run. See [docs/running-and-testing.md](docs/running-and-testing.md) for every setting, a step-by-step test of each feature with the expected results, and troubleshooting. API reference: [docs/backend-api.md](docs/backend-api.md).
 
 ### Live camera
 

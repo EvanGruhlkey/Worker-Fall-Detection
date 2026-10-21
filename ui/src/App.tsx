@@ -33,7 +33,7 @@ export default function App() {
           <div className="feed-col">
             <h2>Camera feed <span className="count">1</span></h2>
             <div style={{ marginTop: 12 }}>
-              <CameraFeed camera={camera} location={location} />
+              <CameraFeed camera={camera} location={location} onChanged={refresh} />
             </div>
             <VideoUpload uploads={uploads} onUploaded={refresh} />
           </div>
