@@ -79,6 +79,11 @@ class Settings:
     camera_label: str | None = field(
         default_factory=lambda: os.environ.get("FALL_CAMERA_LABEL") or None
     )
+    # Temporal classifier checkpoint (see docs/features/10-23-2026-temporal-classifier.md).
+    # Leave empty to keep the rule-based detector in fall_detector.py.
+    classifier_path: Path | None = field(
+        default_factory=lambda: _env_path("FALL_CLASSIFIER_PATH", None)
+    )
 
     @property
     def input_dir(self):
