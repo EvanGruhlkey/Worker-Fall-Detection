@@ -5,16 +5,19 @@
     uv run scripts/backup.py restore backups/fall-backup-20261030-120000.zip
 
 A backup is one .zip holding ``database.dump`` (pg_dump's custom format) and the
-data folders the rows point at: events/ (snapshots and review clips), and
-unless --no-videos, input/ (uploaded videos) and output/ (annotated videos).
-Moving the system to another machine or database is a backup here and a
-restore there; see docs/database.md.
+files the rows point at: events/ (snapshots and review clips), and unless
+--no-videos, input/ (this computer's uploaded videos) and output/ (annotated
+videos). With shared storage configured, files only in the bucket (recorded by
+other stations) are downloaded into the backup too. Moving the system to
+another machine or database is a backup here and a restore there; see
+docs/database.md.
 
-Restoring REPLACES everything in the configured database and overwrites files
-of the same name in the data folder. Stop the backend first.
+Restoring REPLACES everything in the configured database, overwrites files of
+the same name in the data folder, and uploads the media to shared storage.
+Stop the backend on every station first.
 
-Needs PostgreSQL's pg_dump and pg_restore (installed with PostgreSQL), at least
-as new as the database server.
+pg_dump, pg_restore and psql come bundled (pixeltable-pgserver, PostgreSQL 18), which
+can back up any server from PostgreSQL 9.2 to 18.
 """
 
 import argparse
@@ -35,9 +38,10 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from backend.config import Settings  # noqa: E402
 from backend.db import close_db, init_db  # noqa: E402
+from backend.storage import SHARED_FOLDERS, MediaStore  # noqa: E402
 
 DUMP_NAME = "database.dump"
-MEDIA_FOLDERS = ("events", "input", "output")
+MEDIA_FOLDERS = (*SHARED_FOLDERS, "input")
 
 
 def parse_args():
@@ -58,17 +62,18 @@ def parse_args():
 
 
 def find_tool(name):
-    """pg_dump/pg_restore from PATH, or from a standard PostgreSQL install on Windows."""
+    """A PostgreSQL tool: the bundled PostgreSQL 18 copy, else one on the PATH."""
+    import pixeltable_pgserver
+
+    package = Path(pixeltable_pgserver.__file__).parent
+    for folder in ("pginstall18", "pginstall"):
+        for candidate in (package / folder / "bin" / name, package / folder / "bin" / f"{name}.exe"):
+            if candidate.is_file():
+                return str(candidate)
     found = shutil.which(name)
     if found:
         return found
-    installs = sorted(
-        Path(os.environ.get("ProgramFiles", r"C:\Program Files"), "PostgreSQL").glob(f"*/bin/{name}.exe"),
-        key=lambda path: int(path.parts[-3]) if path.parts[-3].isdigit() else 0,
-    )
-    if installs:
-        return str(installs[-1])
-    sys.exit(f"{name} not found. It comes with PostgreSQL; add PostgreSQL's bin folder to PATH.")
+    sys.exit(f"{name} not found; reinstall the dependencies with `uv sync`.")
 
 
 def libpq_target(database_url):
@@ -90,6 +95,7 @@ def run(command, env):
 def backup(args, settings):
     target, env = libpq_target(settings.database_url)
     folders = ("events",) if args.no_videos else MEDIA_FOLDERS
+    media = MediaStore(settings)
     args.output.mkdir(parents=True, exist_ok=True)
     archive = args.output / f"fall-backup-{datetime.now():%Y%m%d-%H%M%S}.zip"
 
@@ -98,15 +104,25 @@ def backup(args, settings):
         run([find_tool("pg_dump"), "--format=custom", "--no-owner", "--no-privileges",
              f"--file={dump}", f"--dbname={target}"], env)
 
-        file_count = 0
         # Dump and videos are already compressed; storing them is just as small and faster.
         with zipfile.ZipFile(archive, "w", zipfile.ZIP_STORED) as zf:
             zf.write(dump, DUMP_NAME)
+            stored = set()
             for folder in folders:
                 for path in sorted((settings.data_dir / folder).rglob("*")):
                     if path.is_file():
-                        zf.write(path, f"data/{path.relative_to(settings.data_dir).as_posix()}")
-                        file_count += 1
+                        key = path.relative_to(settings.data_dir).as_posix()
+                        zf.write(path, f"data/{key}")
+                        stored.add(key)
+            if media.enabled:
+                # Recorded on other stations: only in the bucket.
+                download = Path(scratch) / "download"
+                for key in sorted(media.remote_keys() - stored):
+                    if key.split("/", 1)[0] in folders:
+                        media.download(key, download)
+                        zf.write(download, f"data/{key}")
+                        stored.add(key)
+            file_count = len(stored)
             zf.writestr("backup.json", json.dumps({
                 "created": datetime.now().astimezone().isoformat(),
                 "database": make_url(settings.database_url).database,
@@ -136,8 +152,18 @@ def restore(args, settings):
         if DUMP_NAME not in zf.namelist():
             sys.exit(f"{args.archive} is not a backup made by this script (no {DUMP_NAME}).")
         dump = Path(zf.extract(DUMP_NAME, scratch))
+        # Turn the dump into SQL and run that, so it restores into older servers
+        # too: PostgreSQL 18's tools add a setting servers before 17 reject.
+        script = Path(scratch) / "restore.sql"
         run([find_tool("pg_restore"), "--clean", "--if-exists", "--no-owner", "--no-privileges",
-             "--single-transaction", f"--dbname={target}", str(dump)], env)
+             f"--file={script}", str(dump)], env)
+        lines = script.read_text(encoding="utf-8").splitlines(keepends=True)
+        script.write_text(
+            "".join(line for line in lines if not line.startswith("SET transaction_timeout")),
+            encoding="utf-8",
+        )
+        run([find_tool("psql"), "--no-psqlrc", "--quiet", "--set=ON_ERROR_STOP=1",
+             "--single-transaction", f"--file={script}", f"--dbname={target}"], env)
 
         restored = 0
         for member in zf.infolist():
@@ -151,10 +177,16 @@ def restore(args, settings):
                 shutil.copyfileobj(src, dst)
             restored += 1
 
+    media = MediaStore(settings)
+    uploaded = media.sync()
+    media.shutdown()
+
     # A backup from an older version gets any newer tables and columns.
     init_db(settings.database_url)
     close_db()
     print(f"Restored database '{database}' and {restored} files into {data_dir}.")
+    if media.enabled:
+        print(f"Uploaded {uploaded} of them to shared storage '{settings.storage_bucket}'.")
 
 
 def main():

@@ -9,6 +9,10 @@ managed cloud database, or the same kind of local install we use.
 
 How to set it up and use it: [docs/database.md](../database.md).
 
+Later the same day the database became shared between all stations (Supabase),
+and the tests moved to a bundled private PostgreSQL; see
+[10-30-2026-shared-database.md](10-30-2026-shared-database.md).
+
 ## Decisions
 
 - **PostgreSQL** rather than MySQL: permissive license (no questions from a

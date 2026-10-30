@@ -5,6 +5,7 @@ Variables can also be put in a ``.env`` file in the project root (see
 """
 
 import os
+import socket
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -110,6 +111,28 @@ class Settings:
     )
     # PostgreSQL holding jobs and fall events; see docs/database.md.
     database_url: str = field(default_factory=database_url_from_env)
+    # This computer's name in the shared database. Its jobs and location are
+    # tagged with it, so restarting one station never touches another's.
+    station_name: str = field(
+        default_factory=lambda: os.environ.get("FALL_STATION_NAME") or socket.gethostname()
+    )
+    # S3-compatible bucket (Supabase Storage, AWS S3, ...) for snapshots, clips
+    # and annotated videos, so every station can play them. Empty: local only.
+    storage_bucket: str | None = field(
+        default_factory=lambda: os.environ.get("FALL_STORAGE_BUCKET") or None
+    )
+    storage_endpoint: str | None = field(
+        default_factory=lambda: os.environ.get("FALL_STORAGE_ENDPOINT") or None
+    )
+    storage_region: str = field(
+        default_factory=lambda: os.environ.get("FALL_STORAGE_REGION") or "us-east-1"
+    )
+    storage_key_id: str | None = field(
+        default_factory=lambda: os.environ.get("FALL_STORAGE_KEY_ID") or None
+    )
+    storage_secret: str | None = field(
+        default_factory=lambda: os.environ.get("FALL_STORAGE_SECRET") or None
+    )
 
     @property
     def input_dir(self):

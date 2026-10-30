@@ -22,6 +22,8 @@ dependencies = [
     "matplotlib>=3.11.2",
     "psycopg[binary]>=3.2",
     "alembic>=1.16",
+    "boto3>=1.40",
+    "pixeltable-pgserver>=0.7",
 ]
 
 [tool.uv]

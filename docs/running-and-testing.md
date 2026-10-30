@@ -24,7 +24,7 @@ There are two programs, and they run in separate terminals:
 
 | Part | Folder | Runs on | What it does |
 |---|---|---|---|
-| **Backend** | `src/backend/` | http://127.0.0.1:8000 | A Python [FastAPI](https://fastapi.tiangolo.com/) web server. It reads the camera, runs the AI models, detects falls, saves them to a database, and serves that data to the dashboard over HTTP. |
+| **Backend** | `src/backend/` | http://127.0.0.1:8000 | A Python [FastAPI](https://fastapi.tiangolo.com/) web server. It reads the camera, runs the AI models, detects falls, saves them to the team's shared database, and serves that data to the dashboard over HTTP. |
 | **Dashboard** | `ui/` | http://localhost:5173 | A React web page (built with [Vite](https://vitejs.dev/)). It requests the backend's data every 2.5 seconds and shows it: stat cards, the live camera feed, and the event log. |
 
 ### What happens to each camera frame
@@ -33,9 +33,10 @@ There are two programs, and they run in separate terminals:
 2. **Tracking** (ByteTrack, inside the same call). Each person gets an ID number that stays the same from frame to frame ("ID 3"), so the system can follow one person's movement over time.
 3. **Fall detection** (`src/backend/fall_detector.py`). For each tracked person, the detector checks whether their **hips dropped by at least 30% of their body height within 1.5 seconds** and they then **stayed roughly horizontal for 0.5 seconds**. If both are true, it reports a fall with a confidence score. ByteTrack often gives a person a new ID in the middle of a fall, because their box suddenly turns from tall to wide. So when a new ID appears where another vanished less than a second earlier, the detector carries the old ID's history over. This is a simple placeholder rule. Setting `FALL_CLASSIFIER_PATH` in `.env` swaps it for the temporal classifier (`src/temporal/`), which scores each person's last 30 frames of joint positions, velocities and accelerations and fires when the probability stays above 0.8 for 5 frames. The only checkpoint so far was trained on synthetic skeletons, so the rule stays the default (see [What is not built yet](#what-is-not-built-yet)).
 4. **Recording the event** (`src/backend/pipeline.py`). When a fall is detected, the backend:
-   - saves a row in the PostgreSQL database with the time, camera, location, coordinates, confidence, and the reason ("hip dropped 46% of body height in 0.7s; torso 74 deg from vertical"),
+   - saves a row in the shared PostgreSQL database with the time, camera, location, coordinates, confidence, and the reason ("hip dropped 46% of body height in 0.7s; torso 74 deg from vertical"),
    - saves a **snapshot** JPEG of that moment,
    - records a **clip** from 5 seconds before to 5 seconds after the fall,
+   - uploads the snapshot and clip to shared storage in the background, so every teammate's dashboard can show them,
    - draws a red **FALL DETECTED** box on the live video for 3 seconds.
 5. **Camera health check**. Every 15th frame, the backend checks the image itself. A nearly uniform image (lens covered, or too dark) is reported as **Obstructed**. An image with very few sharp edges (out of focus, dirty lens) is reported as **Blurry**.
 
@@ -49,7 +50,7 @@ There are two programs, and they run in separate terminals:
 | **Detection uptime** | Share of the last 24 hours that at least one camera was running. Green at 95% or above, red below 80%. |
 | **Camera health** | The image check described above: Good / Blurry / Obstructed / Offline |
 | **Camera feed** | The live video, with skeletons, IDs and fall alerts drawn by the backend |
-| **Event log** | Today's events, newest first: time, event, camera and location, confidence, status. Click a row to review it. |
+| **Event log** | Every station's events, newest first: time, event, camera and location, confidence, status. **Today** / **All time** switches between today's and every event ever recorded (earlier days show their date). **Export log** downloads the shown events as a CSV. Click a row to review it. |
 | **Analyze a recorded video** (under the camera) | Upload a video file. The backend runs the same pose, tracking and fall detection as for the live camera, shows the progress, then lists how many falls it found and links to the analyzed video. Falls found go into the event log. |
 
 Every event moves through these review statuses:
@@ -72,7 +73,7 @@ You need:
   - Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
 - **Node.js 18 or newer**, which runs the dashboard. Get it from https://nodejs.org. Check it with `node -v`.
 - **The pose model** at `models/yolo11n-pose.pt` (already in the repo).
-- **PostgreSQL 14 or newer**, which stores the events. Install it and create the app's database as described in [database.md: First-time setup](database.md#first-time-setup).
+- **The team's database settings** for `.env`: the shared Supabase database and storage. Get them from a teammate; see [database.md: Setting up a station](database.md#setting-up-a-station-each-laptop). Nothing else to install.
 
 Then, from the project root:
 
@@ -81,12 +82,11 @@ uv sync               # installs Python 3.12 and the backend packages into .venv
 cd ui
 npm install           # installs the dashboard packages into ui/node_modules
 cd ..
-uv run scripts/create_db.py   # asks for the postgres password; creates the database and tables
 ```
 
-**Expected:** `uv sync` ends with `Installed N packages` (or `Checked N packages` if they're already installed). `npm install` ends with `added N packages`. Warnings about funding or deprecations are fine. `create_db.py` ends with `Tables are up to date.`
+**Expected:** `uv sync` ends with `Installed N packages` (or `Checked N packages` if they're already installed). `npm install` ends with `added N packages`. Warnings about funding or deprecations are fine.
 
-If you have events from before the switch to PostgreSQL in `data/falls.db`, copy them over once with `uv run scripts/sqlite_to_postgres.py`.
+Then fill in the database and storage settings in `.env` (it's created from `.env.example` on the first `uv run run.py`, or copy it yourself) and check them with `uv run scripts/sync_media.py`.
 
 ---
 
@@ -145,7 +145,8 @@ Settings live in `.env` in the project root. `run.py` creates it from `.env.exam
 | `FALL_CAMERA_NAME` / `FALL_CAMERA_LABEL` | Camera name and description on the dashboard | `Camera 01` / `Webcam` |
 | `FALL_SITE_LOCATION` / `FALL_SITE_COORDS` | Location used **only** until the browser reports this computer's location, or if location is blocked | `Unspecified location` / empty |
 | `FALL_CLASSIFIER_PATH` | Path to a temporal classifier checkpoint (for example `models/fall_gru.pt`). Empty keeps the rule-based fall detector. | empty |
-| `FALL_DB_*` | How to reach the PostgreSQL database ([database.md](database.md#2-check-the-settings-in-env)) | `localhost`, `5432`, `fall_detection`, user `fall`, password `fall` |
+| `FALL_DATABASE_URL`, `FALL_STORAGE_*` | The team's shared database and storage ([database.md](database.md#setting-up-a-station-each-laptop)) | empty |
+| `FALL_STATION_NAME` | This laptop's name in the shared database; must differ per laptop | the computer's network name |
 | `FALL_REVERSE_GEOCODE` | `1` looks up the city name for the browser's coordinates with OpenStreetMap. `0` keeps the coordinates on this computer and shows them instead of a city name. | `1` |
 
 The rest of the settings are in [backend-api.md](backend-api.md#settings). A variable set in the terminal overrides the same variable in `.env`.
@@ -175,13 +176,14 @@ Then open **http://localhost:5173**. The dashboard sends every request that star
 uv run pytest -v
 ```
 
-**Expected:** `110 passed`. The first run takes about 20–40 seconds, because some tests run the real YOLO model. PostgreSQL must be running: the tests use their own `fall_detection_test` database (created by `scripts/create_db.py`) and empty it before each test, so your real events are never touched.
+**Expected:** `116 passed`. A run takes about 30 seconds, because some tests run the real YOLO model; the very first run takes about 15 seconds longer. The tests never touch the shared database: they start a private PostgreSQL bundled with the project's packages and empty it before each test, and use a stand-in for shared storage.
 
 | Test file | Tests | What it checks |
 |---|---|---|
 | `tests/test_api.py` | 9 | Core API: health, video upload processed end to end, fall events saved with snapshot, clip and location, review flow, error handling |
-| `tests/test_dashboard.py` | 17 | Dashboard data matches the UI's types, the four stat cards, uptime math, "today" filter, CSV export, camera health check, upload progress, events marked as coming from uploads, review shown on the dashboard |
+| `tests/test_dashboard.py` | 17 | Dashboard data matches the UI's types, the four stat cards, uptime math, "today" and "all time" filters with dates on older events, CSV export, camera health check, upload progress, events marked as coming from uploads, review shown on the dashboard |
 | `tests/test_db.py` | 2 | The migrations create exactly the tables in `db.py`; times keep their timezone |
+| `tests/test_shared.py` | 6 | Several stations sharing a database: a restart only recovers its own jobs, each station keeps its own location, media is uploaded with its type, footage from another station is served from the bucket, offline media is uploaded later |
 | `tests/test_fall_detector.py` | 8 | The fall rule: detects a sudden fall only once, including when the tracker switches the person's ID mid-fall; ignores standing still, someone already lying down, a brief dip they recover from, people without tracking IDs, and new IDs that appear far away or long after |
 | `tests/test_location.py` | 9 | Browser-reported location: city lookup, reusing the name for small moves, falling back to coordinates or `.env`, location saved on new events, reading `.env` |
 | `tests/test_sliding_window.py` | 25 | The sliding window buffer (see [features/10-18-2026-sliding-window.md](features/10-18-2026-sliding-window.md)) |
@@ -283,11 +285,13 @@ Cover the webcam lens with your finger or a piece of paper for about 3 seconds.
 
 A very out-of-focus or smudged view shows `Blurry`. The thresholds are rough. They're `OBSTRUCTED_MAX_STD` and `BLURRY_MAX_SHARPNESS` in `src/backend/pipeline.py`.
 
-### Test 9: export the log
+### Test 9: all past events, and exporting the log
 
-Open http://127.0.0.1:8000/api/dashboard/events.csv.
+1. In the event log, click **All time**.
+   **Expected:** every recorded fall from every station, newest first. Falls from earlier days show their date ("Oct 19, 6:15:19 PM"); today's show only the time. Click **Today** to go back.
+2. Click **Export log**.
 
-**Expected:** a file named `fall-events-YYYY-MM-DD.csv` downloads. It opens in Excel with one row per event and these columns: `id, detected_at_utc, local_time, event, camera, location, coords, confidence_percent, status, track_id, reason, reviewer, notes, reviewed_at_utc`.
+**Expected:** a file named `fall-events-YYYY-MM-DD.csv` downloads, holding the events currently shown (today's, or all time). It opens in Excel with one row per event and these columns: `id, detected_at_utc, local_time, event, camera, location, coords, confidence_percent, status, track_id, reason, reviewer, notes, reviewed_at_utc`.
 
 ### Test 10: data is kept after a restart, and the offline state works
 
@@ -296,7 +300,7 @@ This test needs the two parts running separately (see [Running the two parts sep
 1. Stop the backend (Ctrl+C in its terminal) and leave the dashboard open.
    **Expected:** within about 3 seconds the stat cards show `-` and "Backend offline", and the camera panel shows **OFFLINE**. Events already on screen stay visible.
 2. Start the backend again.
-   **Expected:** everything comes back on its own, including all earlier events (they're saved in PostgreSQL). **Detection uptime** now drops below 100%, because the time the backend was stopped counts as downtime.
+   **Expected:** everything comes back on its own, including all earlier events (they're saved in the shared database). **Detection uptime** now drops below 100%, because the time the backend was stopped counts as downtime.
 
 ### Test 11: analyze a recorded video (no webcam needed)
 
@@ -342,8 +346,9 @@ uv run src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-
 | `Port 8000 (backend) is already in use` (or 5173) | Another copy is still running, maybe in another terminal or VS Code. Stop it with Ctrl+C there, or end `python` / `node` in Task Manager or Activity Monitor. |
 | Header shows `Unspecified location` | Location is blocked for the dashboard. Click the icon to the left of the address bar, then **Site settings**, set **Location** to **Allow**, and reload. On Windows, also check **Settings → Privacy & security → Location** is on. On macOS, check **System Settings → Privacy & Security → Location Services** for your browser. |
 | Header shows coordinates instead of a city | The OpenStreetMap lookup failed (no internet) or `FALL_REVERSE_GEOCODE=0`. The lookup is retried the next time the dashboard reports the location: on page reload, or every 10 minutes. |
-| `[run] ERROR: Could not connect to the database` | PostgreSQL isn't running, or `.env` has the wrong `FALL_DB_*` settings. See [database.md: Troubleshooting](database.md#troubleshooting). |
-| Start over with an empty event log | Back up first if needed (`uv run scripts/backup.py backup`). Stop the backend, run `psql -h localhost -U fall -d fall_detection -c "TRUNCATE fallevent, job, sitelocation RESTART IDENTITY"`, and delete `data/events/`. |
+| `[run] ERROR: Could not connect to the database` | No internet, wrong `FALL_DATABASE_URL`, or the Supabase project is paused after a week idle. See [database.md: Troubleshooting](database.md#troubleshooting). |
+| A teammate's fall shows, but its snapshot or clip doesn't load | Their laptop hasn't uploaded it yet (offline or still writing the clip). See [database.md: Troubleshooting](database.md#troubleshooting). |
+| Start over with an empty event log | **This deletes the whole team's events**, since the database is shared; agree on it first. Back up (`uv run scripts/backup.py backup`), stop every station's backend, run `TRUNCATE fallevent, job, sitelocation RESTART IDENTITY;` in Supabase's SQL Editor, empty the bucket in Supabase's Storage page, and delete `data/events/` and `data/output/` on each station. |
 | The browser console shows `[AssignmentCache]` or other messages from `all.js` | Those come from a browser extension, not this project. Ignore them. |
 
 ---
@@ -351,7 +356,7 @@ uv run src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-
 ## What is not built yet
 
 - **Temporal classifier (stage 6): built, not yet trained on real falls.** `src/temporal/` has the frame sampler, feature extraction, GRU/TCN model, threshold gate and a drop-in `TemporalFallDetector`. `models/fall_gru.pt` was trained on synthetic skeletons only, so the dashboard keeps the rule in `fall_detector.py` unless `FALL_CLASSIFIER_PATH` is set. Next step: collect labeled footage (OmniFall plus site clips), run it through `yolo_pose.py`, list it in a manifest and train with `scripts/train_temporal.py --manifest`. Details and the plotting tool: [features/10-23-2026-temporal-classifier.md](features/10-23-2026-temporal-classifier.md).
-- **Dashboard buttons.** "All events" (filter), "Export log" and "Settings" aren't hooked up yet. The backend already supports filtering and CSV export; the buttons just need to be connected.
+- **Dashboard buttons.** "Settings" isn't hooked up yet, and there's no filter by review status in the event log (the backend supports `?status=`).
 - **Alerts beyond the dashboard.** There are no sounds, push notifications, SMS or email yet. The dashboard checks for new events every 2.5 s.
 - **Several cameras on the dashboard.** The backend can run several, but the dashboard shows one.
 - **Login.** There is no authentication. Only run it on a trusted network.

@@ -1,36 +1,41 @@
+import logging
 import os
+import tempfile
+from pathlib import Path
 
+import pixeltable_pgserver
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 from sqlalchemy.engine import make_url
 from sqlmodel import SQLModel
 
-from backend.config import REPO_ROOT, Settings, database_url_from_env
+from backend.config import REPO_ROOT, Settings
 from backend.db import close_db, create_db_engine, init_db
 from backend.main import create_app
 
-
-def _test_database_url():
-    """The app's database with "_test" appended, so tests never touch real data."""
-    if os.environ.get("FALL_TEST_DATABASE_URL"):
-        return os.environ["FALL_TEST_DATABASE_URL"]
-    name = make_url(database_url_from_env()).database
-    return database_url_from_env(database=f"{name}_test")
+# The tests never use the shared database from .env: they empty the database
+# before every test. They start a private PostgreSQL (bundled with the
+# pixeltable-pgserver package) whose files are kept between runs, so only the
+# first run waits for it to be created.
+TEST_PGDATA = Path(tempfile.gettempdir()) / "worker-fall-detection-test-pg"
+# Its routine messages also run at exit, after pytest has closed the output.
+logging.getLogger("pixeltable_pgserver").setLevel(logging.WARNING)
 
 
 @pytest.fixture(scope="session")
 def test_database_url():
-    url = _test_database_url()
-    try:
-        init_db(url)
-    except RuntimeError as error:
-        pytest.exit(
-            f"{error}\nCreate the test database with `uv run scripts/create_db.py`.",
-            returncode=1,
-        )
+    url = os.environ.get("FALL_TEST_DATABASE_URL")
+    server = None
+    if not url:
+        server = pixeltable_pgserver.get_server(TEST_PGDATA, cleanup_mode="stop")
+        url = make_url(server.get_uri()).set(drivername="postgresql+psycopg")
+        url = url.render_as_string(hide_password=False)
+    init_db(url)
     close_db()
-    return url
+    yield url
+    if server:
+        server.cleanup()
 
 
 @pytest.fixture
@@ -56,6 +61,8 @@ def settings(tmp_path, database_url):
         camera_source=None,
         reverse_geocode=False,
         database_url=database_url,
+        station_name="test-station",
+        storage_bucket=None,
     )
 
 

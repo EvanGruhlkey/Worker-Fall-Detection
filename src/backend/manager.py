@@ -44,10 +44,16 @@ class JobManager:
         threading.Thread(target=run, name="model-warm-up", daemon=True).start()
 
     def recover_interrupted_jobs(self):
-        """Jobs left running when the server stopped can't resume; mark them."""
+        """This station's jobs left running when it stopped can't resume; mark them.
+
+        Other stations' jobs are theirs to recover: they may be running right now.
+        """
         with Session(get_engine()) as session:
             jobs = session.exec(
-                select(Job).where(Job.status.in_([JobStatus.queued, JobStatus.running]))
+                select(Job).where(
+                    Job.status.in_([JobStatus.queued, JobStatus.running]),
+                    (Job.station == self.settings.station_name) | Job.station.is_(None),
+                )
             ).all()
             for job in jobs:
                 job.status = JobStatus.failed
@@ -74,6 +80,7 @@ class JobManager:
         with Session(get_engine()) as session:
             job = Job(
                 kind=JobKind.camera,
+                station=self.settings.station_name,
                 name=name or (f"Camera {source}" if source.isdigit() else source),
                 source=source,
                 label=label,

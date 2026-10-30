@@ -64,7 +64,10 @@ async def upload_video(
         while chunk := await file.read(UPLOAD_CHUNK):
             out.write(chunk)
 
-    job = Job(kind=JobKind.video, name=original_name, source=str(destination))
+    job = Job(
+        kind=JobKind.video, station=settings.station_name, name=original_name,
+        source=str(destination),
+    )
     session.add(job)
     session.commit()
     session.refresh(job)

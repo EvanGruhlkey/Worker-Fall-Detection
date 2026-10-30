@@ -1,4 +1,7 @@
-"""Create the PostgreSQL user and databases the backend uses (run once per machine).
+"""Create the user and database on a self-hosted PostgreSQL server (run once).
+
+Not needed with a hosted database such as the team's Supabase project, which
+is set with FALL_DATABASE_URL instead.
 
     uv run scripts/create_db.py
 
@@ -6,8 +9,7 @@ Asks for the password of the PostgreSQL admin user (``postgres``, chosen when
 PostgreSQL was installed), then creates:
 
 - the user FALL_DB_USER with password FALL_DB_PASSWORD (from .env),
-- the database FALL_DB_NAME, owned by that user, with the tables created,
-- FALL_DB_NAME + "_test" for the automated tests.
+- the database FALL_DB_NAME, owned by that user, with the tables created.
 
 Anything that already exists is left as it is, so it is safe to run again.
 The admin password is only used for this script and is not saved. Set
@@ -40,8 +42,8 @@ def main():
     args = parse_args()
     if os.environ.get("FALL_DATABASE_URL"):
         sys.exit(
-            "FALL_DATABASE_URL is set, so the database is managed elsewhere. Ask its "
-            "administrator for a user and database, or unset it to use FALL_DB_* settings."
+            "FALL_DATABASE_URL is set, so the database is hosted elsewhere (e.g. Supabase) "
+            "and needs no setup here. Unset it to set up a local server with FALL_DB_*."
         )
 
     host = os.environ.get("FALL_DB_HOST", "localhost")
@@ -72,16 +74,15 @@ def main():
             )
             print(f"Created user '{user}'.")
 
-        for database in (name, f"{name}_test"):
-            if admin.execute("SELECT 1 FROM pg_database WHERE datname = %s", (database,)).fetchone():
-                print(f"Database '{database}' already exists.")
-            else:
-                admin.execute(
-                    sql.SQL("CREATE DATABASE {} OWNER {} ENCODING 'UTF8'").format(
-                        sql.Identifier(database), sql.Identifier(user)
-                    )
+        if admin.execute("SELECT 1 FROM pg_database WHERE datname = %s", (name,)).fetchone():
+            print(f"Database '{name}' already exists.")
+        else:
+            admin.execute(
+                sql.SQL("CREATE DATABASE {} OWNER {} ENCODING 'UTF8'").format(
+                    sql.Identifier(name), sql.Identifier(user)
                 )
-                print(f"Created database '{database}'.")
+            )
+            print(f"Created database '{name}'.")
 
     # Create the tables now, as the app's own user, to check its login works.
     try:

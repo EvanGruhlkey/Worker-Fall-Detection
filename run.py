@@ -108,8 +108,8 @@ def check_database():
         where = make_url(url).render_as_string(hide_password=True)
         fail(
             f"Could not connect to the database at {where}: {reason}\n"
-            "      Is PostgreSQL running? On first setup, run `uv run scripts/create_db.py`.\n"
-            "      See docs/database.md."
+            "      Check FALL_DATABASE_URL in .env (the team's Supabase connection) and the\n"
+            "      internet connection. See docs/database.md."
         )
     finally:
         engine.dispose()

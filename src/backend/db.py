@@ -17,6 +17,8 @@ from sqlalchemy.exc import OperationalError
 from sqlmodel import Field, Session, SQLModel, create_engine
 
 MIGRATIONS_DIR = Path(__file__).resolve().with_name("migrations")
+# Any fixed number; identifies the lock held while migrations run.
+MIGRATION_LOCK = 7_301_042
 
 
 def utc_now():
@@ -69,7 +71,10 @@ class Job(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     kind: JobKind = _choice(JobKind)
+    # Computer that ran the job (FALL_STATION_NAME); None for rows from before.
+    station: str | None = Field(default=None, index=True)
     name: str
+    # Camera index/URL, or the upload's path on the station that ran it.
     source: str
     # Shown on the dashboard under the camera name, e.g. "North entrance".
     label: str | None = None
@@ -121,13 +126,14 @@ class FallEvent(SQLModel, table=True):
 
 
 class SiteLocation(SQLModel, table=True):
-    """Where the system is now, as last reported by the dashboard's browser.
+    """Where a station is, as last reported by its dashboard's browser.
 
-    A single row (id 1). It's kept across restarts, so events recorded before
+    One row per station. It's kept across restarts, so events recorded before
     the dashboard is opened again still get the last known location.
     """
 
-    id: int | None = Field(default=1, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
+    station: str | None = Field(default=None, unique=True)
     name: str | None = None
     latitude: float | None = None
     longitude: float | None = None
@@ -150,10 +156,18 @@ def alembic_config(database_url):
 def create_db_engine(database_url):
     return create_engine(
         database_url,
-        # Reconnect quietly if the database restarted while we were idle.
+        # Reconnect quietly if the database restarted or the network dropped.
         pool_pre_ping=True,
-        # Timestamps are stored and read back in UTC whatever the server's zone.
-        connect_args={"options": "-c timezone=UTC"},
+        # A hosted database allows few connections in total (Supabase's free
+        # pooler: 15), and every station has its own pool.
+        pool_size=3,
+        max_overflow=2,
+        connect_args={
+            # Timestamps are stored and read back in UTC whatever the server's zone.
+            "options": "-c timezone=UTC",
+            # Server-side prepared statements break behind transaction poolers.
+            "prepare_threshold": None,
+        },
     )
 
 
@@ -164,6 +178,9 @@ def init_db(database_url):
     engine = create_db_engine(database_url)
     try:
         with engine.begin() as connection:
+            # Stations starting together take turns; the others then find
+            # nothing left to do.
+            connection.execute(sa.text("SELECT pg_advisory_xact_lock(:key)"), {"key": MIGRATION_LOCK})
             config = alembic_config(database_url)
             config.attributes["connection"] = connection
             command.upgrade(config, "head")

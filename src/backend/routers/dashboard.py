@@ -52,8 +52,14 @@ class Scope(str, Enum):
 
 
 def local_time_label(moment):
-    """'10:42:11 AM' in the server's local time zone."""
-    return moment.astimezone().strftime("%I:%M:%S %p").lstrip("0")
+    """'10:42:11 AM' today, 'Oct 19, 10:42:11 AM' before, in the server's local time zone."""
+    local = moment.astimezone()
+    label = local.strftime("%I:%M:%S %p").lstrip("0")
+    today = datetime.now().astimezone().date()
+    if local.date() == today:
+        return label
+    year = f" {local.year}" if local.year != today.year else ""
+    return f"{local:%b} {local.day}{year}, {label}"
 
 
 def start_of_today(now):
@@ -290,7 +296,7 @@ def build_location(settings, session, camera_job):
 def dashboard(
     scope: Scope = Scope.today,
     status: ReviewStatus | None = None,
-    limit: int = Query(100, ge=1, le=1000),
+    limit: int = Query(500, ge=1, le=1000),
     session: Session = Depends(get_session),
     settings=Depends(get_settings),
     manager=Depends(get_manager),

@@ -96,6 +96,9 @@ def test_today_scope_hides_older_events(client):
     assert [e["reason"] for e in today] == ["today"]
     everything = client.get("/api/dashboard", params={"scope": "all"}).json()["events"]
     assert len(everything) == 2
+    # Older events carry their date, so they can't be mistaken for today's.
+    assert re.fullmatch(r"\d{1,2}:\d{2}:\d{2} [AP]M", everything[0]["time"])
+    assert re.fullmatch(r"[A-Z][a-z]{2} \d{1,2}, \d{1,2}:\d{2}:\d{2} [AP]M", everything[1]["time"])
 
 
 def test_status_filter(client):
