@@ -15,7 +15,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import Settings
-from .db import init_db
+from .db import close_db, init_db
 from .manager import JobManager
 from .routers import dashboard, events, jobs, location
 
@@ -35,6 +35,7 @@ def create_app(settings=None):
         manager.start_configured_camera()
         yield
         manager.shutdown()
+        close_db()
 
     app = FastAPI(
         title="Oxy Worker Fall Detection API",

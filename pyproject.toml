@@ -20,6 +20,8 @@ dependencies = [
     "python-multipart>=0.0.32",
     "imageio-ffmpeg>=0.6.0",
     "matplotlib>=3.11.2",
+    "psycopg[binary]>=3.2",
+    "alembic>=1.16",
 ]
 
 [tool.uv]

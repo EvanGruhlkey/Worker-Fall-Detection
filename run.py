@@ -68,6 +68,8 @@ def check_setup():
     if not (ROOT / "models" / "yolo11n-pose.pt").exists():
         fail("models/yolo11n-pose.pt is missing.")
 
+    check_database()
+
     node = shutil.which("node")
     if not node:
         fail("Node.js was not found. Install it from https://nodejs.org and open a new terminal.")
@@ -86,6 +88,31 @@ def check_setup():
                 "running; stop it first (close its terminal or end it in Task Manager)."
             )
     return node
+
+
+def check_database():
+    """Fail early, with a hint, if PostgreSQL can't be reached with the .env settings."""
+    sys.path.insert(0, str(ROOT / "src"))
+    from sqlalchemy.engine import make_url
+
+    from backend.config import database_url_from_env  # reads .env
+    from backend.db import create_db_engine
+
+    url = database_url_from_env()
+    engine = create_db_engine(url)
+    try:
+        with engine.connect():
+            pass
+    except Exception as error:
+        reason = str(getattr(error, "orig", error)).strip().splitlines()[0]
+        where = make_url(url).render_as_string(hide_password=True)
+        fail(
+            f"Could not connect to the database at {where}: {reason}\n"
+            "      Is PostgreSQL running? On first setup, run `uv run scripts/create_db.py`.\n"
+            "      See docs/database.md."
+        )
+    finally:
+        engine.dispose()
 
 
 def start(name, command, cwd):

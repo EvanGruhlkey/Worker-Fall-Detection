@@ -9,7 +9,7 @@
 ### Currently Working
 
 - **Pose detection and tracking** on a live camera or a prerecorded video. The live view shows skeletons, tracking IDs, FPS, and the number of detected people.
-- **Backend server** (`src/backend/`). Runs the camera through the models and a placeholder fall detector. Each detected fall is saved to a database with its time, camera, location, confidence, a snapshot and a short clip.
+- **Backend server** (`src/backend/`). Runs the camera through the models and a placeholder fall detector. Each detected fall is saved to a PostgreSQL database with its time, camera, location, confidence, a snapshot and a short clip. See [docs/database.md](docs/database.md).
 - **Temporal classifier** (`src/temporal/`). Stages 2, 6 and 7 of the design: frame sampler, GRU/TCN classifier over each person's 30-frame window of joint positions, velocities and accelerations, and the threshold gate. A bootstrap model trained on synthetic skeletons is in `models/fall_gru.pt`; `src/fall_pipeline.py` runs it over a video and plots every person's hip/head height, torso angle, vertical velocity and fall probability. See [docs/features/10-23-2026-temporal-classifier.md](docs/features/10-23-2026-temporal-classifier.md).
 - **Dashboard** (`ui/`). Live annotated camera feed, stat cards (active incidents, cameras online, uptime, camera health), and an event log that updates every few seconds. Click an event to see its clip and confirm it or mark it a false alarm. Upload a recorded video to check it for falls; a test video is in `data/samples/`.
 
@@ -34,6 +34,14 @@ uv sync
 This downloads Python 3.12 if needed, creates `.venv`, and installs the locked dependencies. You do not need to activate the virtual env; prefix commands with `uv run` instead.
 
 To add a dependency, use `uv add <package>` (this updates `pyproject.toml` and `uv.lock`). Commit both files.
+
+Events are stored in [PostgreSQL](https://www.postgresql.org/download/) (14 or newer). Install it, then create the app's user, databases and tables once (it asks for the `postgres` password you chose when installing):
+
+```bash
+uv run scripts/create_db.py
+```
+
+Viewing and editing the data, schema changes, backups and moving the database to another server are covered in [docs/database.md](docs/database.md).
 
 The dashboard also needs [Node.js](https://nodejs.org) 18 or newer. Install its packages once:
 

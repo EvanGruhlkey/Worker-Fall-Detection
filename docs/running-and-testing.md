@@ -33,7 +33,7 @@ There are two programs, and they run in separate terminals:
 2. **Tracking** (ByteTrack, inside the same call). Each person gets an ID number that stays the same from frame to frame ("ID 3"), so the system can follow one person's movement over time.
 3. **Fall detection** (`src/backend/fall_detector.py`). For each tracked person, the detector checks whether their **hips dropped by at least 30% of their body height within 1.5 seconds** and they then **stayed roughly horizontal for 0.5 seconds**. If both are true, it reports a fall with a confidence score. ByteTrack often gives a person a new ID in the middle of a fall, because their box suddenly turns from tall to wide. So when a new ID appears where another vanished less than a second earlier, the detector carries the old ID's history over. This is a simple placeholder rule. Setting `FALL_CLASSIFIER_PATH` in `.env` swaps it for the temporal classifier (`src/temporal/`), which scores each person's last 30 frames of joint positions, velocities and accelerations and fires when the probability stays above 0.8 for 5 frames. The only checkpoint so far was trained on synthetic skeletons, so the rule stays the default (see [What is not built yet](#what-is-not-built-yet)).
 4. **Recording the event** (`src/backend/pipeline.py`). When a fall is detected, the backend:
-   - saves a row in the database (`data/falls.db`) with the time, camera, location, coordinates, confidence, and the reason ("hip dropped 46% of body height in 0.7s; torso 74 deg from vertical"),
+   - saves a row in the PostgreSQL database with the time, camera, location, coordinates, confidence, and the reason ("hip dropped 46% of body height in 0.7s; torso 74 deg from vertical"),
    - saves a **snapshot** JPEG of that moment,
    - records a **clip** from 5 seconds before to 5 seconds after the fall,
    - draws a red **FALL DETECTED** box on the live video for 3 seconds.
@@ -72,6 +72,7 @@ You need:
   - Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
 - **Node.js 18 or newer**, which runs the dashboard. Get it from https://nodejs.org. Check it with `node -v`.
 - **The pose model** at `models/yolo11n-pose.pt` (already in the repo).
+- **PostgreSQL 14 or newer**, which stores the events. Install it and create the app's database as described in [database.md: First-time setup](database.md#first-time-setup).
 
 Then, from the project root:
 
@@ -80,9 +81,12 @@ uv sync               # installs Python 3.12 and the backend packages into .venv
 cd ui
 npm install           # installs the dashboard packages into ui/node_modules
 cd ..
+uv run scripts/create_db.py   # asks for the postgres password; creates the database and tables
 ```
 
-**Expected:** `uv sync` ends with `Installed N packages` (or `Checked N packages` if they're already installed). `npm install` ends with `added N packages`. Warnings about funding or deprecations are fine.
+**Expected:** `uv sync` ends with `Installed N packages` (or `Checked N packages` if they're already installed). `npm install` ends with `added N packages`. Warnings about funding or deprecations are fine. `create_db.py` ends with `Tables are up to date.`
+
+If you have events from before the switch to PostgreSQL in `data/falls.db`, copy them over once with `uv run scripts/sqlite_to_postgres.py`.
 
 ---
 
@@ -141,6 +145,7 @@ Settings live in `.env` in the project root. `run.py` creates it from `.env.exam
 | `FALL_CAMERA_NAME` / `FALL_CAMERA_LABEL` | Camera name and description on the dashboard | `Camera 01` / `Webcam` |
 | `FALL_SITE_LOCATION` / `FALL_SITE_COORDS` | Location used **only** until the browser reports this computer's location, or if location is blocked | `Unspecified location` / empty |
 | `FALL_CLASSIFIER_PATH` | Path to a temporal classifier checkpoint (for example `models/fall_gru.pt`). Empty keeps the rule-based fall detector. | empty |
+| `FALL_DB_*` | How to reach the PostgreSQL database ([database.md](database.md#2-check-the-settings-in-env)) | `localhost`, `5432`, `fall_detection`, user `fall`, password `fall` |
 | `FALL_REVERSE_GEOCODE` | `1` looks up the city name for the browser's coordinates with OpenStreetMap. `0` keeps the coordinates on this computer and shows them instead of a city name. | `1` |
 
 The rest of the settings are in [backend-api.md](backend-api.md#settings). A variable set in the terminal overrides the same variable in `.env`.
@@ -170,12 +175,13 @@ Then open **http://localhost:5173**. The dashboard sends every request that star
 uv run pytest -v
 ```
 
-**Expected:** `109 passed`. The first run takes about 20–40 seconds, because some tests run the real YOLO model.
+**Expected:** `110 passed`. The first run takes about 20–40 seconds, because some tests run the real YOLO model. PostgreSQL must be running: the tests use their own `fall_detection_test` database (created by `scripts/create_db.py`) and empty it before each test, so your real events are never touched.
 
 | Test file | Tests | What it checks |
 |---|---|---|
 | `tests/test_api.py` | 9 | Core API: health, video upload processed end to end, fall events saved with snapshot, clip and location, review flow, error handling |
-| `tests/test_dashboard.py` | 18 | Dashboard data matches the UI's types, the four stat cards, uptime math, "today" filter, CSV export, camera health check, upgrading an old database, upload progress, events marked as coming from uploads, review shown on the dashboard |
+| `tests/test_dashboard.py` | 17 | Dashboard data matches the UI's types, the four stat cards, uptime math, "today" filter, CSV export, camera health check, upload progress, events marked as coming from uploads, review shown on the dashboard |
+| `tests/test_db.py` | 2 | The migrations create exactly the tables in `db.py`; times keep their timezone |
 | `tests/test_fall_detector.py` | 8 | The fall rule: detects a sudden fall only once, including when the tracker switches the person's ID mid-fall; ignores standing still, someone already lying down, a brief dip they recover from, people without tracking IDs, and new IDs that appear far away or long after |
 | `tests/test_location.py` | 9 | Browser-reported location: city lookup, reusing the name for small moves, falling back to coordinates or `.env`, location saved on new events, reading `.env` |
 | `tests/test_sliding_window.py` | 25 | The sliding window buffer (see [features/10-18-2026-sliding-window.md](features/10-18-2026-sliding-window.md)) |
@@ -290,7 +296,7 @@ This test needs the two parts running separately (see [Running the two parts sep
 1. Stop the backend (Ctrl+C in its terminal) and leave the dashboard open.
    **Expected:** within about 3 seconds the stat cards show `-` and "Backend offline", and the camera panel shows **OFFLINE**. Events already on screen stay visible.
 2. Start the backend again.
-   **Expected:** everything comes back on its own, including all earlier events (they're saved in `data/falls.db`). **Detection uptime** now drops below 100%, because the time the backend was stopped counts as downtime.
+   **Expected:** everything comes back on its own, including all earlier events (they're saved in PostgreSQL). **Detection uptime** now drops below 100%, because the time the backend was stopped counts as downtime.
 
 ### Test 11: analyze a recorded video (no webcam needed)
 
@@ -336,7 +342,8 @@ uv run src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-
 | `Port 8000 (backend) is already in use` (or 5173) | Another copy is still running, maybe in another terminal or VS Code. Stop it with Ctrl+C there, or end `python` / `node` in Task Manager or Activity Monitor. |
 | Header shows `Unspecified location` | Location is blocked for the dashboard. Click the icon to the left of the address bar, then **Site settings**, set **Location** to **Allow**, and reload. On Windows, also check **Settings → Privacy & security → Location** is on. On macOS, check **System Settings → Privacy & Security → Location Services** for your browser. |
 | Header shows coordinates instead of a city | The OpenStreetMap lookup failed (no internet) or `FALL_REVERSE_GEOCODE=0`. The lookup is retried the next time the dashboard reports the location: on page reload, or every 10 minutes. |
-| Start over with an empty event log | Stop the backend and delete `data/falls.db*` and `data/events/`. They're recreated on the next start. |
+| `[run] ERROR: Could not connect to the database` | PostgreSQL isn't running, or `.env` has the wrong `FALL_DB_*` settings. See [database.md: Troubleshooting](database.md#troubleshooting). |
+| Start over with an empty event log | Back up first if needed (`uv run scripts/backup.py backup`). Stop the backend, run `psql -h localhost -U fall -d fall_detection -c "TRUNCATE fallevent, job, sitelocation RESTART IDENTITY"`, and delete `data/events/`. |
 | The browser console shows `[AssignmentCache]` or other messages from `all.js` | Those come from a browser extension, not this project. Ignore them. |
 
 ---

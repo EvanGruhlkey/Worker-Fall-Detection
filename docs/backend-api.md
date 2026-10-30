@@ -170,7 +170,7 @@ Errors return `{"detail": "message"}` with a 4xx status.
 | `routers/location.py`, `location.py` | Browser-reported site location, place-name lookup, which location events use |
 | `routers/dashboard.py` | `/api/dashboard`: stored data in the UI's shapes, stat cards, CSV export |
 | `schemas.py` | JSON request/response models |
-| `db.py` | Database tables (`Job`, `FallEvent`), SQLite at `data/falls.db`. Older databases are upgraded automatically on startup |
+| `db.py` | Database tables (`Job`, `FallEvent`, `SiteLocation`) in PostgreSQL. Migrations in `migrations/` are applied on startup ([database.md](database.md)) |
 | `pipeline.py` | Runs frames through the model and fall detector, records events and clips |
 | `manager.py` | Background threads: video queue (one at a time) and live cameras |
 | `fall_detector.py` | **Placeholder** rule-based fall detector (see below) |
@@ -197,7 +197,8 @@ Set these in `.env` in the project root (copy `.env.example`), or as environment
 | `FALL_REVERSE_GEOCODE` | `1`. Set `0` to not send coordinates to OpenStreetMap; the name then shows the coordinates |
 | `FALL_CAMERA_SOURCE` | unset. Set it (e.g. `0`) to start that camera when the server boots |
 | `FALL_CAMERA_NAME` / `FALL_CAMERA_LABEL` | `Camera <source>` / `Live camera` |
-| `FALL_DATABASE_URL` | SQLite file in the data dir |
+| `FALL_DB_HOST` / `FALL_DB_PORT` / `FALL_DB_NAME` / `FALL_DB_USER` / `FALL_DB_PASSWORD` | `localhost` / `5432` / `fall_detection` / `fall` / `fall`. See [database.md](database.md) |
+| `FALL_DATABASE_URL` | unset. A full PostgreSQL URL; overrides the `FALL_DB_*` settings |
 
 ## Not done yet
 

@@ -8,6 +8,8 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from sqlalchemy.engine import URL, make_url
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -32,6 +34,28 @@ load_env_file(REPO_ROOT / ".env")
 def _env_path(name, default):
     value = os.environ.get(name)
     return Path(value).resolve() if value else default
+
+
+def database_url_from_env(database=None):
+    """PostgreSQL URL from FALL_DATABASE_URL, or else from the FALL_DB_* parts.
+
+    ``database`` replaces the database name (the tests use their own).
+    """
+    url = os.environ.get("FALL_DATABASE_URL")
+    if url:
+        parsed = make_url(url)
+    else:
+        parsed = URL.create(
+            "postgresql+psycopg",
+            username=os.environ.get("FALL_DB_USER", "fall"),
+            password=os.environ.get("FALL_DB_PASSWORD", "fall"),
+            host=os.environ.get("FALL_DB_HOST", "localhost"),
+            port=int(os.environ.get("FALL_DB_PORT", "5432")),
+            database=os.environ.get("FALL_DB_NAME", "fall_detection"),
+        )
+    if database:
+        parsed = parsed.set(database=database)
+    return parsed.render_as_string(hide_password=False)
 
 
 @dataclass
@@ -84,6 +108,8 @@ class Settings:
     classifier_path: Path | None = field(
         default_factory=lambda: _env_path("FALL_CLASSIFIER_PATH", None)
     )
+    # PostgreSQL holding jobs and fall events; see docs/database.md.
+    database_url: str = field(default_factory=database_url_from_env)
 
     @property
     def input_dir(self):
@@ -96,12 +122,6 @@ class Settings:
     @property
     def events_dir(self):
         return self.data_dir / "events"
-
-    @property
-    def database_url(self):
-        return os.environ.get(
-            "FALL_DATABASE_URL", f"sqlite:///{(self.data_dir / 'falls.db').as_posix()}"
-        )
 
     def ensure_dirs(self):
         for directory in (self.input_dir, self.output_dir, self.events_dir):
