@@ -189,7 +189,7 @@ Set these in `.env` in the project root (copy `.env.example`), or as environment
 |---|---|
 | `FALL_DATA_DIR` | `data/` (uploads in `input/`, outputs in `output/`, event media in `events/`) |
 | `FALL_MODEL_PATH` | `models/yolo11n-pose.pt` |
-| `FALL_IMAGE_SIZE` | `640` |
+| `FALL_IMAGE_SIZE` | `native`: YOLO runs at the camera's own resolution. A number (e.g. `640`) scales the long side down to it; faster, but people far from the camera are missed |
 | `FALL_CLIP_PRE_SECONDS` / `FALL_CLIP_POST_SECONDS` | `5` / `5` |
 | `FALL_CORS_ORIGINS` | `*` |
 | `FALL_SITE_LOCATION` | `Unspecified location`. Used until the dashboard reports the browser's location, or if location is blocked |

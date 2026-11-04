@@ -62,7 +62,7 @@ From the project root, run:
 uv run src/yolo_pose.py --model models/yolo11n-pose.pt
 ```
 
-This opens camera `0`. Press `Q` or `Esc` to stop. To select another camera or request a particular resolution:
+This opens camera `0`. Press `Q` or `Esc` to stop. YOLO runs at the camera's native resolution by default so people far from the camera are still found; add `--image-size 640` to downscale (about 3x faster on a CPU, but distant people are missed). To select another camera or request a particular resolution:
 
 ```bash
 uv run src/yolo_pose.py --model models/yolo11n-pose.pt --camera 1 --width 1280 --height 720
