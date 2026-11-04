@@ -10,6 +10,7 @@ Three cheap rules from the system guide:
 """
 
 
+
 class ThresholdGate:
     def __init__(self, threshold=0.8, debounce=5, cooldown_seconds=30.0):
         if not 0.0 <= threshold <= 1.0:
