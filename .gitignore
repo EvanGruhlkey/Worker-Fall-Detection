@@ -1,4 +1,7 @@
 data/input/*
+# Training videos are versioned (labels: data/labels/clips.csv)
+!data/input/rig_falls/
+!data/input/normal_rig_work/
 data/output/*
 .venv/
 .DS_Store
