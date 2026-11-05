@@ -37,6 +37,7 @@ from temporal.detector import handoff_lost_tracks, score_tracks  # noqa: E402
 from temporal.features import window_signals  # noqa: E402
 from temporal.gate import ThresholdGate  # noqa: E402
 from temporal.model import load_checkpoint  # noqa: E402
+from temporal.pose_io import load_pose_json  # noqa: E402
 from temporal.sampler import FrameSampler  # noqa: E402
 from temporal.visualize import (  # noqa: E402
     SignalPanel,
@@ -48,6 +49,8 @@ from temporal.visualize import (  # noqa: E402
 from yolo_pose import load_pose_model, process_frame  # noqa: E402
 
 PANEL_WIDTH, PANEL_HEIGHT = 640, 720
+# Sampling rate when no classifier says otherwise; matches the rig pose files.
+DEFAULT_TARGET_FPS = 12.0
 
 
 def _video_frames(path, max_frames=None):
@@ -73,12 +76,14 @@ def _video_frames(path, max_frames=None):
 
 
 def _json_frames(path, max_frames=None):
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
-    fps = float(data["metadata"].get("fps") or 30.0)
-    frames = sorted(data["frames"], key=lambda f: f["frame_index"])
-    if max_frames is not None:
-        frames = frames[:max_frames]
-    return fps, len(frames), ((f["frame_index"], f["people"]) for f in frames)
+    """Frames of a pose JSON from either pipeline, numbered 0, 1, 2, ...
+
+    Returns ``(fps, count, frames, start_seconds)``; ``fps`` is the rate of the
+    frames in the file, which is already sampled for the RTMPose pipeline.
+    """
+    poses = load_pose_json(path)
+    people = poses.people if max_frames is None else poses.people[:max_frames]
+    return poses.fps, len(people), enumerate(people), poses.times[0]
 
 
 def choose_focus(histories, now, recent_seconds=2.0):
@@ -157,14 +162,20 @@ def run(args):
     output_dir = Path(args.output_dir) / f"{name}_temporal"
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    start_seconds = 0.0
     if args.pose_json:
-        source_fps, total, frames = _json_frames(args.pose_json, args.max_frames)
+        source_fps, total, frames, start_seconds = _json_frames(args.pose_json, args.max_frames)
         pose_model = None
     else:
         source_fps, total, frames = _video_frames(args.input, args.max_frames)
         pose_model = load_pose_model(args.model)
 
-    sampler = FrameSampler(source_fps, args.target_fps)
+    target_fps = args.target_fps
+    if target_fps is None:
+        # Sample at the rate the classifier was trained at, so its window spans
+        # the same time live and offline.
+        target_fps = load_checkpoint(args.classifier)[1]["fps"] if args.classifier else DEFAULT_TARGET_FPS
+    sampler = FrameSampler(source_fps, target_fps)
     run_state = TemporalRun(sampler.fps, args.classifier, args.threshold, args.debounce, args.cooldown)
     print(
         f"{name}: {source_fps:.1f} fps source, keeping every {sampler.stride} frame(s) "
@@ -180,7 +191,7 @@ def run(args):
         if not sampler.keep(frame_index):
             continue
         index = sampler.processed_index(frame_index)
-        time_seconds = frame_index / source_fps
+        time_seconds = start_seconds + frame_index / source_fps
 
         if pose_model is not None:
             annotated, people = process_frame(pose_model, payload, args.image_size)
@@ -249,7 +260,10 @@ def parse_args(argv=None):
     source.add_argument("--pose-json", help="Replay a pose JSON from yolo_pose.py instead of running YOLO")
     parser.add_argument("--model", default=str(REPO_ROOT / "models" / "yolo11n-pose.pt"), help="YOLO pose weights")
     parser.add_argument("--classifier", help="Temporal classifier checkpoint (.pt); omit to plot signals only")
-    parser.add_argument("--target-fps", type=float, default=15.0, help="Frame rate after sampling (default 15)")
+    parser.add_argument(
+        "--target-fps", type=float, default=None,
+        help=f"Frame rate after sampling (default: the classifier's training rate, else {DEFAULT_TARGET_FPS:g})",
+    )
     parser.add_argument("--threshold", type=float, help="Gate threshold (default: from the checkpoint, else 0.8)")
     parser.add_argument("--debounce", type=int, default=5, help="Frames above the threshold before an event")
     parser.add_argument("--cooldown", type=float, default=30.0, help="Seconds between events for one person")
@@ -261,7 +275,7 @@ def parse_args(argv=None):
     parser.add_argument("--min-plot-frames", type=int, default=15, help="Skip PNGs for tracks shorter than this")
     parser.add_argument("--max-frames", type=int, help="Stop after this many source frames")
     args = parser.parse_args(argv)
-    if args.target_fps <= 0:
+    if args.target_fps is not None and args.target_fps <= 0:
         parser.error("--target-fps must be greater than zero")
     if args.threshold is not None and not 0 <= args.threshold <= 1:
         parser.error("--threshold must be between 0 and 1")

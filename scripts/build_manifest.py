@@ -5,8 +5,12 @@
 
 One row per fall event: a clip with two falls gets two rows with the same
 clip_id. Clips without a fall have one row with empty fall times. Rows marked
-quality=drop are left out. Pose JSON is expected where yolo_pose.py writes it,
-data/output/<clip_id>.json; clips without one are reported and skipped.
+quality=drop are left out. Pose JSON is looked for at
+data/output/<folder>/<clip_id>.json (the RTMPose batch layout), then
+data/output/<clip_id>.json (yolo_pose.py); clips without one are reported and
+skipped. Each pose file is also checked: that it covers the whole clip, that
+the faller's track ID is actually seen during the fall, and that every clip
+ends up at the same frame rate.
 
 The sheet is checked before anything is written, so a typo (end before start,
 a time past the end of the clip, a fall time on a no-fall clip) stops the
@@ -22,6 +26,10 @@ from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from temporal.pose_io import load_pose_json  # noqa: E402
+
 QUALITIES = {"keep", "review", "drop"}
 
 
@@ -30,7 +38,10 @@ def parse_args(argv=None):
     parser.add_argument("--csv", default=str(ROOT / "data" / "labels" / "clips.csv"))
     parser.add_argument("--output", default=str(ROOT / "data" / "labels" / "manifest.json"))
     parser.add_argument("--pose-dir", default=str(ROOT / "data" / "output"))
-    parser.add_argument("--target-fps", type=float, default=15.0)
+    parser.add_argument(
+        "--target-fps", type=float, default=12.0,
+        help="Rate the windows are cut at (default 12, the rig pose files' rate; frames are never invented)",
+    )
     parser.add_argument("--keep-only", action="store_true", help="Leave out rows still marked review")
     return parser.parse_args(argv)
 
@@ -66,6 +77,7 @@ def read_clips(path):
 
             clip = clips.setdefault(clip_id, {
                 "has_fall": has_fall, "quality": quality, "group": row.get("group") or clip_id,
+                "folder": row.get("folder", ""),
                 "duration": _number(row.get("duration_s") or "0", "duration_s", where, errors),
                 "falls": [], "track_ids": set(), "lines": [],
             })
@@ -113,7 +125,7 @@ def main(argv=None):
 
     output = Path(args.output)
     pose_dir = Path(args.pose_dir)
-    videos, skipped, warnings = [], defaultdict(list), []
+    videos, skipped, warnings, rates = [], defaultdict(list), [], {}
     for clip_id, clip in sorted(clips.items()):
         if clip["quality"] == "drop":
             skipped["quality=drop"].append(clip_id)
@@ -121,10 +133,17 @@ def main(argv=None):
         if clip["quality"] == "review" and args.keep_only:
             skipped["quality=review"].append(clip_id)
             continue
-        pose_json = pose_dir / f"{clip_id}.json"
-        if not pose_json.exists():
+        pose_json = find_pose_json(pose_dir, clip["folder"], clip_id)
+        if pose_json is None:
             skipped["no pose JSON yet"].append(clip_id)
             continue
+        try:
+            poses = load_pose_json(pose_json)
+        except (OSError, ValueError, KeyError) as error:
+            print(f"Error: {clip_id}: cannot read {pose_json}: {error}", file=sys.stderr)
+            return 1
+        warnings += check_pose_file(clip_id, clip, poses)
+        rates[clip_id] = poses.resample(args.target_fps).fps
 
         entry = {"name": clip_id, "group": clip["group"], "pose_json": _relative(pose_json, output.parent)}
         if clip["has_fall"] == "1":
@@ -143,13 +162,60 @@ def main(argv=None):
 
     falls = sum(1 for v in videos if "falls_seconds" in v)
     groups = len({v["group"] for v in videos})
+    distinct = sorted({round(rate, 2) for rate in rates.values()})
+    rate_note = f", {distinct[0]:g} fps" if len(distinct) == 1 else ""
     print(f"Wrote {output}: {len(videos)} clips ({falls} with falls, {len(videos) - falls} without), "
-          f"{groups} groups")
+          f"{groups} groups{rate_note}")
+    if len(distinct) > 1:
+        by_rate = defaultdict(list)
+        for clip_id, rate in rates.items():
+            by_rate[round(rate, 2)].append(clip_id)
+        for rate, ids in sorted(by_rate.items()):
+            warnings.append(f"{len(ids)} clip(s) end up at {rate:g} fps: {', '.join(sorted(ids))}")
+        warnings.append("clips end up at different frame rates; training will refuse this manifest "
+                        "until they are re-extracted at one rate or --target-fps is lowered")
     for reason, ids in skipped.items():
         print(f"  skipped {len(ids)} ({reason}): {', '.join(ids)}")
     for warning in warnings:
         print(f"  warning: {warning}")
     return 0
+
+
+def find_pose_json(pose_dir, folder, clip_id):
+    """data/output/<folder>/<clip>.json (RTMPose batch layout), else data/output/<clip>.json."""
+    candidates = [pose_dir / folder / f"{clip_id}.json"] if folder else []
+    candidates.append(pose_dir / f"{clip_id}.json")
+    return next((path for path in candidates if path.exists()), None)
+
+
+def check_pose_file(clip_id, clip, poses):
+    """Warnings about a pose file that would quietly weaken training."""
+    warnings = []
+    duration = clip["duration"] or 0
+    covered = poses.times[-1] + 1 / poses.fps
+    if duration and abs(covered - duration) > 0.25:
+        warnings.append(f"{clip_id}: pose file covers {covered:.2f} s but the clip is {duration:.2f} s; "
+                        "was it extracted from a different version of the video?")
+    if clip["has_fall"] != "1" or not clip["track_ids"]:
+        return warnings
+    for start, end in clip["falls"]:
+        first, last = poses.interval_indices(start, end)
+        seen = sum(
+            any(person.get("track_id") in clip["track_ids"] for person in poses.people[i])
+            for i in range(first, last + 1)
+        )
+        total = last - first + 1
+        if seen == 0:
+            warnings.append(f"{clip_id}: faller track {_ids(clip)} is never seen during the fall "
+                            f"{start}-{end} s; check the ID (the fall may yield no positive windows)")
+        elif seen < total / 2:
+            warnings.append(f"{clip_id}: faller track {_ids(clip)} is seen in only {seen} of {total} frames "
+                            f"of the fall {start}-{end} s (tracker lost them; the handoff may recover it)")
+    return warnings
+
+
+def _ids(clip):
+    return ";".join(str(i) for i in sorted(clip["track_ids"]))
 
 
 def _relative(path, start):

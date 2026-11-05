@@ -1,3 +1,4 @@
+import json
 import sys
 from pathlib import Path
 
@@ -12,11 +13,14 @@ from sliding_window import TrackWindows  # noqa: E402
 from temporal import features as F  # noqa: E402
 from temporal.dataset import (  # noqa: E402
     label_for_window,
+    samples_from_manifest,
+    samples_from_pose_json,
     samples_from_sequences,
     split_by_source,
     stack,
     windows_from_frames,
 )
+from temporal.pose_io import load_pose_json  # noqa: E402
 from temporal.detector import TemporalFallDetector, handoff_lost_tracks  # noqa: E402
 from temporal.gate import ThresholdGate  # noqa: E402
 from temporal.model import FallGRU, FallTCN, build_model, load_checkpoint, save_checkpoint  # noqa: E402
@@ -245,6 +249,34 @@ def test_split_keeps_whole_sources_together():
     assert len(train) + len(val) + len(test) == len(samples)
 
 
+def test_split_keeps_a_group_of_clips_on_one_side():
+    frames = [[person(1, 300.0)] for _ in range(40)]
+    samples = []
+    for clip in range(12):
+        clip_samples = windows_from_frames(frames, FPS, source=f"clip{clip}", stride=5)
+        for sample in clip_samples:
+            sample.group = "drillfloor" if clip < 4 else f"clip{clip}"
+        samples += clip_samples
+    for seed in range(5):
+        parts = split_by_source(samples, seed=seed, val_fraction=0.2, test_fraction=0.2)
+        sides = [i for i, part in enumerate(parts) if any(s.group == "drillfloor" for s in part)]
+        assert len(sides) == 1
+
+
+def test_training_follows_the_faller_through_an_id_switch():
+    # The faller (track 1) is upright, then the tracker loses them as they go
+    # down and they come back as track 2 at the same spot, lying.
+    frames = [[person(1, 300.0)] for _ in range(40)]
+    frames += [[] for _ in range(2)]
+    frames += [[person(2, 500.0, lying=True)] for _ in range(20)]
+    fall = [(40, 45)]
+    followed = windows_from_frames(frames, FPS, fall, source="v", stride=1, track_ids=[1])
+    lost = windows_from_frames(frames, FPS, fall, source="v", stride=1, track_ids=[1], handoff=False)
+    assert sum(s.label for s in followed) > 0
+    assert sum(s.label for s in lost) == 0  # without the handoff the fall gives nothing
+    assert {s.track_id for s in followed} == {1, 2}
+
+
 def test_training_learns_synthetic_falls():
     sequences = generate_dataset(80, seed=2)
     train, val, test = split_by_source(samples_from_sequences(sequences), seed=2)
@@ -252,6 +284,88 @@ def test_training_learns_synthetic_falls():
     assert history["epochs"][-1]["train_loss"] < history["epochs"][0]["train_loss"]
     result = evaluate(model, test, thresholds=(0.5,))["at"][0]
     assert result["f1"] > 0.5
+
+
+# Pose files from both pipelines
+
+
+def write_pose_json(path, frames, *, sampled_from=None):
+    """Write `frames` as yolo_pose.py output, or, with `sampled_from=(source_fps,
+    step)`, as the RTMPose batch output that keeps every `step`-th frame."""
+    if sampled_from is None:
+        data = {
+            "metadata": {"fps": FPS, "frame_count": len(frames)},
+            "frames": [{"frame_index": i, "people": people} for i, people in enumerate(frames)],
+        }
+    else:
+        source_fps, step = sampled_from
+        data = {
+            "metadata": {"fps": source_fps / step, "source_fps": source_fps, "frame_count": len(frames)},
+            "frames": [
+                {"sample_index": i, "source_frame": i * step, "timestamp": i * step / source_fps,
+                 "people": people, "alerts": []}
+                for i, people in enumerate(frames)
+            ],
+        }
+    path.write_text(json.dumps(data), encoding="utf-8")
+    return path
+
+
+def test_sampled_pose_file_reports_its_own_rate_and_times(tmp_path):
+    frames = [[person(1, 300.0)] for _ in range(10)]
+    poses = load_pose_json(write_pose_json(tmp_path / "a.json", frames, sampled_from=(24.0, 2)))
+    assert poses.fps == 12.0 and poses.source_fps == 24.0
+    assert poses.times[:3] == pytest.approx([0.0, 1 / 12, 2 / 12])
+    # Asking for 15 fps keeps every frame: frames are never invented.
+    assert poses.resample(15.0).fps == 12.0 and len(poses.resample(15.0)) == 10
+    assert poses.resample(6.0).fps == 6.0 and len(poses.resample(6.0)) == 5
+
+
+def test_every_frame_pose_file_still_loads(tmp_path):
+    frames = [[person(1, 300.0)] for _ in range(30)]
+    poses = load_pose_json(write_pose_json(tmp_path / "a.json", frames))
+    assert poses.fps == FPS and len(poses) == 30 and poses.times[15] == pytest.approx(1.0)
+
+
+def test_unevenly_sampled_pose_file_is_refused(tmp_path):
+    path = write_pose_json(tmp_path / "a.json", [[person(1, 300.0)] for _ in range(5)], sampled_from=(24.0, 2))
+    data = json.loads(path.read_text())
+    data["frames"][3]["source_frame"] += 1
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="not evenly sampled"):
+        load_pose_json(path)
+
+
+def test_fall_seconds_land_on_the_same_frames_at_any_sampling(tmp_path):
+    frames = [[person(1, 300.0)] for _ in range(80)]
+    # 12 fps: 4.0-4.5 s is frames 48-54.
+    sampled = write_pose_json(tmp_path / "s.json", frames, sampled_from=(24.0, 2))
+    samples, fps = samples_from_pose_json(sampled, falls_seconds=[(4.0, 4.5)], target_fps=12.0, stride=1)
+    expected = windows_from_frames(frames, 12.0, [(48, 54)], source="s", stride=1)
+    assert fps == 12.0
+    assert [s.label for s in samples] == [s.label for s in expected]
+    assert sum(s.label for s in samples) > 0
+    # The same fall given in source frames (24 fps) gives the same labels.
+    by_frames, _ = samples_from_pose_json(sampled, falls=[(96, 108)], target_fps=12.0, stride=1)
+    assert [s.label for s in by_frames] == [s.label for s in samples]
+
+
+def test_manifest_reports_the_real_rate_and_refuses_mixed_rates(tmp_path):
+    frames = [[person(1, 300.0)] for _ in range(60)]
+    write_pose_json(tmp_path / "a.json", frames, sampled_from=(24.0, 2))
+    write_pose_json(tmp_path / "b.json", frames, sampled_from=(24.0, 2))
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(json.dumps({"target_fps": 15, "videos": [
+        {"name": "a", "group": "g", "pose_json": "a.json", "falls_seconds": [[3.0, 3.5]]},
+        {"name": "b", "pose_json": "b.json"},
+    ]}))
+    samples, fps = samples_from_manifest(manifest, stride=5)
+    assert fps == 12.0  # not the 15 the manifest asked for
+    assert {s.group for s in samples} == {"g", "b"}
+
+    write_pose_json(tmp_path / "b.json", frames)  # every frame at 15 fps
+    with pytest.raises(ValueError, match="different frame rates"):
+        samples_from_manifest(manifest, stride=5)
 
 
 # Track handoff

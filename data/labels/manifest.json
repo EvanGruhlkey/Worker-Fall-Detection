@@ -1,0 +1,350 @@
+{
+  "target_fps": 12.0,
+  "source": "clips.csv",
+  "videos": [
+    {
+      "name": "1xiFn4bLdT-6Alz7z0XDz_alligator",
+      "group": "1xiFn4bLdT-6Alz7z0XDz_alligator",
+      "pose_json": "../output/normal_rig_work/1xiFn4bLdT-6Alz7z0XDz_alligator.json"
+    },
+    {
+      "name": "29jB-BibMmaRAZBqZtNnU_alligator",
+      "group": "29jB-BibMmaRAZBqZtNnU_alligator",
+      "pose_json": "../output/normal_rig_work/29jB-BibMmaRAZBqZtNnU_alligator.json"
+    },
+    {
+      "name": "4CJH5B2NtzP8VwFzxMwO5_alligator",
+      "group": "4CJH5B2NtzP8VwFzxMwO5_alligator",
+      "pose_json": "../output/normal_rig_work/4CJH5B2NtzP8VwFzxMwO5_alligator.json"
+    },
+    {
+      "name": "EIlywKhfkRHTAlBqul_mf_alligator",
+      "group": "EIlywKhfkRHTAlBqul_mf_alligator",
+      "pose_json": "../output/normal_rig_work/EIlywKhfkRHTAlBqul_mf_alligator.json"
+    },
+    {
+      "name": "ILLOvByCSJmu2U4QL4R7q_output",
+      "group": "drillfloor_720p",
+      "pose_json": "../output/rig_falls/ILLOvByCSJmu2U4QL4R7q_output.json",
+      "falls_seconds": [
+        [
+          3.0,
+          3.5
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "LXCUWr1Hjb3MEZVgdYPIh_alligator",
+      "group": "LXCUWr1Hjb3MEZVgdYPIh_alligator",
+      "pose_json": "../output/normal_rig_work/LXCUWr1Hjb3MEZVgdYPIh_alligator.json"
+    },
+    {
+      "name": "MIPR_SGTQICev4mFBDU2c_alligator",
+      "group": "MIPR_SGTQICev4mFBDU2c_alligator",
+      "pose_json": "../output/normal_rig_work/MIPR_SGTQICev4mFBDU2c_alligator.json"
+    },
+    {
+      "name": "UyNpEpYTGgJkfrlSRc7Kd_alligator",
+      "group": "UyNpEpYTGgJkfrlSRc7Kd_alligator",
+      "pose_json": "../output/normal_rig_work/UyNpEpYTGgJkfrlSRc7Kd_alligator.json"
+    },
+    {
+      "name": "YdQeOIiCjBFNpPjdTE641_output",
+      "group": "drillfloor_720p",
+      "pose_json": "../output/rig_falls/YdQeOIiCjBFNpPjdTE641_output.json",
+      "falls_seconds": [
+        [
+          6.72,
+          7.33
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "_4RXOScjeGcGW1uLah2Cb_output",
+      "group": "drillfloor_720p",
+      "pose_json": "../output/rig_falls/_4RXOScjeGcGW1uLah2Cb_output.json",
+      "falls_seconds": [
+        [
+          8.83,
+          9.5
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "backward_fall_near_equipment",
+      "group": "backward_fall_near_equipment",
+      "pose_json": "../output/rig_falls/backward_fall_near_equipment.json",
+      "falls_seconds": [
+        [
+          9.75,
+          10.75
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "backward_slip_while_stepping_back",
+      "group": "backward_slip_while_stepping_back",
+      "pose_json": "../output/rig_falls/backward_slip_while_stepping_back.json",
+      "falls_seconds": [
+        [
+          10.0,
+          10.7
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "f40KfQHxg3C36Lj1rYwqk_alligator",
+      "group": "f40KfQHxg3C36Lj1rYwqk_alligator",
+      "pose_json": "../output/normal_rig_work/f40KfQHxg3C36Lj1rYwqk_alligator.json"
+    },
+    {
+      "name": "fall_from_ladder",
+      "group": "fall_from_ladder",
+      "pose_json": "../output/rig_falls/fall_from_ladder.json",
+      "falls_seconds": [
+        [
+          7.5,
+          8.1
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "fall_while_working_on_pipe",
+      "group": "fall_while_working_on_pipe",
+      "pose_json": "../output/rig_falls/fall_while_working_on_pipe.json",
+      "falls_seconds": [
+        [
+          7.75,
+          8.7
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "forward_fall_while_carrying_a_tool",
+      "group": "forward_fall_while_carrying_a_tool",
+      "pose_json": "../output/rig_falls/forward_fall_while_carrying_a_tool.json",
+      "falls_seconds": [
+        [
+          8.57,
+          9.25
+        ]
+      ],
+      "track_ids": [
+        3
+      ]
+    },
+    {
+      "name": "forward_trip_while_walking",
+      "group": "forward_trip_while_walking",
+      "pose_json": "../output/rig_falls/forward_trip_while_walking.json",
+      "falls_seconds": [
+        [
+          5.25,
+          5.9
+        ]
+      ],
+      "track_ids": [
+        4
+      ]
+    },
+    {
+      "name": "jrigd_ZgdOhh4j67tzGVU_alligator",
+      "group": "jrigd_ZgdOhh4j67tzGVU_alligator",
+      "pose_json": "../output/normal_rig_work/jrigd_ZgdOhh4j67tzGVU_alligator.json"
+    },
+    {
+      "name": "miller_group_fall_01_slip_wet_grating",
+      "group": "miller_group_fall_01_slip_wet_grating",
+      "pose_json": "../output/rig_falls/miller_group_fall_01_slip_wet_grating.json",
+      "falls_seconds": [
+        [
+          6.08,
+          6.42
+        ]
+      ],
+      "track_ids": [
+        2
+      ]
+    },
+    {
+      "name": "miller_group_fall_02_trip_over_hose",
+      "group": "miller_group_fall_02_trip_over_hose",
+      "pose_json": "../output/rig_falls/miller_group_fall_02_trip_over_hose.json",
+      "falls_seconds": [
+        [
+          4.17,
+          4.75
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "miller_group_fall_03_slip_oily_patch_drizzle",
+      "group": "miller_group_fall_03_slip_oily_patch_drizzle",
+      "pose_json": "../output/rig_falls/miller_group_fall_03_slip_oily_patch_drizzle.json",
+      "falls_seconds": [
+        [
+          3.4,
+          4.25
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "miller_group_fall_04_ladder_fall_pipe_rack",
+      "group": "miller_group_fall_04_ladder_fall_pipe_rack",
+      "pose_json": "../output/rig_falls/miller_group_fall_04_ladder_fall_pipe_rack.json",
+      "falls_seconds": [
+        [
+          7.0,
+          7.45
+        ]
+      ],
+      "track_ids": [
+        11
+      ]
+    },
+    {
+      "name": "miller_group_fall_05_stair_misstep_night",
+      "group": "miller_group_fall_05_stair_misstep_night",
+      "pose_json": "../output/rig_falls/miller_group_fall_05_stair_misstep_night.json",
+      "falls_seconds": [
+        [
+          5.75,
+          6.5
+        ]
+      ],
+      "track_ids": [
+        3
+      ]
+    },
+    {
+      "name": "miller_group_fall_08_fall_from_low_platform",
+      "group": "miller_group_fall_08_fall_from_low_platform",
+      "pose_json": "../output/rig_falls/miller_group_fall_08_fall_from_low_platform.json",
+      "falls_seconds": [
+        [
+          4.67,
+          5.25
+        ]
+      ],
+      "track_ids": [
+        3
+      ]
+    },
+    {
+      "name": "miller_group_fall_10_slip_carrying_toolbox_night_rain",
+      "group": "miller_group_fall_10_slip_carrying_toolbox_night_rain",
+      "pose_json": "../output/rig_falls/miller_group_fall_10_slip_carrying_toolbox_night_rain.json",
+      "falls_seconds": [
+        [
+          4.17,
+          5.1
+        ]
+      ],
+      "track_ids": [
+        2
+      ]
+    },
+    {
+      "name": "oO8L7gEH7O6hbAxYdXVHD_output",
+      "group": "drillfloor_720p",
+      "pose_json": "../output/rig_falls/oO8L7gEH7O6hbAxYdXVHD_output.json",
+      "falls_seconds": [
+        [
+          2.1,
+          2.5
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "slip_behind_person",
+      "group": "slip_behind_person",
+      "pose_json": "../output/rig_falls/slip_behind_person.json",
+      "falls_seconds": [
+        [
+          7.25,
+          7.75
+        ]
+      ],
+      "track_ids": [
+        4
+      ]
+    },
+    {
+      "name": "slip_between_coworkers",
+      "group": "slip_between_coworkers",
+      "pose_json": "../output/rig_falls/slip_between_coworkers.json",
+      "falls_seconds": [
+        [
+          6.85,
+          7.67
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "slip_in_the_open",
+      "group": "slip_in_the_open",
+      "pose_json": "../output/rig_falls/slip_in_the_open.json",
+      "falls_seconds": [
+        [
+          6.3,
+          6.67
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "sudden_collapse",
+      "group": "sudden_collapse",
+      "pose_json": "../output/rig_falls/sudden_collapse.json",
+      "falls_seconds": [
+        [
+          6.25,
+          6.67
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "yQ3kWNc-Qe3EgqRaNso6l_alligator",
+      "group": "yQ3kWNc-Qe3EgqRaNso6l_alligator",
+      "pose_json": "../output/normal_rig_work/yQ3kWNc-Qe3EgqRaNso6l_alligator.json"
+    }
+  ]
+}
