@@ -1,0 +1,287 @@
+{
+  "configuration": {
+    "pipeline": "YOLO26n + ByteTrack + RTMPose-t",
+    "person_class": 0,
+    "image_size": 640,
+    "confidence": 0.1,
+    "nms_iou": 0.7,
+    "fps": 12,
+    "device_id": 0,
+    "yolo_sha256": "ba5f5715e9c0cd44e0899ee01e9dfece1ebd9f60844797857a6ee60db0f0be0f",
+    "rtmpose_sha256": "a6c2f6a3896a4d51131d14d7a80a3d08b50f559af5a58a45d5b098aef510a70f",
+    "annotation_style": "coco17_blue_boxes_yellow_ids_v3",
+    "fall_alerts": false
+  },
+  "gpu_proof": {
+    "yolo": {
+      "label": "AMD GPU / DirectML (CPU preprocessing, tracking and decoding)",
+      "profile": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_batch_gpu_profiles\\yolo26n_2026-11-04_20-46-00.json",
+      "node_events": {
+        "DmlExecutionProvider": 1
+      },
+      "cpu_partition_present": false
+    },
+    "rtmpose": {
+      "label": "AMD GPU / DirectML (CPU preprocessing, tracking and decoding)",
+      "profile": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_batch_gpu_profiles\\rtmpose-t_2026-11-04_20-46-00.json",
+      "node_events": {
+        "DmlExecutionProvider": 1
+      },
+      "cpu_partition_present": false
+    }
+  },
+  "videos": [
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\_4RXOScjeGcGW1uLah2Cb_output.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\_4RXOScjeGcGW1uLah2Cb_output.mp4",
+      "frames": 181,
+      "processing_seconds": 3.208433300140314,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\backward_fall_near_equipment.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\backward_fall_near_equipment.mp4",
+      "frames": 181,
+      "processing_seconds": 11.522885599581059,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\backward_slip_while_stepping_back.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\backward_slip_while_stepping_back.mp4",
+      "frames": 181,
+      "processing_seconds": 7.968251600686926,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\fall_from_ladder.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\fall_from_ladder.mp4",
+      "frames": 181,
+      "processing_seconds": 8.874113999539986,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\fall_while_working_on_pipe.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\fall_while_working_on_pipe.mp4",
+      "frames": 181,
+      "processing_seconds": 8.49183640035335,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\forward_fall_while_carrying_a_tool.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\forward_fall_while_carrying_a_tool.mp4",
+      "frames": 181,
+      "processing_seconds": 10.880377000081353,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\forward_trip_while_walking.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\forward_trip_while_walking.mp4",
+      "frames": 181,
+      "processing_seconds": 10.712836199381854,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\ILLOvByCSJmu2U4QL4R7q_output.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\ILLOvByCSJmu2U4QL4R7q_output.mp4",
+      "frames": 61,
+      "processing_seconds": 1.027869300392922,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\miller_group_fall_01_slip_wet_grating.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\miller_group_fall_01_slip_wet_grating.mp4",
+      "frames": 121,
+      "processing_seconds": 3.510494599759113,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\miller_group_fall_02_trip_over_hose.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\miller_group_fall_02_trip_over_hose.mp4",
+      "frames": 121,
+      "processing_seconds": 2.9463984000030905,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\miller_group_fall_03_slip_oily_patch_drizzle.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\miller_group_fall_03_slip_oily_patch_drizzle.mp4",
+      "frames": 121,
+      "processing_seconds": 3.801573200034909,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\miller_group_fall_04_ladder_fall_pipe_rack.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\miller_group_fall_04_ladder_fall_pipe_rack.mp4",
+      "frames": 121,
+      "processing_seconds": 2.8417375999852084,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\miller_group_fall_05_stair_misstep_night.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\miller_group_fall_05_stair_misstep_night.mp4",
+      "frames": 121,
+      "processing_seconds": 4.055320200044662,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\miller_group_fall_06_trip_over_raised_flange.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\miller_group_fall_06_trip_over_raised_flange.mp4",
+      "frames": 121,
+      "processing_seconds": 2.7553274998790585,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\miller_group_fall_07_loses_balance_carrying_pipe.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\miller_group_fall_07_loses_balance_carrying_pipe.mp4",
+      "frames": 121,
+      "processing_seconds": 3.2749085999676026,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\miller_group_fall_08_fall_from_low_platform.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\miller_group_fall_08_fall_from_low_platform.mp4",
+      "frames": 121,
+      "processing_seconds": 2.951446400373243,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\miller_group_fall_09_slip_stepping_off_ladder_mist.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\miller_group_fall_09_slip_stepping_off_ladder_mist.mp4",
+      "frames": 121,
+      "processing_seconds": 3.1287818000419065,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\miller_group_fall_10_slip_carrying_toolbox_night_rain.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\miller_group_fall_10_slip_carrying_toolbox_night_rain.mp4",
+      "frames": 121,
+      "processing_seconds": 2.4957172002177685,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\oO8L7gEH7O6hbAxYdXVHD_output.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\oO8L7gEH7O6hbAxYdXVHD_output.mp4",
+      "frames": 61,
+      "processing_seconds": 1.432267100084573,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\slip_behind_person.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\slip_behind_person.mp4",
+      "frames": 181,
+      "processing_seconds": 11.077813500131015,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\slip_between_coworkers.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\slip_between_coworkers.mp4",
+      "frames": 181,
+      "processing_seconds": 8.495968700328376,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\slip_in_the_open.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\slip_in_the_open.mp4",
+      "frames": 181,
+      "processing_seconds": 9.974884500028566,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\sudden_collapse.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\sudden_collapse.mp4",
+      "frames": 181,
+      "processing_seconds": 10.048126200097613,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\tQK1GkTah0KQwNeGMvMU8_output.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\tQK1GkTah0KQwNeGMvMU8_output.mp4",
+      "frames": 61,
+      "processing_seconds": 1.1682551000267267,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\WSei4_QnUMN4eXI5LZEXM_output.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\WSei4_QnUMN4eXI5LZEXM_output.mp4",
+      "frames": 61,
+      "processing_seconds": 1.1660063001909293,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\rig_falls\\YdQeOIiCjBFNpPjdTE641_output.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\rig_falls\\YdQeOIiCjBFNpPjdTE641_output.mp4",
+      "frames": 181,
+      "processing_seconds": 4.927479199890513,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\normal_rig_work\\1xiFn4bLdT-6Alz7z0XDz_alligator.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\normal_rig_work\\1xiFn4bLdT-6Alz7z0XDz_alligator.mp4",
+      "frames": 181,
+      "processing_seconds": 6.571338000241667,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\normal_rig_work\\29jB-BibMmaRAZBqZtNnU_alligator.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\normal_rig_work\\29jB-BibMmaRAZBqZtNnU_alligator.mp4",
+      "frames": 181,
+      "processing_seconds": 10.072734600282274,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\normal_rig_work\\4CJH5B2NtzP8VwFzxMwO5_alligator.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\normal_rig_work\\4CJH5B2NtzP8VwFzxMwO5_alligator.mp4",
+      "frames": 181,
+      "processing_seconds": 5.575089100340847,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\normal_rig_work\\EIlywKhfkRHTAlBqul_mf_alligator.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\normal_rig_work\\EIlywKhfkRHTAlBqul_mf_alligator.mp4",
+      "frames": 181,
+      "processing_seconds": 9.248152700078208,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\normal_rig_work\\f40KfQHxg3C36Lj1rYwqk_alligator.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\normal_rig_work\\f40KfQHxg3C36Lj1rYwqk_alligator.mp4",
+      "frames": 181,
+      "processing_seconds": 6.587336899887305,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\normal_rig_work\\jrigd_ZgdOhh4j67tzGVU_alligator.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\normal_rig_work\\jrigd_ZgdOhh4j67tzGVU_alligator.mp4",
+      "frames": 121,
+      "processing_seconds": 7.31833680003183,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\normal_rig_work\\LXCUWr1Hjb3MEZVgdYPIh_alligator.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\normal_rig_work\\LXCUWr1Hjb3MEZVgdYPIh_alligator.mp4",
+      "frames": 181,
+      "processing_seconds": 5.67563680006424,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\normal_rig_work\\MIPR_SGTQICev4mFBDU2c_alligator.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\normal_rig_work\\MIPR_SGTQICev4mFBDU2c_alligator.mp4",
+      "frames": 181,
+      "processing_seconds": 8.163814199971966,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\normal_rig_work\\UyNpEpYTGgJkfrlSRc7Kd_alligator.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\normal_rig_work\\UyNpEpYTGgJkfrlSRc7Kd_alligator.mp4",
+      "frames": 181,
+      "processing_seconds": 6.978074799757451,
+      "status": "completed_verified"
+    },
+    {
+      "source": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\input\\normal_rig_work\\yQ3kWNc-Qe3EgqRaNso6l_alligator.mp4",
+      "output": "C:\\Users\\Evan Gruhlkey\\Downloads\\Worker-Fall-Detection\\data\\output\\normal_rig_work\\yQ3kWNc-Qe3EgqRaNso6l_alligator.mp4",
+      "frames": 121,
+      "processing_seconds": 5.992159000190441,
+      "status": "completed_verified"
+    }
+  ]
+}

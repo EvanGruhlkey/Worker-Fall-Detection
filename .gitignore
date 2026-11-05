@@ -1,5 +1,9 @@
 # Training videos are versioned (labels: data/labels/clips.csv)
 .venv/
+.venv-amd/
+data/output/amd_comparison/
+data/output/rig_batch_gpu_profiles/
+models/comparison/
 .DS_Store
 __pycache__/
 .pytest_cache/
