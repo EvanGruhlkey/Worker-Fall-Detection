@@ -14,12 +14,23 @@ $root = Split-Path -Parent $PSScriptRoot
 $common = "--seeds 0 1 --plots summary --threads $Threads"
 
 $batches = @{
+    # Batch 1: rig clips only (--external off), one change at a time.
     1 = [ordered]@{
-        "baseline"        = ""
-        "margin"          = "--ignore-partial"
-        "margin-aug3"     = "--ignore-partial --augment 3"
-        "margin-synth200" = "--ignore-partial --synthetic 200"
-        "margin-tcn"      = "--ignore-partial --arch tcn"
+        "baseline"        = "--external off"
+        "margin"          = "--external off --ignore-partial"
+        "margin-aug3"     = "--external off --ignore-partial --augment 3"
+        "margin-synth200" = "--external off --ignore-partial --synthetic 200"
+        "margin-tcn"      = "--external off --ignore-partial --arch tcn"
+    }
+    # Batch 2: does CAUCAFall help? Every run is scored on the rig clips only;
+    # CAUCAFall clips are added to training (or, in the last run, tested too).
+    # Needs data/output/caucafall/*.json (see docs/external-data.md).
+    2 = [ordered]@{
+        "rig-only"            = "--external off --ignore-partial"
+        "plus-cauca"          = "--external train --ignore-partial"
+        "plus-cauca-aug3"     = "--external train --ignore-partial --augment 3"
+        "rig-only-win18"      = "--external off --ignore-partial --window-size 18"
+        "cauca-in-folds"      = "--external cv --ignore-partial"
     }
 }
 

@@ -56,6 +56,11 @@ class RunConfig:
     cooldown: float = 30.0
     catch_after: float = 1.5
     final: bool = False
+    # Clips whose source is not "rig" (external datasets): "train" = added to
+    # every training set, never tested (the headline stays rig-only and
+    # comparable); "cv" = dealt into the folds like rig clips and reported per
+    # source; "off" = not used.
+    external: str = "train"
 
     def model_config(self):
         key = "hidden_size" if self.arch == "gru" else "channels"
@@ -94,6 +99,13 @@ class CVResult:
     outcomes: dict = field(default_factory=dict)  # seed -> clip outcomes at the chosen threshold
     final_model: object = None
     final_epochs: int = None
+    extra_train: list = field(default_factory=list)  # external clips used only for training
+
+    @property
+    def headline_clips(self):
+        """The clips the headline numbers and threshold come from: the rig clips."""
+        rig = [c for c in self.clips if c.source == "rig"]
+        return rig or self.clips
 
 
 def make_folds(clips, folds, seed=0):
@@ -144,7 +156,14 @@ def _training_clips(clips, config, seed, fps):
 
 
 def run_cv(clips, fps, config, log=print):
-    result = CVResult(config, fps, clips, make_folds(clips, config.folds, config.split_seed))
+    if config.external not in ("train", "cv", "off"):
+        raise ValueError(f"external must be train, cv or off, not {config.external!r}")
+    rig = [c for c in clips if c.source == "rig"]
+    external = [c for c in clips if c.source != "rig"]
+    evaluated = clips if config.external == "cv" else rig
+    result = CVResult(config, fps, evaluated, make_folds(evaluated, config.folds, config.split_seed))
+    result.extra_train = external if config.external == "train" else []
+    clips = evaluated
     for clip in clips:
         result.positive_windows[clip.name] = sum(s.label for s in samples_from_clip(clip, **config.window_options()))
 
@@ -159,7 +178,9 @@ def run_cv(clips, fps, config, log=print):
 
             tag = f"  seed {seed} fold {fold + 1}/{config.folds}"
             log(f"{tag}: building windows ({len(train)} train, {len(val)} val, {len(test)} test clips)...")
-            train_samples = _samples(_training_clips(train, config, seed * 100 + fold, fps), config)
+            train_samples = _samples(
+                _training_clips(train + result.extra_train, config, seed * 100 + fold, fps), config
+            )
             val_samples = _samples(val, config)
             log(f"{tag}: training on {len(train_samples)} windows "
                 f"({int(sum(s.label for s in train_samples))} falls)")
@@ -194,14 +215,14 @@ def run_cv(clips, fps, config, log=print):
     result.sweep = [sweep_point(result, threshold) for threshold in THRESHOLDS]
     result.threshold = choose_threshold(result.sweep)
     for seed in config.seeds:
-        result.outcomes[seed] = outcomes_at(result, seed, result.threshold)
+        result.outcomes[seed] = outcomes_at(result, seed, result.threshold, clips=result.clips)
     return result
 
 
-def outcomes_at(result, seed, threshold):
+def outcomes_at(result, seed, threshold, clips=None):
     config = result.config
     out = []
-    for clip in result.clips:
+    for clip in (result.headline_clips if clips is None else clips):
         scores = result.scores[(seed, clip.name)]
         alerts = alerts_for(scores, threshold, config.debounce, config.cooldown)
         out.append(clip_outcome(scores, alerts, config.catch_after))
@@ -268,7 +289,7 @@ def train_final(result, log=print):
     """Train on every clip for the median best epoch of the folds."""
     config = result.config
     epochs = max(5, int(statistics.median(f.best_epoch for f in result.fold_results)))
-    samples = _samples(_training_clips(result.clips, config, 12345, result.fps), config)
+    samples = _samples(_training_clips(result.clips + result.extra_train, config, 12345, result.fps), config)
     log(f"Final model: {len(samples)} windows ({int(sum(s.label for s in samples))} falls), {epochs} epochs")
     model, _ = train_model(
         samples, None, arch=config.arch, epochs=epochs, batch_size=config.batch_size,

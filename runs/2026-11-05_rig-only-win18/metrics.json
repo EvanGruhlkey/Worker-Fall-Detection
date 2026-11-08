@@ -1,0 +1,845 @@
+{
+  "name": "rig-only-win18",
+  "created": "2026-11-05T20:11:01",
+  "git_commit": "897c565+changes",
+  "data": "manifest.json: 131 clips, 71 falls",
+  "fps": 12.0,
+  "clips": 31,
+  "fall_clips": 21,
+  "sources": {
+    "rig": {
+      "clips": 31,
+      "falls": 21
+    }
+  },
+  "extra_training_clips": {},
+  "groups": 28,
+  "config": {
+    "name": "rig-only-win18",
+    "arch": "gru",
+    "hidden": 64,
+    "dropout": 0.1,
+    "epochs": 40,
+    "learning_rate": 0.002,
+    "batch_size": 64,
+    "window_size": 18,
+    "stride": 1,
+    "ignore_partial": true,
+    "augment": 0,
+    "synthetic": 0,
+    "folds": 5,
+    "seeds": [
+      0,
+      1
+    ],
+    "split_seed": 0,
+    "debounce": 5,
+    "cooldown": 30.0,
+    "catch_after": 1.5,
+    "final": false,
+    "external": "off"
+  },
+  "folds": [
+    [
+      "UyNpEpYTGgJkfrlSRc7Kd_alligator",
+      "drillfloor_720p",
+      "fall_while_working_on_pipe",
+      "miller_group_fall_02_trip_over_hose",
+      "slip_behind_person",
+      "yQ3kWNc-Qe3EgqRaNso6l_alligator"
+    ],
+    [
+      "1xiFn4bLdT-6Alz7z0XDz_alligator",
+      "backward_slip_while_stepping_back",
+      "f40KfQHxg3C36Lj1rYwqk_alligator",
+      "miller_group_fall_01_slip_wet_grating",
+      "miller_group_fall_04_ladder_fall_pipe_rack",
+      "miller_group_fall_05_stair_misstep_night"
+    ],
+    [
+      "EIlywKhfkRHTAlBqul_mf_alligator",
+      "fall_from_ladder",
+      "forward_fall_while_carrying_a_tool",
+      "forward_trip_while_walking",
+      "jrigd_ZgdOhh4j67tzGVU_alligator",
+      "slip_between_coworkers"
+    ],
+    [
+      "4CJH5B2NtzP8VwFzxMwO5_alligator",
+      "MIPR_SGTQICev4mFBDU2c_alligator",
+      "miller_group_fall_03_slip_oily_patch_drizzle",
+      "miller_group_fall_08_fall_from_low_platform",
+      "slip_in_the_open"
+    ],
+    [
+      "29jB-BibMmaRAZBqZtNnU_alligator",
+      "LXCUWr1Hjb3MEZVgdYPIh_alligator",
+      "backward_fall_near_equipment",
+      "miller_group_fall_10_slip_carrying_toolbox_night_rain",
+      "sudden_collapse"
+    ]
+  ],
+  "chosen_threshold": 0.99,
+  "at_chosen_threshold": {
+    "threshold": 0.99,
+    "caught": 10.0,
+    "false_alerts": 2.0,
+    "late": 0.0,
+    "normal_clip_false_alerts": 1.0,
+    "falls": 21,
+    "non_fall_minutes": 5.790277777777778,
+    "recall": 0.47619047619047616,
+    "false_alerts_per_hour": 20.724394339170065,
+    "median_delay": 0.08333333333333348,
+    "window": {
+      "threshold": 0.99,
+      "precision": 0.8,
+      "recall": 0.4627,
+      "f1": 0.5863,
+      "confusion": {
+        "tp": 236,
+        "fp": 59,
+        "fn": 274,
+        "tn": 18875
+      }
+    }
+  },
+  "window_average_precision": 0.6544003085288778,
+  "threshold_sweep": [
+    {
+      "threshold": 0.05,
+      "caught": 13.5,
+      "false_alerts": 24.5,
+      "late": 1.0,
+      "normal_clip_false_alerts": 12.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6428571428571429,
+      "false_alerts_per_hour": 253.87383065483328,
+      "median_delay": -0.125,
+      "window": {
+        "threshold": 0.05,
+        "precision": 0.2528,
+        "recall": 0.8098,
+        "f1": 0.3853,
+        "confusion": {
+          "tp": 413,
+          "fp": 1221,
+          "fn": 97,
+          "tn": 17713
+        }
+      }
+    },
+    {
+      "threshold": 0.1,
+      "caught": 14.5,
+      "false_alerts": 19.0,
+      "late": 1.0,
+      "normal_clip_false_alerts": 12.0,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6904761904761905,
+      "false_alerts_per_hour": 196.8817462221156,
+      "median_delay": -0.10416666666666674,
+      "window": {
+        "threshold": 0.1,
+        "precision": 0.3193,
+        "recall": 0.7882,
+        "f1": 0.4545,
+        "confusion": {
+          "tp": 402,
+          "fp": 857,
+          "fn": 108,
+          "tn": 18077
+        }
+      }
+    },
+    {
+      "threshold": 0.15,
+      "caught": 15.0,
+      "false_alerts": 16.0,
+      "late": 1.0,
+      "normal_clip_false_alerts": 11.0,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.7142857142857143,
+      "false_alerts_per_hour": 165.79515471336052,
+      "median_delay": -0.08333333333333326,
+      "window": {
+        "threshold": 0.15,
+        "precision": 0.378,
+        "recall": 0.7804,
+        "f1": 0.5093,
+        "confusion": {
+          "tp": 398,
+          "fp": 655,
+          "fn": 112,
+          "tn": 18279
+        }
+      }
+    },
+    {
+      "threshold": 0.2,
+      "caught": 15.0,
+      "false_alerts": 13.0,
+      "late": 1.0,
+      "normal_clip_false_alerts": 8.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.7142857142857143,
+      "false_alerts_per_hour": 134.7085632046054,
+      "median_delay": -0.08333333333333304,
+      "window": {
+        "threshold": 0.2,
+        "precision": 0.4401,
+        "recall": 0.7784,
+        "f1": 0.5623,
+        "confusion": {
+          "tp": 397,
+          "fp": 505,
+          "fn": 113,
+          "tn": 18429
+        }
+      }
+    },
+    {
+      "threshold": 0.25,
+      "caught": 14.5,
+      "false_alerts": 12.0,
+      "late": 1.0,
+      "normal_clip_false_alerts": 7.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6904761904761905,
+      "false_alerts_per_hour": 124.34636603502038,
+      "median_delay": -0.04166666666666652,
+      "window": {
+        "threshold": 0.25,
+        "precision": 0.4847,
+        "recall": 0.7745,
+        "f1": 0.5962,
+        "confusion": {
+          "tp": 395,
+          "fp": 420,
+          "fn": 115,
+          "tn": 18514
+        }
+      }
+    },
+    {
+      "threshold": 0.3,
+      "caught": 14.5,
+      "false_alerts": 10.5,
+      "late": 1.0,
+      "normal_clip_false_alerts": 6.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6904761904761905,
+      "false_alerts_per_hour": 108.80307028064283,
+      "median_delay": -0.04166666666666652,
+      "window": {
+        "threshold": 0.3,
+        "precision": 0.5178,
+        "recall": 0.7686,
+        "f1": 0.6188,
+        "confusion": {
+          "tp": 392,
+          "fp": 365,
+          "fn": 118,
+          "tn": 18569
+        }
+      }
+    },
+    {
+      "threshold": 0.35,
+      "caught": 14.5,
+      "false_alerts": 10.5,
+      "late": 1.0,
+      "normal_clip_false_alerts": 6.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6904761904761905,
+      "false_alerts_per_hour": 108.80307028064283,
+      "median_delay": -0.020833333333333037,
+      "window": {
+        "threshold": 0.35,
+        "precision": 0.5389,
+        "recall": 0.7608,
+        "f1": 0.6309,
+        "confusion": {
+          "tp": 388,
+          "fp": 332,
+          "fn": 122,
+          "tn": 18602
+        }
+      }
+    },
+    {
+      "threshold": 0.4,
+      "caught": 14.5,
+      "false_alerts": 10.5,
+      "late": 1.0,
+      "normal_clip_false_alerts": 6.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6904761904761905,
+      "false_alerts_per_hour": 108.80307028064283,
+      "median_delay": -0.020833333333333037,
+      "window": {
+        "threshold": 0.4,
+        "precision": 0.5648,
+        "recall": 0.7608,
+        "f1": 0.6483,
+        "confusion": {
+          "tp": 388,
+          "fp": 299,
+          "fn": 122,
+          "tn": 18635
+        }
+      }
+    },
+    {
+      "threshold": 0.45,
+      "caught": 14.5,
+      "false_alerts": 10.5,
+      "late": 1.0,
+      "normal_clip_false_alerts": 6.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6904761904761905,
+      "false_alerts_per_hour": 108.80307028064283,
+      "median_delay": 2.220446049250313e-16,
+      "window": {
+        "threshold": 0.45,
+        "precision": 0.5811,
+        "recall": 0.7588,
+        "f1": 0.6582,
+        "confusion": {
+          "tp": 387,
+          "fp": 279,
+          "fn": 123,
+          "tn": 18655
+        }
+      }
+    },
+    {
+      "threshold": 0.5,
+      "caught": 14.5,
+      "false_alerts": 10.5,
+      "late": 1.0,
+      "normal_clip_false_alerts": 6.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6904761904761905,
+      "false_alerts_per_hour": 108.80307028064283,
+      "median_delay": 0.02083333333333326,
+      "window": {
+        "threshold": 0.5,
+        "precision": 0.5956,
+        "recall": 0.7451,
+        "f1": 0.662,
+        "confusion": {
+          "tp": 380,
+          "fp": 258,
+          "fn": 130,
+          "tn": 18676
+        }
+      }
+    },
+    {
+      "threshold": 0.55,
+      "caught": 14.5,
+      "false_alerts": 10.0,
+      "late": 1.0,
+      "normal_clip_false_alerts": 6.0,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6904761904761905,
+      "false_alerts_per_hour": 103.62197169585032,
+      "median_delay": 0.02083333333333326,
+      "window": {
+        "threshold": 0.55,
+        "precision": 0.608,
+        "recall": 0.7451,
+        "f1": 0.6696,
+        "confusion": {
+          "tp": 380,
+          "fp": 245,
+          "fn": 130,
+          "tn": 18689
+        }
+      }
+    },
+    {
+      "threshold": 0.6,
+      "caught": 14.5,
+      "false_alerts": 10.0,
+      "late": 1.0,
+      "normal_clip_false_alerts": 6.0,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6904761904761905,
+      "false_alerts_per_hour": 103.62197169585032,
+      "median_delay": 0.02083333333333326,
+      "window": {
+        "threshold": 0.6,
+        "precision": 0.626,
+        "recall": 0.7353,
+        "f1": 0.6763,
+        "confusion": {
+          "tp": 375,
+          "fp": 224,
+          "fn": 135,
+          "tn": 18710
+        }
+      }
+    },
+    {
+      "threshold": 0.65,
+      "caught": 14.0,
+      "false_alerts": 9.5,
+      "late": 1.0,
+      "normal_clip_false_alerts": 5.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6666666666666666,
+      "false_alerts_per_hour": 98.4408731110578,
+      "median_delay": 0.04166666666666674,
+      "window": {
+        "threshold": 0.65,
+        "precision": 0.6375,
+        "recall": 0.7275,
+        "f1": 0.6795,
+        "confusion": {
+          "tp": 371,
+          "fp": 211,
+          "fn": 139,
+          "tn": 18723
+        }
+      }
+    },
+    {
+      "threshold": 0.7,
+      "caught": 13.5,
+      "false_alerts": 9.0,
+      "late": 1.0,
+      "normal_clip_false_alerts": 5.0,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6428571428571429,
+      "false_alerts_per_hour": 93.25977452626529,
+      "median_delay": 0.02083333333333348,
+      "window": {
+        "threshold": 0.7,
+        "precision": 0.6572,
+        "recall": 0.7255,
+        "f1": 0.6897,
+        "confusion": {
+          "tp": 370,
+          "fp": 193,
+          "fn": 140,
+          "tn": 18741
+        }
+      }
+    },
+    {
+      "threshold": 0.75,
+      "caught": 13.5,
+      "false_alerts": 8.5,
+      "late": 1.0,
+      "normal_clip_false_alerts": 4.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6428571428571429,
+      "false_alerts_per_hour": 88.07867594147277,
+      "median_delay": 0.02083333333333348,
+      "window": {
+        "threshold": 0.75,
+        "precision": 0.674,
+        "recall": 0.7216,
+        "f1": 0.697,
+        "confusion": {
+          "tp": 368,
+          "fp": 178,
+          "fn": 142,
+          "tn": 18756
+        }
+      }
+    },
+    {
+      "threshold": 0.8,
+      "caught": 13.5,
+      "false_alerts": 8.0,
+      "late": 1.0,
+      "normal_clip_false_alerts": 4.0,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6428571428571429,
+      "false_alerts_per_hour": 82.89757735668026,
+      "median_delay": 0.02083333333333348,
+      "window": {
+        "threshold": 0.8,
+        "precision": 0.6823,
+        "recall": 0.7118,
+        "f1": 0.6967,
+        "confusion": {
+          "tp": 363,
+          "fp": 169,
+          "fn": 147,
+          "tn": 18765
+        }
+      }
+    },
+    {
+      "threshold": 0.85,
+      "caught": 13.0,
+      "false_alerts": 7.5,
+      "late": 0.5,
+      "normal_clip_false_alerts": 4.0,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6190476190476191,
+      "false_alerts_per_hour": 77.71647877188774,
+      "median_delay": 0.0,
+      "window": {
+        "threshold": 0.85,
+        "precision": 0.6873,
+        "recall": 0.698,
+        "f1": 0.6926,
+        "confusion": {
+          "tp": 356,
+          "fp": 162,
+          "fn": 154,
+          "tn": 18772
+        }
+      }
+    },
+    {
+      "threshold": 0.9,
+      "caught": 13.0,
+      "false_alerts": 7.5,
+      "late": 0.5,
+      "normal_clip_false_alerts": 4.0,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6190476190476191,
+      "false_alerts_per_hour": 77.71647877188774,
+      "median_delay": 0.0,
+      "window": {
+        "threshold": 0.9,
+        "precision": 0.697,
+        "recall": 0.6765,
+        "f1": 0.6866,
+        "confusion": {
+          "tp": 345,
+          "fp": 150,
+          "fn": 165,
+          "tn": 18784
+        }
+      }
+    },
+    {
+      "threshold": 0.95,
+      "caught": 13.0,
+      "false_alerts": 6.5,
+      "late": 0.5,
+      "normal_clip_false_alerts": 3.0,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6190476190476191,
+      "false_alerts_per_hour": 67.3542816023027,
+      "median_delay": 0.04166666666666696,
+      "window": {
+        "threshold": 0.95,
+        "precision": 0.7112,
+        "recall": 0.6373,
+        "f1": 0.6722,
+        "confusion": {
+          "tp": 325,
+          "fp": 132,
+          "fn": 185,
+          "tn": 18802
+        }
+      }
+    },
+    {
+      "threshold": 0.96,
+      "caught": 13.0,
+      "false_alerts": 6.0,
+      "late": 0.0,
+      "normal_clip_false_alerts": 3.0,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.6190476190476191,
+      "false_alerts_per_hour": 62.17318301751019,
+      "median_delay": 0.04166666666666696,
+      "window": {
+        "threshold": 0.96,
+        "precision": 0.7306,
+        "recall": 0.6275,
+        "f1": 0.6751,
+        "confusion": {
+          "tp": 320,
+          "fp": 118,
+          "fn": 190,
+          "tn": 18816
+        }
+      }
+    },
+    {
+      "threshold": 0.97,
+      "caught": 12.5,
+      "false_alerts": 5.5,
+      "late": 0.0,
+      "normal_clip_false_alerts": 2.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.5952380952380952,
+      "false_alerts_per_hour": 56.992084432717675,
+      "median_delay": 0.0625,
+      "window": {
+        "threshold": 0.97,
+        "precision": 0.7426,
+        "recall": 0.5941,
+        "f1": 0.6601,
+        "confusion": {
+          "tp": 303,
+          "fp": 105,
+          "fn": 207,
+          "tn": 18829
+        }
+      }
+    },
+    {
+      "threshold": 0.98,
+      "caught": 12.5,
+      "false_alerts": 3.5,
+      "late": 0.0,
+      "normal_clip_false_alerts": 1.5,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.5952380952380952,
+      "false_alerts_per_hour": 36.267690093547614,
+      "median_delay": 0.10416666666666674,
+      "window": {
+        "threshold": 0.98,
+        "precision": 0.7821,
+        "recall": 0.549,
+        "f1": 0.6452,
+        "confusion": {
+          "tp": 280,
+          "fp": 78,
+          "fn": 230,
+          "tn": 18856
+        }
+      }
+    },
+    {
+      "threshold": 0.99,
+      "caught": 10.0,
+      "false_alerts": 2.0,
+      "late": 0.0,
+      "normal_clip_false_alerts": 1.0,
+      "falls": 21,
+      "non_fall_minutes": 5.790277777777778,
+      "recall": 0.47619047619047616,
+      "false_alerts_per_hour": 20.724394339170065,
+      "median_delay": 0.08333333333333348,
+      "window": {
+        "threshold": 0.99,
+        "precision": 0.8,
+        "recall": 0.4627,
+        "f1": 0.5863,
+        "confusion": {
+          "tp": 236,
+          "fp": 59,
+          "fn": 274,
+          "tn": 18875
+        }
+      }
+    }
+  ],
+  "fold_results": [
+    {
+      "seed": 0,
+      "fold": 1,
+      "test_clips": 9,
+      "val_groups": [
+        "4CJH5B2NtzP8VwFzxMwO5_alligator",
+        "miller_group_fall_05_stair_misstep_night",
+        "slip_between_coworkers"
+      ],
+      "train_windows": 7099,
+      "train_positives": 158,
+      "test_windows": 1882,
+      "test_positives": 66,
+      "best_epoch": 3,
+      "average_precision": 0.927993753670807,
+      "f1_at_0.5": 0.8722,
+      "seconds": 56.9
+    },
+    {
+      "seed": 0,
+      "fold": 2,
+      "test_clips": 6,
+      "val_groups": [
+        "miller_group_fall_02_trip_over_hose",
+        "miller_group_fall_03_slip_oily_patch_drizzle",
+        "yQ3kWNc-Qe3EgqRaNso6l_alligator"
+      ],
+      "train_windows": 7259,
+      "train_positives": 182,
+      "test_windows": 1672,
+      "test_positives": 51,
+      "best_epoch": 9,
+      "average_precision": 0.35745717984726355,
+      "f1_at_0.5": 0.4545,
+      "seconds": 70.6
+    },
+    {
+      "seed": 0,
+      "fold": 3,
+      "test_clips": 6,
+      "val_groups": [
+        "4CJH5B2NtzP8VwFzxMwO5_alligator",
+        "fall_while_working_on_pipe",
+        "miller_group_fall_10_slip_carrying_toolbox_night_rain"
+      ],
+      "train_windows": 6523,
+      "train_positives": 159,
+      "test_windows": 2409,
+      "test_positives": 64,
+      "best_epoch": 3,
+      "average_precision": 0.9327378801071554,
+      "f1_at_0.5": 0.8527,
+      "seconds": 63.8
+    },
+    {
+      "seed": 0,
+      "fold": 4,
+      "test_clips": 5,
+      "val_groups": [
+        "29jB-BibMmaRAZBqZtNnU_alligator",
+        "backward_slip_while_stepping_back",
+        "miller_group_fall_10_slip_carrying_toolbox_night_rain"
+      ],
+      "train_windows": 6539,
+      "train_positives": 212,
+      "test_windows": 1687,
+      "test_positives": 23,
+      "best_epoch": 1,
+      "average_precision": 0.6110012945297162,
+      "f1_at_0.5": 0.5263,
+      "seconds": 65.2
+    },
+    {
+      "seed": 0,
+      "fold": 5,
+      "test_clips": 5,
+      "val_groups": [
+        "UyNpEpYTGgJkfrlSRc7Kd_alligator",
+        "miller_group_fall_05_stair_misstep_night",
+        "slip_in_the_open"
+      ],
+      "train_windows": 6803,
+      "train_positives": 174,
+      "test_windows": 2072,
+      "test_positives": 51,
+      "best_epoch": 17,
+      "average_precision": 0.6311370941185872,
+      "f1_at_0.5": 0.6275,
+      "seconds": 64.2
+    },
+    {
+      "seed": 1,
+      "fold": 1,
+      "test_clips": 9,
+      "val_groups": [
+        "LXCUWr1Hjb3MEZVgdYPIh_alligator",
+        "miller_group_fall_08_fall_from_low_platform",
+        "slip_between_coworkers"
+      ],
+      "train_windows": 7270,
+      "train_positives": 173,
+      "test_windows": 1882,
+      "test_positives": 66,
+      "best_epoch": 1,
+      "average_precision": 0.9100619175891748,
+      "f1_at_0.5": 0.8707,
+      "seconds": 72.1
+    },
+    {
+      "seed": 1,
+      "fold": 2,
+      "test_clips": 6,
+      "val_groups": [
+        "EIlywKhfkRHTAlBqul_mf_alligator",
+        "forward_fall_while_carrying_a_tool",
+        "sudden_collapse"
+      ],
+      "train_windows": 6685,
+      "train_positives": 170,
+      "test_windows": 1672,
+      "test_positives": 51,
+      "best_epoch": 1,
+      "average_precision": 0.2938298327686446,
+      "f1_at_0.5": 0.2842,
+      "seconds": 61.8
+    },
+    {
+      "seed": 1,
+      "fold": 3,
+      "test_clips": 6,
+      "val_groups": [
+        "MIPR_SGTQICev4mFBDU2c_alligator",
+        "drillfloor_720p",
+        "miller_group_fall_02_trip_over_hose"
+      ],
+      "train_windows": 5998,
+      "train_positives": 140,
+      "test_windows": 2409,
+      "test_positives": 64,
+      "best_epoch": 2,
+      "average_precision": 0.906285589890444,
+      "f1_at_0.5": 0.8261,
+      "seconds": 63.4
+    },
+    {
+      "seed": 1,
+      "fold": 4,
+      "test_clips": 5,
+      "val_groups": [
+        "29jB-BibMmaRAZBqZtNnU_alligator",
+        "fall_while_working_on_pipe",
+        "miller_group_fall_01_slip_wet_grating"
+      ],
+      "train_windows": 6527,
+      "train_positives": 199,
+      "test_windows": 1687,
+      "test_positives": 23,
+      "best_epoch": 4,
+      "average_precision": 0.6737622660351636,
+      "f1_at_0.5": 0.7027,
+      "seconds": 65.9
+    },
+    {
+      "seed": 1,
+      "fold": 5,
+      "test_clips": 5,
+      "val_groups": [
+        "f40KfQHxg3C36Lj1rYwqk_alligator",
+        "miller_group_fall_04_ladder_fall_pipe_rack",
+        "slip_behind_person"
+      ],
+      "train_windows": 6845,
+      "train_positives": 190,
+      "test_windows": 2072,
+      "test_positives": 51,
+      "best_epoch": 3,
+      "average_precision": 0.584110010345665,
+      "f1_at_0.5": 0.6667,
+      "seconds": 60.1
+    }
+  ],
+  "final_model_epochs": null
+}

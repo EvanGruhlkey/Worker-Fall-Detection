@@ -1,4 +1,7 @@
 # Training videos are versioned (labels: data/labels/clips.csv)
+# External datasets are downloaded, not versioned (see DATA_SOURCES.md); their
+# label CSVs (data/labels/external_*.csv) and pose files (data/output/) are.
+data/external/
 .venv/
 .venv-amd/
 data/output/amd_comparison/

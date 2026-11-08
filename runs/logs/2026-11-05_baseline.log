@@ -1,0 +1,115 @@
+Started 2026-11-05 19:23; log: C:\Oxy Github\Worker-Fall-Detection\runs\logs\2026-11-05_baseline.log
+baseline: 131 clips (71 falls), 38 groups, 12 fps
+  seed 0 fold 1/5: building windows (19 train, 3 val, 9 test clips)...
+  seed 0 fold 1/5: training on 6219 windows (265 falls)
+  seed 0 fold 1/5: epoch   5/40  train loss 0.0457  val loss 2.3702  val P 0.660 R 0.636 F1 0.648  (7s)
+  seed 0 fold 1/5: epoch  10/40  train loss 0.0075  val loss 1.8895  val P 0.731 R 0.691 F1 0.710  (15s)
+  seed 0 fold 1/5: epoch  15/40  train loss 0.0105  val loss 2.6585  val P 0.783 R 0.654 F1 0.713  (23s)
+  seed 0 fold 1/5: epoch  20/40  train loss 0.0011  val loss 3.8194  val P 0.745 R 0.636 F1 0.686  (30s)
+  seed 0 fold 1/5: epoch  25/40  train loss 0.0005  val loss 3.8375  val P 0.761 R 0.636 F1 0.693  (39s)
+  seed 0 fold 1/5: epoch  30/40  train loss 0.0004  val loss 3.8825  val P 0.750 R 0.654 F1 0.699  (48s)
+  seed 0 fold 1/5: epoch  35/40  train loss 0.0003  val loss 3.9678  val P 0.735 R 0.654 F1 0.692  (57s)
+  seed 0 fold 1/5: epoch  40/40  train loss 0.0002  val loss 3.9858  val P 0.735 R 0.654 F1 0.692  (65s)
+  seed 0 fold 1/5: 6219 train windows (265 falls), best epoch 15, 9 test clips, 82s
+  seed 0 fold 2/5: building windows (22 train, 3 val, 6 test clips)...
+  seed 0 fold 2/5: training on 6405 windows (312 falls)
+  seed 0 fold 2/5: epoch   5/40  train loss 0.0676  val loss 1.4019  val P 0.897 R 0.765 F1 0.825  (9s)
+  seed 0 fold 2/5: epoch  10/40  train loss 0.0139  val loss 1.4067  val P 0.839 R 0.765 F1 0.800  (18s)
+  seed 0 fold 2/5: epoch  15/40  train loss 0.0027  val loss 1.5240  val P 0.897 R 0.765 F1 0.825  (28s)
+  seed 0 fold 2/5: epoch  20/40  train loss 0.0013  val loss 1.6627  val P 0.897 R 0.765 F1 0.825  (37s)
+  seed 0 fold 2/5: epoch  25/40  train loss 0.0026  val loss 1.5969  val P 0.897 R 0.765 F1 0.825  (47s)
+  seed 0 fold 2/5: epoch  30/40  train loss 0.0004  val loss 1.6545  val P 0.897 R 0.765 F1 0.825  (54s)
+  seed 0 fold 2/5: epoch  35/40  train loss 0.0003  val loss 1.6680  val P 0.897 R 0.765 F1 0.825  (62s)
+  seed 0 fold 2/5: epoch  40/40  train loss 0.0003  val loss 1.6760  val P 0.897 R 0.765 F1 0.825  (72s)
+  seed 0 fold 2/5: 6405 train windows (312 falls), best epoch 16, 6 test clips, 86s
+  seed 0 fold 3/5: building windows (22 train, 3 val, 6 test clips)...
+  seed 0 fold 3/5: training on 5638 windows (265 falls)
+  seed 0 fold 3/5: epoch   5/40  train loss 0.0146  val loss 6.6864  val P 0.667 R 0.429 F1 0.522  (8s)
+  seed 0 fold 3/5: epoch  10/40  train loss 0.0121  val loss 8.1007  val P 0.562 R 0.482 F1 0.519  (17s)
+  seed 0 fold 3/5: epoch  15/40  train loss 0.0021  val loss 8.1596  val P 0.711 R 0.482 F1 0.575  (25s)
+  seed 0 fold 3/5: epoch  20/40  train loss 0.0007  val loss 8.9418  val P 0.722 R 0.464 F1 0.565  (33s)
+  seed 0 fold 3/5: epoch  25/40  train loss 0.0003  val loss 9.3521  val P 0.765 R 0.464 F1 0.578  (41s)
+  seed 0 fold 3/5: epoch  30/40  train loss 0.0002  val loss 9.5557  val P 0.765 R 0.464 F1 0.578  (49s)
+  seed 0 fold 3/5: epoch  35/40  train loss 0.0002  val loss 9.6404  val P 0.765 R 0.464 F1 0.578  (58s)
+  seed 0 fold 3/5: epoch  40/40  train loss 0.0002  val loss 9.6565  val P 0.765 R 0.464 F1 0.578  (66s)
+  seed 0 fold 3/5: 5638 train windows (265 falls), best epoch 16, 6 test clips, 86s
+  seed 0 fold 4/5: building windows (23 train, 3 val, 5 test clips)...
+  seed 0 fold 4/5: training on 5665 windows (367 falls)
+  seed 0 fold 4/5: epoch   5/40  train loss 0.0252  val loss 2.7970  val P 0.000 R 0.000 F1 0.000  (8s)
+  seed 0 fold 4/5: epoch  10/40  train loss 0.0069  val loss 3.2872  val P 0.000 R 0.000 F1 0.000  (16s)
+  seed 0 fold 4/5: epoch  15/40  train loss 0.0011  val loss 3.4712  val P 0.000 R 0.000 F1 0.000  (24s)
+  seed 0 fold 4/5: epoch  20/40  train loss 0.0005  val loss 3.8384  val P 0.000 R 0.000 F1 0.000  (32s)
+  seed 0 fold 4/5: epoch  25/40  train loss 0.0003  val loss 4.0152  val P 0.000 R 0.000 F1 0.000  (40s)
+  seed 0 fold 4/5: epoch  30/40  train loss 0.0002  val loss 4.1016  val P 0.000 R 0.000 F1 0.000  (48s)
+  seed 0 fold 4/5: epoch  35/40  train loss 0.0002  val loss 4.1372  val P 0.000 R 0.000 F1 0.000  (55s)
+  seed 0 fold 4/5: epoch  40/40  train loss 0.0002  val loss 4.1458  val P 0.000 R 0.000 F1 0.000  (62s)
+  seed 0 fold 4/5: 5665 train windows (367 falls), best epoch 1, 5 test clips, 75s
+  seed 0 fold 5/5: building windows (23 train, 3 val, 5 test clips)...
+  seed 0 fold 5/5: training on 5947 windows (292 falls)
+  seed 0 fold 5/5: epoch   5/40  train loss 0.0313  val loss 1.7813  val P 0.722 R 0.722 F1 0.722  (7s)
+  seed 0 fold 5/5: epoch  10/40  train loss 0.0190  val loss 5.7907  val P 0.962 R 0.463 F1 0.625  (16s)
+  seed 0 fold 5/5: epoch  15/40  train loss 0.0008  val loss 6.2129  val P 0.875 R 0.518 F1 0.651  (24s)
+  seed 0 fold 5/5: epoch  20/40  train loss 0.0004  val loss 7.2208  val P 1.000 R 0.518 F1 0.683  (33s)
+  seed 0 fold 5/5: epoch  25/40  train loss 0.0002  val loss 7.0583  val P 0.935 R 0.537 F1 0.682  (43s)
+  seed 0 fold 5/5: epoch  30/40  train loss 0.0002  val loss 7.1155  val P 0.857 R 0.556 F1 0.674  (52s)
+  seed 0 fold 5/5: epoch  35/40  train loss 0.0002  val loss 7.1969  val P 0.909 R 0.556 F1 0.690  (60s)
+  seed 0 fold 5/5: epoch  40/40  train loss 0.0002  val loss 7.1872  val P 0.857 R 0.556 F1 0.674  (68s)
+  seed 0 fold 5/5: 5947 train windows (292 falls), best epoch 8, 5 test clips, 82s
+  seed 1 fold 1/5: building windows (19 train, 3 val, 9 test clips)...
+  seed 1 fold 1/5: training on 6398 windows (293 falls)
+  seed 1 fold 1/5: epoch   5/40  train loss 0.0645  val loss 0.2254  val P 0.619 R 0.963 F1 0.754  (8s)
+  seed 1 fold 1/5: epoch  10/40  train loss 0.0102  val loss 1.1646  val P 0.719 R 0.852 F1 0.780  (17s)
+  seed 1 fold 1/5: epoch  15/40  train loss 0.0030  val loss 1.2053  val P 0.793 R 0.852 F1 0.821  (27s)
+  seed 1 fold 1/5: epoch  20/40  train loss 0.0014  val loss 1.1678  val P 0.767 R 0.852 F1 0.807  (36s)
+  seed 1 fold 1/5: epoch  25/40  train loss 0.0005  val loss 1.2817  val P 0.742 R 0.852 F1 0.793  (46s)
+  seed 1 fold 1/5: epoch  30/40  train loss 0.0003  val loss 1.2079  val P 0.774 R 0.889 F1 0.828  (56s)
+  seed 1 fold 1/5: epoch  35/40  train loss 0.0003  val loss 1.2031  val P 0.774 R 0.889 F1 0.828  (65s)
+  seed 1 fold 1/5: epoch  40/40  train loss 0.0002  val loss 1.1991  val P 0.774 R 0.889 F1 0.828  (73s)
+  seed 1 fold 1/5: 6398 train windows (293 falls), best epoch 3, 9 test clips, 88s
+  seed 1 fold 2/5: building windows (22 train, 3 val, 6 test clips)...
+  seed 1 fold 2/5: training on 5844 windows (288 falls)
+  seed 1 fold 2/5: epoch   5/40  train loss 0.0720  val loss 2.0216  val P 0.917 R 0.569 F1 0.702  (9s)
+  seed 1 fold 2/5: epoch  10/40  train loss 0.0149  val loss 1.7644  val P 0.698 R 0.638 F1 0.667  (17s)
+  seed 1 fold 2/5: epoch  15/40  train loss 0.0026  val loss 2.7490  val P 1.000 R 0.534 F1 0.697  (25s)
+  seed 1 fold 2/5: epoch  20/40  train loss 0.0010  val loss 2.9156  val P 1.000 R 0.586 F1 0.739  (33s)
+  seed 1 fold 2/5: epoch  25/40  train loss 0.0004  val loss 3.1486  val P 1.000 R 0.603 F1 0.753  (40s)
+  seed 1 fold 2/5: epoch  30/40  train loss 0.0002  val loss 3.2528  val P 0.972 R 0.603 F1 0.745  (47s)
+  seed 1 fold 2/5: epoch  35/40  train loss 0.0002  val loss 3.3655  val P 0.946 R 0.603 F1 0.737  (56s)
+  seed 1 fold 2/5: epoch  40/40  train loss 0.0002  val loss 3.4268  val P 0.946 R 0.603 F1 0.737  (64s)
+  seed 1 fold 2/5: 5844 train windows (288 falls), best epoch 9, 6 test clips, 78s
+  seed 1 fold 3/5: building windows (19 train, 6 val, 6 test clips)...
+  seed 1 fold 3/5: training on 5145 windows (235 falls)
+  seed 1 fold 3/5: epoch   5/40  train loss 0.1176  val loss 0.1738  val P 0.902 R 0.965 F1 0.933  (7s)
+  seed 1 fold 3/5: epoch  10/40  train loss 0.0207  val loss 3.1241  val P 0.603 R 0.442 F1 0.510  (14s)
+  seed 1 fold 3/5: epoch  15/40  train loss 0.0043  val loss 2.3065  val P 0.885 R 0.535 F1 0.667  (22s)
+  seed 1 fold 3/5: epoch  20/40  train loss 0.0109  val loss 2.9953  val P 0.891 R 0.477 F1 0.621  (29s)
+  seed 1 fold 3/5: epoch  25/40  train loss 0.0008  val loss 3.0967  val P 0.878 R 0.500 F1 0.637  (35s)
+  seed 1 fold 3/5: epoch  30/40  train loss 0.0004  val loss 3.1719  val P 0.878 R 0.500 F1 0.637  (43s)
+  seed 1 fold 3/5: epoch  35/40  train loss 0.0004  val loss 3.2009  val P 0.896 R 0.500 F1 0.642  (49s)
+  seed 1 fold 3/5: epoch  40/40  train loss 0.0003  val loss 3.1999  val P 0.896 R 0.500 F1 0.642  (55s)
+  seed 1 fold 3/5: 5145 train windows (235 falls), best epoch 5, 6 test clips, 73s
+  seed 1 fold 4/5: building windows (23 train, 3 val, 5 test clips)...
+  seed 1 fold 4/5: training on 5632 windows (342 falls)
+  seed 1 fold 4/5: epoch   5/40  train loss 0.0533  val loss 1.5030  val P 0.757 R 0.491 F1 0.596  (8s)
+  seed 1 fold 4/5: epoch  10/40  train loss 0.0443  val loss 2.2765  val P 0.765 R 0.456 F1 0.571  (15s)
+  seed 1 fold 4/5: epoch  15/40  train loss 0.0028  val loss 1.9115  val P 0.727 R 0.561 F1 0.634  (22s)
+  seed 1 fold 4/5: epoch  20/40  train loss 0.0017  val loss 2.2193  val P 0.816 R 0.544 F1 0.653  (29s)
+  seed 1 fold 4/5: epoch  25/40  train loss 0.0010  val loss 2.7180  val P 0.857 R 0.526 F1 0.652  (37s)
+  seed 1 fold 4/5: epoch  30/40  train loss 0.0005  val loss 2.6705  val P 0.816 R 0.544 F1 0.653  (44s)
+  seed 1 fold 4/5: epoch  35/40  train loss 0.0004  val loss 2.6979  val P 0.795 R 0.544 F1 0.646  (53s)
+  seed 1 fold 4/5: epoch  40/40  train loss 0.0004  val loss 2.7042  val P 0.795 R 0.544 F1 0.646  (60s)
+  seed 1 fold 4/5: 5632 train windows (342 falls), best epoch 22, 5 test clips, 74s
+  seed 1 fold 5/5: building windows (23 train, 3 val, 5 test clips)...
+  seed 1 fold 5/5: training on 5947 windows (320 falls)
+  seed 1 fold 5/5: epoch   5/40  train loss 0.0243  val loss 2.3848  val P 0.722 R 0.500 F1 0.591  (8s)
+  seed 1 fold 5/5: epoch  10/40  train loss 0.0040  val loss 0.7313  val P 0.719 R 0.885 F1 0.793  (16s)
+  seed 1 fold 5/5: epoch  15/40  train loss 0.0008  val loss 0.9526  val P 0.880 R 0.846 F1 0.863  (23s)
+  seed 1 fold 5/5: epoch  20/40  train loss 0.0123  val loss 2.4022  val P 0.929 R 0.500 F1 0.650  (31s)
+  seed 1 fold 5/5: epoch  25/40  train loss 0.0003  val loss 3.3951  val P 0.824 R 0.538 F1 0.651  (40s)
+  seed 1 fold 5/5: epoch  30/40  train loss 0.0003  val loss 3.3819  val P 0.867 R 0.500 F1 0.634  (48s)
+  seed 1 fold 5/5: epoch  35/40  train loss 0.0002  val loss 3.3973  val P 0.867 R 0.500 F1 0.634  (57s)
+  seed 1 fold 5/5: epoch  40/40  train loss 0.0002  val loss 3.3967  val P 0.867 R 0.500 F1 0.634  (65s)
+  seed 1 fold 5/5: 5947 train windows (320 falls), best epoch 9, 5 test clips, 80s
+
+Threshold 0.99: caught 10.5/21 falls, 6 false alerts in 5.8 min, window AP 0.636
+Report: C:\Oxy Github\Worker-Fall-Detection\runs\2026-11-05_baseline\report.md  (817s)

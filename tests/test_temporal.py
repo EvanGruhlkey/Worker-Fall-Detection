@@ -321,6 +321,23 @@ def test_sampled_pose_file_reports_its_own_rate_and_times(tmp_path):
     assert poses.resample(6.0).fps == 6.0 and len(poses.resample(6.0)) == 5
 
 
+def test_20fps_pose_file_is_interpolated_to_exact_12fps_steps(tmp_path):
+    # A person moving down 20 px per frame at 20 fps: 400 px per second.
+    frames = [[person(1, 300.0 + 20.0 * i)] for i in range(41)]
+    path = tmp_path / "a.json"
+    path.write_text(json.dumps({
+        "metadata": {"fps": 20.0, "source_fps": 20.0},
+        "frames": [{"sample_index": i, "source_frame": i, "timestamp": i / 20, "people": p}
+                   for i, p in enumerate(frames)],
+    }))
+    poses = load_pose_json(path).resample(12.0)
+    assert poses.fps == 12.0 and len(poses) == 25  # 0 to 2.0 s
+    assert poses.times[5] == pytest.approx(5 / 12)
+    hips = [p[0]["keypoints"][F.LEFT_HIP]["y"] for p in poses.people]
+    steps = np.diff(hips)
+    assert steps == pytest.approx(np.full(len(steps), 400.0 / 12))  # even spacing, true speed
+
+
 def test_every_frame_pose_file_still_loads(tmp_path):
     frames = [[person(1, 300.0)] for _ in range(30)]
     poses = load_pose_json(write_pose_json(tmp_path / "a.json", frames))

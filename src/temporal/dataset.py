@@ -173,6 +173,7 @@ class Clip:
     times: list  # seconds from the start of the video, per frame
     fall_intervals: list  # (first, last) frame indices, inclusive
     track_ids: list | None  # the person who falls; None = everyone
+    source: str = "rig"  # which label sheet / dataset the clip comes from
 
     @property
     def has_fall(self):
@@ -214,6 +215,7 @@ def load_clips(path):
                 times=poses.times,
                 fall_intervals=[poses.interval_indices(a, b) for a, b in seconds],
                 track_ids=video.get("track_ids"),
+                source=video.get("source") or "rig",
             )
         )
     if not clips:
@@ -254,6 +256,7 @@ def synthetic_clips(count, fps, seed=0, fall_fraction=0.4):
                 times=[i / sequence.fps for i in range(len(sequence.frames))],
                 fall_intervals=[sequence.fall_interval] if sequence.fall_interval else [],
                 track_ids=None,
+                source="synthetic",
             )
         )
     return clips
