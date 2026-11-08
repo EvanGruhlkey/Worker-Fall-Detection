@@ -9,7 +9,7 @@ import torch
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from sliding_window import TrackWindows  # noqa: E402
+from utils.sliding_window import TrackWindows  # noqa: E402
 from temporal import features as F  # noqa: E402
 from temporal.dataset import (  # noqa: E402
     label_for_window,

@@ -7,7 +7,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from sliding_window import TrackWindows, normalize_window  # noqa: E402
+from utils.sliding_window import TrackWindows, normalize_window  # noqa: E402
 
 SAMPLE_JSON = REPO_ROOT / "data" / "output" / "001.json"
 

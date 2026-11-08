@@ -9,6 +9,7 @@ __pycache__/
 .pytest_cache/
 pytest-cache-files-*/
 data/events/
+runs/
 # Old SQLite database (copy it with scripts/sqlite_to_postgres.py)
 data/falls.db*
 # Database backups (scripts/backup.py)
@@ -16,3 +17,5 @@ backups/
 
 # Local settings (copy from .env.example)
 .env
+.env.localtest
+data/local-test/

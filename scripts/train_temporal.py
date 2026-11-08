@@ -16,6 +16,8 @@ and test metrics, and a <output>.json copy of the metrics is written beside it.
 import argparse
 import json
 import sys
+import time
+import hashlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,11 +46,12 @@ def parse_args(argv=None):
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--min-precision", type=float, default=0.9, help="For the recommended threshold")
     parser.add_argument(
-        "--threshold", type=float, default=0.8,
-        help="Gate threshold stored in the checkpoint (default 0.8, the guide's starting point; "
-             "the validation-set recommendation is only reported until real footage exists)",
+        "--threshold", type=float, default=None,
+        help="Override validation-selected threshold; synthetic training defaults to 0.8",
     )
     parser.add_argument("--output", default=None, help="Checkpoint path (default models/fall_<arch>.pt)")
+    parser.add_argument("--audit-only", action="store_true", help="Check windows and splits without training")
+    parser.add_argument("--threads", type=int, default=4, help="CPU training threads")
     args = parser.parse_args(argv)
     if args.synthetic is not None and args.synthetic < 20:
         parser.error("--synthetic needs at least 20 sequences to split into train/val/test")
@@ -57,6 +60,8 @@ def parse_args(argv=None):
 
 def main(argv=None):
     args = parse_args(argv)
+    import torch
+    torch.set_num_threads(args.threads)
     output = Path(args.output or ROOT / "models" / f"fall_{args.arch}.pt")
 
     if args.synthetic:
@@ -71,6 +76,18 @@ def main(argv=None):
         data_note = f"manifest {args.manifest}"
 
     train, val, test = split_by_source(samples, seed=args.seed)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    audit = {"fps": fps, "window_size": args.window_size, "stride": args.stride, "seed": args.seed,
+             "device": "cpu", "splits": {}}
+    if args.manifest:
+        audit['manifest_sha256'] = hashlib.sha256(Path(args.manifest).read_bytes()).hexdigest()
+    for name, part in (("train", train), ("val", val), ("test", test)):
+        audit['splits'][name] = {"windows": len(part), "positives": sum(s.label for s in part),
+            "clips": {source: {"windows": sum(s.source == source for s in part),
+                                "positives": sum(s.label for s in part if s.source == source),
+                                "group": next(s.group for s in part if s.source == source)}
+                      for source in sorted({s.source for s in part})}}
+    output.with_suffix('.data.json').write_text(json.dumps(audit, indent=2), encoding='utf-8')
     for name, part in (("train", train), ("val", val), ("test", test)):
         positives = sum(s.label for s in part)
         print(f"  {name:5s}: {len(part):6d} windows, {positives:5d} positive, "
@@ -78,24 +95,29 @@ def main(argv=None):
     if not train or not val or not test:
         print("Error: not enough data to split; add more sequences or videos", file=sys.stderr)
         return 1
+    if args.audit_only:
+        print(f"Saved data audit to {output.with_suffix('.data.json')}; no training started")
+        return 0
 
     config = (
         {"hidden_size": args.hidden, "dropout": args.dropout}
         if args.arch == "gru"
         else {"channels": args.hidden, "dropout": args.dropout}
     )
+    started = time.perf_counter()
     model, history = train_model(
         train, val, arch=args.arch, epochs=args.epochs, batch_size=args.batch_size,
         learning_rate=args.lr, seed=args.seed, **config,
     )
+    training_seconds = time.perf_counter() - started
     print(f"\n{args.arch.upper()} with {model.count_parameters():,} parameters; "
           f"best epoch {history['best_epoch']} (val F1 {history['best_val_f1']:.3f})")
 
     recommended, at_recommended = recommend_threshold(model, val, min_precision=args.min_precision)
+    threshold = args.threshold if args.threshold is not None else (0.8 if args.synthetic else recommended)
     print(f"Validation set suggests a gate threshold of {recommended:.2f} "
           f"(precision {at_recommended['precision']:.3f}, recall {at_recommended['recall']:.3f}); "
-          f"storing {args.threshold:.2f}")
-    threshold = args.threshold
+          f"storing {threshold:.2f}")
 
     test_metrics = evaluate(model, test, thresholds=(0.5, threshold))
     print(f"\nTest set: {test_metrics['windows']} windows, {test_metrics['positives']} positive")
@@ -113,8 +135,14 @@ def main(argv=None):
         "validation_f1": history["best_val_f1"],
         "threshold": threshold,
         "validation_recommended_threshold": recommended,
+        "validation_at_recommended_threshold": at_recommended,
+        "validation_precision_target": args.min_precision,
+        "validation_precision_target_met": at_recommended['precision'] >= args.min_precision,
         "test": test_metrics,
         "history": history["epochs"],
+        "training_seconds": training_seconds,
+        "device": "cpu",
+        "data_audit": audit,
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     save_checkpoint(output, model, fps=fps, window_size=args.window_size, threshold=threshold,

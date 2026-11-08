@@ -14,7 +14,7 @@ This guide explains how to run the whole system (the backend server and the dash
 ## How the system works
 
 ```
- Camera / video ──▶ YOLO Pose + ByteTrack ──▶ Fall detector ──▶ Database ──▶ Dashboard
+ Camera / video ──▶ YOLO + ByteTrack + RTMPose ──▶ Fall detector ──▶ Database ──▶ Dashboard
   (webcam, RTSP,     skeleton + ID for          rule: fast        events,      live feed,
    uploaded file)    each person, per frame     drop + lying       snapshots,   stats,
                                                 down               clips        event log
@@ -29,8 +29,8 @@ There are two programs, and they run in separate terminals:
 
 ### What happens to each camera frame
 
-1. **Pose estimation** (`src/yolo_pose.py`). The YOLO11 pose model finds every person in the frame. The application discards facial points 0-4 and keeps the 12 body keypoints (shoulders through ankles).
-2. **Tracking** (ByteTrack, inside the same call). Each person gets an ID number that stays the same from frame to frame ("ID 3"), so the system can follow one person's movement over time.
+1. **Person detection and tracking** (`src/detectors/yolo_detector.py` and `src/trackers/bytetrack_tracker.py`). YOLO finds people and ByteTrack assigns an ID to follow each person across frames.
+2. **Pose estimation** (`src/pose_estimators/rtmpose_estimator.py`). RTMPose keeps 12 body keypoints on each tracked person. The models are ONNX files selected by `models/pose_pipeline.json`; both use automatic CUDA, DirectML, or CPU selection.
 3. **Fall detection** (`src/backend/fall_detector.py`). For each tracked person, the detector checks whether their **hips dropped by at least 30% of their body height within 1.5 seconds** and they then **stayed roughly horizontal for 0.5 seconds**. If both are true, it reports a fall with a confidence score. ByteTrack often gives a person a new ID in the middle of a fall, because their box suddenly turns from tall to wide. So when a new ID appears where another vanished less than a second earlier, the detector carries the old ID's history over. This is a simple placeholder rule. Setting `FALL_CLASSIFIER_PATH` in `.env` swaps it for the temporal classifier (`src/temporal/`), which scores each person's last 30 frames of joint positions, velocities and accelerations and fires when the probability stays above 0.8 for 5 frames. The only checkpoint so far was trained on synthetic skeletons, so the rule stays the default (see [What is not built yet](#what-is-not-built-yet)).
 4. **Recording the event** (`src/backend/pipeline.py`). When a fall is detected, the backend:
    - saves a row in the shared PostgreSQL database with the time, camera, location, coordinates, confidence, and the reason ("hip dropped 46% of body height in 0.7s; torso 74 deg from vertical"),
@@ -72,7 +72,7 @@ You need:
   - macOS / Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
   - Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
 - **Node.js 18 or newer**, which runs the dashboard. Get it from https://nodejs.org. Check it with `node -v`.
-- **The pose model** at `models/yolo11n-pose.pt` (already in the repo).
+- **The pose model** at `models/pose_pipeline.json` (already in the repo).
 - **The team's database settings** for `.env`: the shared Supabase database and storage. Get them from a teammate; see [database.md: Setting up a station](database.md#setting-up-a-station-each-laptop). Nothing else to install.
 
 Then, from the project root:
@@ -325,11 +325,11 @@ Notes:
 
 ### Test 12: the original stand-alone script
 
-`src/yolo_pose.py` still works on its own. It doesn't use the backend, the dashboard or the fall detector.
+`src/detectors/yolo_pose.py` still works on its own. It doesn't use the backend, the dashboard or the fall detector.
 
 ```bash
-uv run src/yolo_pose.py --model models/yolo11n-pose.pt                  # live camera, Q or Esc to quit
-uv run src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-pose.pt
+uv run src/detectors/yolo_pose.py --model models/pose_pipeline.json                  # live camera, Q or Esc to quit
+uv run src/detectors/yolo_pose.py --input data/input/YourVideo.mp4 --model models/pose_pipeline.json
 ```
 
 **Expected:** a window with skeletons, IDs, FPS and a person count. For a video, the results are saved as `data/output/YourVideo.mp4` and `.json`. Stop the backend's camera first, because only one program can use the webcam.

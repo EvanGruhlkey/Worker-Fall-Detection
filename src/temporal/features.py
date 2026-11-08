@@ -25,7 +25,7 @@ padding boundary.
 
 import numpy as np
 
-from sliding_window import NUM_KEYPOINTS
+from utils.sliding_window import NUM_KEYPOINTS
 
 # Bump when the layout or meaning of the feature vector changes, so an old
 # checkpoint is refused rather than silently fed different numbers.

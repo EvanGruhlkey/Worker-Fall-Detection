@@ -31,7 +31,7 @@ from pathlib import Path
 
 import numpy as np
 
-from sliding_window import TrackWindows
+from utils.sliding_window import TrackWindows
 
 from .detector import handoff_lost_tracks
 from .features import extract_features

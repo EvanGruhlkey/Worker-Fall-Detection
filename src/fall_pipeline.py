@@ -6,8 +6,8 @@ window per person, scores every full window with the temporal classifier,
 applies the threshold gate, and records the motion signals the classifier
 sees (hip height, torso angle, vertical velocity) for every person.
 
-    uv run src/fall_pipeline.py --input data/input/test.mp4
-    uv run src/fall_pipeline.py --input data/samples/synthetic_fall.mp4 --classifier models/fall_gru.pt
+    uv run src/fall_pipeline.py --input data/input/test.mp4 --model models/pose_pipeline.json
+    uv run src/fall_pipeline.py --input data/input/test.mp4 --model models/yolo11n-pose.pt
     uv run src/fall_pipeline.py --pose-json data/output/001.json --classifier models/fall_gru.pt
 
 Without ``--classifier`` the signals are still computed and plotted, so the
@@ -20,6 +20,7 @@ visualisation works before a model exists. Outputs land in
 """
 
 import argparse
+from functools import partial
 import json
 import sys
 import time
@@ -32,7 +33,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from backend.media import VideoWriter  # noqa: E402
-from sliding_window import TrackWindows  # noqa: E402
+from utils.sliding_window import TrackWindows  # noqa: E402
 from temporal.detector import handoff_lost_tracks, score_tracks  # noqa: E402
 from temporal.features import window_signals  # noqa: E402
 from temporal.gate import ThresholdGate  # noqa: E402
@@ -46,8 +47,6 @@ from temporal.visualize import (  # noqa: E402
     draw_track_status,
     plot_track_timeline,
 )
-from yolo_pose import load_pose_model, process_frame  # noqa: E402
-
 PANEL_WIDTH, PANEL_HEIGHT = 640, 720
 # Sampling rate when no classifier says otherwise; matches the rig pose files.
 DEFAULT_TARGET_FPS = 12.0
@@ -158,6 +157,7 @@ class TemporalRun:
 
 
 def run(args):
+    # create output folder for temporal model, in the future we should get rid of this and send it straight to the temp model
     name = Path(args.pose_json or args.input).stem
     output_dir = Path(args.output_dir) / f"{name}_temporal"
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -166,9 +166,25 @@ def run(args):
     if args.pose_json:
         source_fps, total, frames, start_seconds = _json_frames(args.pose_json, args.max_frames)
         pose_model = None
+        process_pose_frame = None
+        pipeline_name = "saved pose JSON"
     else:
         source_fps, total, frames = _video_frames(args.input, args.max_frames)
-        pose_model = load_pose_model(args.model)
+        if args.pipeline == "rtmpose":
+            from pose_estimators.rtmpose_pipeline import RTMPosePipeline
+
+            pose_model = RTMPosePipeline(args.model)
+            process_pose_frame = pose_model.process_frame
+            pipeline_name = "YOLO detector + ByteTrack + RTMPose"
+        else:
+            from detectors.yolo_pose import (
+                load_yolo_pose_model,
+                process_yolo_pose_frame,
+            )
+
+            pose_model = load_yolo_pose_model(args.model)
+            process_pose_frame = partial(process_yolo_pose_frame, pose_model)
+            pipeline_name = "YOLO-Pose + ByteTrack"
 
     target_fps = args.target_fps
     if target_fps is None:
@@ -179,11 +195,17 @@ def run(args):
     run_state = TemporalRun(sampler.fps, args.classifier, args.threshold, args.debounce, args.cooldown)
     print(
         f"{name}: {source_fps:.1f} fps source, keeping every {sampler.stride} frame(s) "
-        f"-> {sampler.fps:.1f} fps; classifier: {args.classifier or 'none (signals only)'}"
+        f"-> {sampler.fps:.1f} fps; pipeline: "
+        f"{pipeline_name if args.input else 'saved pose JSON'}; "
+        f"classifier: {args.classifier or 'none (signals only)'}"
     )
 
     writer = panel = None
-    if pose_model is not None and not args.no_video:
+    annotated_video = getattr(args, 'annotated_video', None)
+    replay = cv2.VideoCapture(str(annotated_video)) if annotated_video else None
+    if replay is not None and not replay.isOpened():
+        raise RuntimeError(f'Could not open annotated video: {annotated_video}')
+    if (pose_model is not None or replay is not None) and not args.no_video:
         panel = SignalPanel(PANEL_WIDTH, PANEL_HEIGHT, args.panel_seconds, run_state.threshold)
     started = time.perf_counter()
     kept = 0
@@ -194,17 +216,24 @@ def run(args):
         time_seconds = start_seconds + frame_index / source_fps
 
         if pose_model is not None:
-            annotated, people = process_frame(pose_model, payload, args.image_size)
+            annotated, people = process_pose_frame(payload, args.image_size)
         else:
             annotated, people = None, payload
+            if replay is not None:
+                if int(replay.get(cv2.CAP_PROP_POS_FRAMES)) != frame_index:
+                    replay.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+                ok, annotated = replay.read()
+                if not ok:
+                    raise RuntimeError(f'Annotated video ended before pose frame {frame_index}')
 
         status = run_state.step(index, time_seconds, people)
         kept += 1
 
         if panel is not None:
-            for person in people:
-                probability, above, fired = status.get(person["track_id"], (np.nan, False, False))
-                draw_track_status(annotated, person, probability, above, fired)
+            if pose_model is not None:
+                for person in people:
+                    probability, above, fired = status.get(person["track_id"], (np.nan, False, False))
+                    draw_track_status(annotated, person, probability, above, fired)
             focus = args.focus_track if args.focus_track is not None else choose_focus(run_state.histories, time_seconds)
             label = run_state.histories[focus].label() if focus is not None else "No tracked person"
             image = compose(annotated, panel.render(run_state.histories.get(focus), time_seconds, label))
@@ -218,6 +247,8 @@ def run(args):
                   f"({time.perf_counter() - started:.0f}s)")
     if writer is not None:
         writer.close()
+    if replay is not None:
+        replay.release()
 
     plots = []
     for track_id, history in sorted(run_state.histories.items()):
@@ -258,7 +289,16 @@ def parse_args(argv=None):
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--input", help="Video to analyse")
     source.add_argument("--pose-json", help="Replay a pose JSON from yolo_pose.py instead of running YOLO")
-    parser.add_argument("--model", default=str(REPO_ROOT / "models" / "yolo11n-pose.pt"), help="YOLO pose weights")
+    parser.add_argument(
+        "--pipeline",
+        choices=("rtmpose", "yolo-pose"),
+        help="Choose the ONNX YOLO detector + RTMPose pipeline or YOLO-Pose model",
+    )
+    parser.add_argument(
+        "--model",
+        help="Pipeline config (.json) or YOLO-Pose weights (.pt); defaults by --pipeline",
+    )
+    parser.add_argument('--annotated-video', help='Existing annotated video paired with --pose-json for the graph panel')
     parser.add_argument("--classifier", help="Temporal classifier checkpoint (.pt); omit to plot signals only")
     parser.add_argument(
         "--target-fps", type=float, default=None,
@@ -275,6 +315,29 @@ def parse_args(argv=None):
     parser.add_argument("--min-plot-frames", type=int, default=15, help="Skip PNGs for tracks shorter than this")
     parser.add_argument("--max-frames", type=int, help="Stop after this many source frames")
     args = parser.parse_args(argv)
+    if args.pipeline is None:
+        args.pipeline = (
+            "yolo-pose"
+            if args.model and Path(args.model).suffix.lower() == ".pt"
+            else "rtmpose"
+        )
+    if args.model is None:
+        args.model = str(
+            REPO_ROOT
+            / "models"
+            / (
+                "yolo11n-pose.pt"
+                if args.pipeline == "yolo-pose"
+                else "pose_pipeline.json"
+            )
+        )
+    expected_suffix = ".pt" if args.pipeline == "yolo-pose" else ".json"
+    if Path(args.model).suffix.lower() != expected_suffix:
+        parser.error(
+            f"--pipeline {args.pipeline} requires a {expected_suffix} model file"
+        )
+    if args.annotated_video and not args.pose_json:
+        parser.error('--annotated-video requires --pose-json')
     if args.target_fps is not None and args.target_fps <= 0:
         parser.error("--target-fps must be greater than zero")
     if args.threshold is not None and not 0 <= args.threshold <= 1:

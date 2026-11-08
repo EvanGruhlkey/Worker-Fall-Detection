@@ -22,7 +22,7 @@ Run the tests with `uv run pytest`.
 ## How it works
 
 1. A **job** is one processing run: an uploaded video or a live camera.
-2. Each frame goes through YOLO Pose + ByteTrack (`src/yolo_pose.py`, unchanged), then a fall detector.
+2. Each frame goes through YOLO Pose + ByteTrack (`src/detectors/yolo_pose.py`, unchanged), then a fall detector.
 3. When a fall is detected, the backend creates a **fall event** with status `unacknowledged`. The event stores the time, camera, location, coordinates and confidence. The backend also saves a snapshot and records a short clip (5 s before to 5 s after).
 4. In the dashboard, someone acknowledges the alert (`needs_review`), checks the footage, and closes it as `resolved` (a real fall, handled) or `false_alarm`.
 

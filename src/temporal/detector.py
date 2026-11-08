@@ -15,7 +15,7 @@ import numpy as np
 import torch
 
 from backend.fall_detector import FallDetection
-from sliding_window import TrackWindows
+from utils.sliding_window import TrackWindows
 
 from .features import SIGNAL_INDEX, SIGNAL_SLICE, extract_features
 from .gate import ThresholdGate

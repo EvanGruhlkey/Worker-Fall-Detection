@@ -29,7 +29,7 @@ dashboard something to run; it is not a validated detector. See
 ## Implementation
 
 All new code is in `src/temporal/`, plus one offline runner and one training
-script. Stage 5 (`src/sliding_window.py`) gained three small additions and is
+script. Stage 5 (`src/utils/sliding_window.py`) gained three small additions and is
 otherwise unchanged: each `Window` now also carries its boxes in the same
 normalized frame as the keypoints, and `TrackWindows` has `rename()`,
 `last_seen()`, `last_box()` and `track_ids()` for tracker ID handoffs.

@@ -18,7 +18,7 @@ YOLO pose (stage 3) -> ByteTrack (stage 4) -> TrackWindows (stage 5) -> classifi
 
 ## Implementation
 
-**`src/sliding_window.py`**, plain NumPy with no model code.
+**`src/utils/sliding_window.py`**, plain NumPy with no model code.
 
 - **One queue per person.** A `dict` maps each ByteTrack `track_id` to a
   `collections.deque(maxlen=30)`. A full deque discards its oldest item
@@ -68,7 +68,7 @@ YOLO pose (stage 3) -> ByteTrack (stage 4) -> TrackWindows (stage 5) -> classifi
 ### Usage
 
 ```python
-from sliding_window import TrackWindows
+from utils.sliding_window import TrackWindows
 
 windows = TrackWindows()  # window_size=30, max_gap=5, stale_after=30
 for frame_index, frame in enumerate(frames):

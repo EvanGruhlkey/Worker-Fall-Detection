@@ -24,11 +24,15 @@ dependencies = [
     "alembic>=1.16",
     "boto3>=1.40",
     "pixeltable-pgserver>=0.7",
+    "rtmlib==0.0.16",
 ]
 
 [tool.uv]
 # This is a collection of scripts, not an installable package.
 package = false
+# Install one ONNX Runtime package; these packages share a Python module.
+default-groups = ["dev", "runtime"]
+conflicts = [[{ group = "runtime" }, { group = "cuda" }]]
 # Make the lockfile include a torch/torchvision version that has wheels for
 # Intel Macs (torch 2.2.2 / torchvision 0.17.2). Other platforms (Apple
 # Silicon, Linux, Windows) still resolve to the newest release.
@@ -36,7 +40,18 @@ required-environments = [
     "sys_platform == 'darwin' and platform_machine == 'x86_64'",
 ]
 
+# RTMLib declares the CPU runtime unconditionally. Select it ourselves below.
+[[tool.uv.dependency-metadata]]
+name = "rtmlib"
+version = "0.0.16"
+requires-dist = ["numpy", "opencv-contrib-python", "opencv-python", "tqdm"]
+
 [dependency-groups]
+runtime = [
+    "onnxruntime-directml>=1.24.4; sys_platform == 'win32'",
+    "onnxruntime>=1.23.2; sys_platform != 'win32'",
+]
+cuda = ["onnxruntime-gpu>=1.23.2; sys_platform != 'darwin'"]
 dev = [
     "httpx2>=2.14.0",
     "pytest>=9.1.1",

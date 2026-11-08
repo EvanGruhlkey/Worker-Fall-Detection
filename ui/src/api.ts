@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Dashboard, EventScope, EventStatus, Stat, Upload } from "./types";
+import type { CameraOption, Dashboard, EventScope, EventStatus, Stat, Upload } from "./types";
 
 const POLL_MS = 2500;
 const LOCATION_REFRESH_MS = 10 * 60 * 1000;
@@ -124,10 +124,11 @@ async function errorMessage(response: Response): Promise<string> {
   return `Request failed (HTTP ${response.status})`;
 }
 
-/** Upload a recorded video; the backend queues it for fall detection. */
+/** Upload a video as a real-time simulated camera feed. */
 export async function uploadVideo(file: File): Promise<Upload> {
   const form = new FormData();
   form.append("file", file);
+  form.append("live", "true");
   const response = await fetch("/api/videos", { method: "POST", body: form });
   if (!response.ok) throw new Error(await errorMessage(response));
   return response.json();
@@ -153,6 +154,11 @@ export async function startCamera(source: string): Promise<void> {
 /** Stop a running camera session. */
 export async function stopCamera(jobId: number): Promise<void> {
   const response = await fetch(`/api/cameras/${jobId}/stop`, { method: "POST" });
+  if (!response.ok) throw new Error(await errorMessage(response));
+}
+
+export async function simulateVideo(id: number): Promise<void> {
+  const response = await fetch(`/api/jobs/${id}/simulate`, { method: "POST" });
   if (!response.ok) throw new Error(await errorMessage(response));
 }
 

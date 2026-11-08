@@ -53,7 +53,7 @@ def database_url(test_database_url):
 def settings(tmp_path, database_url):
     return Settings(
         data_dir=tmp_path,
-        model_path=REPO_ROOT / "models" / "yolo11n-pose.pt",
+        model_path=REPO_ROOT / "models" / "pose_pipeline.json",
         clip_pre_seconds=0.5,
         clip_post_seconds=0.5,
         site_location="Plant 2, Houston, TX",

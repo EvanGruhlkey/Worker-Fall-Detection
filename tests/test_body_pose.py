@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from sliding_window import TrackWindows
+from utils.sliding_window import TrackWindows
 from temporal.features import extract_features, feature_names, window_signals
 from temporal.model import FallGRU, load_checkpoint, save_checkpoint
 from temporal.visualize import TrackSignals

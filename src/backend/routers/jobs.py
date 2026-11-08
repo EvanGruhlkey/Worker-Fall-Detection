@@ -4,7 +4,7 @@ import asyncio
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session, select
 
@@ -48,6 +48,7 @@ def _get_job(session, job_id):
 @router.post("/videos", response_model=JobRead, status_code=201)
 async def upload_video(
     file: UploadFile = File(...),
+    live: bool = Form(False),
     session: Session = Depends(get_session),
     settings=Depends(get_settings),
     manager=Depends(get_manager),
@@ -64,6 +65,8 @@ async def upload_video(
         while chunk := await file.read(UPLOAD_CHUNK):
             out.write(chunk)
 
+    if live:
+        return to_job_read(_start_simulation(manager, destination, original_name), manager)
     job = Job(
         kind=JobKind.video, station=settings.station_name, name=original_name,
         source=str(destination),
@@ -73,6 +76,22 @@ async def upload_video(
     session.refresh(job)
     manager.submit_video(job.id)
     return to_job_read(job, manager)
+
+
+def _start_simulation(manager, source, name):
+    for job_id, worker in list(manager.active_cameras().items()):
+        if '://' not in worker.source and Path(worker.source).is_file():
+            manager.stop_camera(job_id)
+    return manager.create_camera(str(source), name=name, label='Video simulation')
+
+
+@router.post('/jobs/{job_id}/simulate', response_model=JobRead, status_code=201)
+def simulate_video(job_id: int, session: Session = Depends(get_session), manager=Depends(get_manager)):
+    job = _get_job(session, job_id)
+    source = Path(job.source)
+    if not source.is_file():
+        raise HTTPException(404, 'The original video is not available on this computer')
+    return to_job_read(_start_simulation(manager, source, job.name), manager)
 
 
 @router.get("/jobs", response_model=list[JobRead])
@@ -105,7 +124,7 @@ def job_video(job_id: int, session: Session = Depends(get_session), settings=Dep
 
 @router.get("/jobs/{job_id}/json")
 def job_json(job_id: int, session: Session = Depends(get_session), settings=Depends(get_settings)):
-    """Per-frame pose and tracking data (same format as src/yolo_pose.py)."""
+    """Per-frame pose and tracking data (same format as src/detectors/yolo_pose.py)."""
     job = _get_job(session, job_id)
     return data_file_response(
         settings, job.output_json, "application/json", filename=f"job_{job_id}.json"

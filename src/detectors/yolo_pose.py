@@ -1,3 +1,5 @@
+"""Run the ONNX YOLO detector, ByteTrack, and RTMPose pipeline."""
+
 import argparse
 import json
 import sys
@@ -5,30 +7,37 @@ import time
 from pathlib import Path
 
 import cv2
-from ultralytics import YOLO
+
+# Allow running this file directly from the repository root.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
-# YOLO's COCO pose model predicts 17 points. The first five are facial points
-# (nose, eyes and ears), so expose only the 12 body points at indices 5-16.
-COCO_KEYPOINT_COUNT = 17
-BODY_KEYPOINT_START = 5
-BODY_KEYPOINT_COUNT = COCO_KEYPOINT_COUNT - BODY_KEYPOINT_START
+DEFAULT_IMAGE_SIZE = 640
 KEYPOINT_FORMAT = "COCO-body-12"
+COCO_KEYPOINT_COUNT = 17
+FACE_KEYPOINT_COUNT = 5
 
 
-def load_pose_model(model_path):
+def load_yolo_pose_model(model_path):
+    """Load a single-model Ultralytics YOLO-Pose model and ByteTrack weights."""
     model_path = Path(model_path)
     if not model_path.is_file():
-        raise FileNotFoundError(f"Model not found: {model_path}")
+        raise FileNotFoundError(f"Pose model not found: {model_path}")
+
+    if model_path.suffix.lower() != ".pt":
+        raise ValueError("YOLO-Pose weights must be a .pt file")
+
+    from ultralytics import YOLO
 
     model = YOLO(str(model_path))
     if model.task != "pose":
-        raise ValueError("Model must be a YOLO pose model")
+        raise ValueError("The .pt model must be a YOLO pose model")
     return model
 
 
-def process_frame(model, frame, image_size=640):
-    """Run pose tracking on one OpenCV frame and return the drawing and data."""
+def process_yolo_pose_frame(model, frame, image_size=DEFAULT_IMAGE_SIZE):
+    """Run one frame through YOLO-Pose + ByteTrack and return 12 body keypoints."""
     result = model.track(
         frame,
         persist=True,
@@ -36,9 +45,6 @@ def process_frame(model, frame, image_size=640):
         imgsz=image_size,
         verbose=False,
     )[0]
-
-    # Read tracked box fields individually because tracking adds an ID column
-    # to the raw box data.
     boxes = result.boxes.xyxy.cpu().tolist()
     confidences = result.boxes.conf.cpu().tolist()
     track_ids = (
@@ -46,78 +52,87 @@ def process_frame(model, frame, image_size=640):
         if result.boxes.id is not None
         else [None] * len(boxes)
     )
+    if len(confidences) != len(boxes) or len(track_ids) != len(boxes):
+        raise ValueError("YOLO-Pose returned inconsistent boxes, confidences, and track IDs")
 
-    keypoints = []
-    if result.keypoints is not None:
-        keypoints = result.keypoints.data.cpu().tolist()
+    keypoints = (
+        result.keypoints.data.cpu().tolist()
+        if result.keypoints is not None
+        else []
+    )
+    if len(keypoints) != len(boxes):
+        if boxes:
+            raise ValueError("YOLO-Pose must return keypoints for every detected person")
+        keypoints = []
 
     people = []
     for box, confidence, track_id, person_keypoints in zip(
         boxes, confidences, track_ids, keypoints
     ):
         if len(person_keypoints) != COCO_KEYPOINT_COUNT:
-            raise ValueError("Model must output exactly 17 COCO keypoints")
-
-        body_keypoints = person_keypoints[BODY_KEYPOINT_START:]
+            raise ValueError("YOLO-Pose must output exactly 17 COCO keypoints")
         people.append(
             {
                 "track_id": track_id,
                 "bbox": box,
                 "confidence": confidence,
                 "keypoints": [
-                    {"x": point[0], "y": point[1], "confidence": point[2]}
-                    for point in body_keypoints
+                    {
+                        "x": point[0],
+                        "y": point[1],
+                        "confidence": point[2],
+                    }
+                    for point in person_keypoints[FACE_KEYPOINT_COUNT:]
                 ],
             }
         )
 
-    # Hide facial points in the annotated output too. Keeping the 17 slots here
-    # lets Ultralytics draw its normal body skeleton, but zero confidence keeps
-    # points 0-4 and their connecting lines out of the frame.
-    if result.keypoints is not None and result.keypoints.data.shape[-1] >= 3:
-        plot_keypoints = result.keypoints.data.clone()
-        plot_keypoints[:, :BODY_KEYPOINT_START, 2] = 0
-        result.keypoints.data = plot_keypoints
-
-    # Draw the pose results without Ultralytics labels, then add a
-    # high-contrast tracking ID and person confidence above each box.
     annotated_frame = result.plot(labels=False, conf=False)
-    frame_width = annotated_frame.shape[1]
-    for box, confidence, track_id in zip(boxes, confidences, track_ids):
+    for box, track_id in zip(boxes, track_ids):
+        if track_id is None:
+            continue
         x1, y1 = int(box[0]), int(box[1])
-        id_label = f"ID {track_id}  " if track_id is not None else ""
-        label = f"{id_label}Conf {confidence:.0%}"
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = 0.8
-        thickness = 2
-        (text_width, text_height), baseline = cv2.getTextSize(
-            label, font, font_scale, thickness
-        )
-        text_x = max(0, min(x1, frame_width - text_width - 8))
-        text_y = max(text_height + 8, y1 - 8)
-
-        cv2.rectangle(
-            annotated_frame,
-            (text_x, text_y - text_height - 8),
-            (text_x + text_width + 8, text_y + baseline),
-            (0, 0, 0),
-            -1,
-        )
         cv2.putText(
             annotated_frame,
-            label,
-            (text_x + 4, text_y - 4),
-            font,
-            font_scale,
+            f"ID {track_id}",
+            (x1, max(20, y1 - 5)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
             (0, 255, 255),
-            thickness,
+            2,
             cv2.LINE_AA,
         )
 
     return annotated_frame, people
 
 
-def process_camera(camera_index, model_path, image_size=640, width=None, height=None):
+def load_pose_model(model_path):
+    """Load either the RTMPose pipeline config or YOLO-Pose weights."""
+    model_path = Path(model_path)
+    if model_path.suffix.lower() == ".json":
+        if not model_path.is_file():
+            raise FileNotFoundError(f"Pose pipeline config not found: {model_path}")
+        from pose_estimators.rtmpose_pipeline import RTMPosePipeline
+
+        return RTMPosePipeline(model_path)
+    return load_yolo_pose_model(model_path)
+
+
+def process_frame(model, frame, image_size=DEFAULT_IMAGE_SIZE):
+    """Run one frame through the selected backend and return body keypoints."""
+    pipeline_processor = getattr(model, "process_frame", None)
+    if callable(pipeline_processor):
+        return pipeline_processor(frame, image_size)
+    return process_yolo_pose_frame(model, frame, image_size)
+
+
+def process_camera(
+    camera_index,
+    model_path,
+    image_size=DEFAULT_IMAGE_SIZE,
+    width=None,
+    height=None,
+):
     """Display pose tracking from a live OpenCV camera feed."""
     model = load_pose_model(model_path)
     camera = cv2.VideoCapture(camera_index)
@@ -132,7 +147,7 @@ def process_camera(camera_index, model_path, image_size=640, width=None, height=
     if height is not None:
         camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
-    window_name = "YOLO Pose - Live Camera (Q or Esc to quit)"
+    window_name = "Pose Tracking - Live Camera (Q or Esc to quit)"
     smoothed_fps = 0.0
     previous_time = time.perf_counter()
 
@@ -178,7 +193,14 @@ def process_camera(camera_index, model_path, image_size=640, width=None, height=
         cv2.destroyAllWindows()
 
 
-def process_video(input_video, model_path, output_video, output_json, image_size=640):
+def process_video(
+    input_video,
+    model_path,
+    output_video,
+    output_json,
+    image_size=DEFAULT_IMAGE_SIZE,
+):
+    """Process a video and save annotated frames plus per-frame pose data."""
     input_video = Path(input_video)
     output_video = Path(output_video)
     output_json = Path(output_json)
@@ -244,7 +266,7 @@ def process_video(input_video, model_path, output_video, output_json, image_size
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
-        description="Run YOLO Pose on a live camera or prerecorded video."
+        description="Run pose tracking on a live camera or prerecorded video."
     )
     source = parser.add_mutually_exclusive_group()
     source.add_argument("--input", help="Path to a prerecorded input video")
@@ -255,12 +277,16 @@ def parse_args(argv=None):
         const=0,
         help="Open a live camera (default index: 0)",
     )
-    parser.add_argument("--model", required=True, help="Path to YOLO Pose weights")
+    parser.add_argument(
+        "--model",
+        default=str(Path(__file__).resolve().parents[2] / "models" / "pose_pipeline.json"),
+        help="JSON config selecting the YOLO and RTMPose ONNX models",
+    )
     parser.add_argument(
         "--image-size",
         type=int,
-        default=640,
-        help="YOLO inference image size (default: 640)",
+        default=DEFAULT_IMAGE_SIZE,
+        help=f"Inference image size (default: {DEFAULT_IMAGE_SIZE})",
     )
     parser.add_argument("--width", type=int, help="Requested live camera width")
     parser.add_argument("--height", type=int, help="Requested live camera height")
@@ -296,7 +322,7 @@ def main():
             return 0
 
         input_video = Path(args.input)
-        repo_root = Path(__file__).resolve().parents[1]
+        repo_root = Path(__file__).resolve().parents[2]
         output_dir = repo_root / "data" / "output"
         output_video = output_dir / f"{input_video.stem}.mp4"
         output_json = output_dir / f"{input_video.stem}.json"

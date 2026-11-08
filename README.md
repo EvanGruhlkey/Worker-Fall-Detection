@@ -31,6 +31,12 @@ Then from the project root:
 uv sync
 ```
 
+On Windows this includes DirectML for AMD and other compatible GPUs. On NVIDIA
+machines with CUDA/cuDNN installed, run with `uv run --no-group runtime --group cuda`
+in place of `uv run`. Other systems use CPU. The YOLO detector and RTMPose models
+use ONNX; the optional YOLO-Pose model uses Ultralytics `.pt` weights. See
+[src/src.md](src/src.md) for the pipeline and device selection.
+
 This downloads Python 3.12 if needed, creates `.venv`, and installs the locked dependencies. You do not need to activate the virtual env; prefix commands with `uv run` instead.
 
 To add a dependency, use `uv add <package>` (this updates `pyproject.toml` and `uv.lock`). Commit both files.
@@ -61,38 +67,68 @@ Choose and switch cameras from the dashboard. Optional startup-camera and fallba
 From the project root, run:
 
 ```bash
-uv run src/yolo_pose.py --model models/yolo11n-pose.pt
+uv run src/detectors/yolo_pose.py --model models/pose_pipeline.json
 ```
 
 This opens camera `0`. Press `Q` or `Esc` to stop. To select another camera or request a particular resolution:
 
 ```bash
-uv run src/yolo_pose.py --model models/yolo11n-pose.pt --camera 1 --width 1280 --height 720
+uv run src/detectors/yolo_pose.py --model models/pose_pipeline.json --camera 1 --width 1280 --height 720
 ```
 
 On first use, your operating system may ask for camera access for Terminal or Python.
+
+The pipeline config selects the ONNX YOLO detector and RTMPose models. Both use
+automatic CUDA, DirectML, or CPU selection. The dashboard uses this config by
+default; set `FALL_MODEL_PATH` in `.env` to use another config.
+The main pipeline is split across `src/detectors/yolo_detector.py`, `src/trackers/bytetrack_tracker.py`,
+and `src/pose_estimators/rtmpose_estimator.py`, and connected by `src/pose_estimators/rtmpose_pipeline.py`.
+
+To use the alternative single-model YOLO-Pose + ByteTrack pipeline, select its
+`.pt` weights instead:
+
+```bash
+uv run src/detectors/yolo_pose.py --model models/yolo11n-pose.pt
+uv run src/detectors/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-pose.pt
+```
+
+In the dashboard, set `FALL_MODEL_PATH=models/yolo11n-pose.pt` in `.env` to
+choose YOLO-Pose. A `.json` pipeline config chooses YOLO detector + ByteTrack +
+RTMPose; a `.pt` pose model chooses YOLO-Pose + ByteTrack. Both return the 12
+body keypoints expected by downstream fall detection.
 
 ### Prerecorded video
 
 Supply your own video. From the project root, run:
 
 ```bash
-uv run src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-pose.pt
+uv run src/detectors/yolo_pose.py --input data/input/YourVideo.mp4 --model models/pose_pipeline.json
 ```
 
 Outputs are saved as `data/output/YourVideo.mp4` and `data/output/YourVideo.json`.
 
 ### Sliding window
 
-`src/sliding_window.py` keeps the last 30 frames of the 12 body keypoints for each tracked person and turns them into a normalized `(30, 36)` window, the input for the temporal classifier. The five facial keypoints (COCO indices 0-4) are discarded. See [docs/features/10-18-2026-sliding-window.md](docs/features/10-18-2026-sliding-window.md).
+`src/utils/sliding_window.py` keeps the last 30 frames of the 12 body keypoints for each tracked person and turns them into a normalized `(30, 36)` window, the input for the temporal classifier. The five facial keypoints (COCO indices 0-4) are discarded. See [docs/features/10-18-2026-sliding-window.md](docs/features/10-18-2026-sliding-window.md).
 
 ### Temporal classifier
 
 Run the skeleton pipeline (frame sampler, pose, tracking, window, classifier, gate) over a video and get the motion-signal plots:
 
 ```bash
+# YOLO detector -> ByteTrack -> RTMPose (default)
 uv run src/fall_pipeline.py --input data/input/YourVideo.mp4 --classifier models/fall_gru.pt
+
+# YOLO-Pose -> ByteTrack
+uv run src/fall_pipeline.py --input data/input/YourVideo.mp4 --pipeline yolo-pose --classifier models/fall_gru.pt
 ```
+
+`--pipeline rtmpose` (the default) starts at `pose_estimators/rtmpose_pipeline.py`,
+which calls the separate YOLO detector, ByteTrack, and RTMPose estimator.
+`--pipeline yolo-pose` starts at `detectors/yolo_pose.py`, which runs YOLO-Pose
+with ByteTrack. `--model` can override either pipeline's default model file.
+Both return the same 12 body keypoints. The runner prints the selected pipeline
+before processing.
 
 Outputs go to `data/output/YourVideo_temporal/`: `signals.mp4` (annotated video with a scrolling signal panel), `track_<id>.png` (full-length plots per person) and `signals.json`. Leave out `--classifier` to get the plots without a model. To (re)train the bootstrap model on synthetic data, or a model on labeled footage:
 

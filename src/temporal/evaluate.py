@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from sliding_window import TrackWindows
+from utils.sliding_window import TrackWindows
 
 from .detector import handoff_lost_tracks, score_tracks
 from .gate import ThresholdGate

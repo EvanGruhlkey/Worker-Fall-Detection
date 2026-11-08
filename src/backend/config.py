@@ -66,7 +66,7 @@ class Settings:
     )
     model_path: Path = field(
         default_factory=lambda: _env_path(
-            "FALL_MODEL_PATH", REPO_ROOT / "models" / "yolo11n-pose.pt"
+            "FALL_MODEL_PATH", REPO_ROOT / "models" / "pose_pipeline.json"
         )
     )
     image_size: int = field(

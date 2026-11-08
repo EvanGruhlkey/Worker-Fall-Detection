@@ -68,13 +68,13 @@ lockfile.
   conversion works (the failure mode with NumPy 2).
 - `models/yolo11n-pose.pt` loads and `process_frame` runs a tracking pass on
   a test frame.
-- `uv run src/yolo_pose.py --help` runs.
+- `uv run src/detectors/yolo_pose.py --help` runs.
 
 ## How to use going forward
 
 ```bash
 uv sync                                                  # after cloning or after a pull changes uv.lock
-uv run src/yolo_pose.py --model models/yolo11n-pose.pt   # run scripts without activating a venv
+uv run src/detectors/yolo_pose.py --model models/yolo11n-pose.pt   # run scripts without activating a venv
 uv add <package>                                         # add a dependency; commit pyproject.toml and uv.lock
 ```
 

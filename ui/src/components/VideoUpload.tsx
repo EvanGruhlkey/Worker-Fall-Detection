@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { uploadVideo } from "../api";
+import { simulateVideo, uploadVideo } from "../api";
 import type { Upload } from "../types";
 import Icon from "./Icon";
 
@@ -16,6 +16,8 @@ function statusText(upload: Upload): string {
       return `Done · ${upload.fall_count} fall${upload.fall_count === 1 ? "" : "s"} found (see event log)`;
     case "failed":
       return `Failed: ${upload.error ?? "unknown error"}`;
+    case "stopped":
+      return "Playback finished";
     default:
       return "Stopped";
   }
@@ -42,15 +44,28 @@ export default function VideoUpload({ uploads, onUploaded }: { uploads: Upload[]
     }
   }
 
+  async function playLive(id: number) {
+    setBusy(true);
+    setError(null);
+    try {
+      await simulateVideo(id);
+      onUploaded();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not start playback");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <article className="uploads">
       <div className="uploads-head">
         <div>
-          <strong>Analyze a recorded video</strong>
-          <small>Runs pose tracking and fall detection on the file; falls are added to the event log.</small>
+          <strong>Test a video as a live feed</strong>
+          <small>Plays at normal speed in the feed above, with live tracking and fall alerts.</small>
         </div>
         <button className="btn" onClick={() => input.current?.click()} disabled={busy}>
-          <Icon name="upload" />{busy ? "Uploading…" : "Upload video"}
+          <Icon name="upload" />{busy ? "Starting…" : "Choose video"}
         </button>
         <input
           ref={input}
@@ -67,6 +82,8 @@ export default function VideoUpload({ uploads, onUploaded }: { uploads: Upload[]
             <li key={u.id}>
               <div className="upload-row">
                 <span className="upload-name" title={u.name}>{u.name}</span>
+                <button className="btn" disabled={busy || u.status === "queued" || u.status === "running"}
+                  onClick={() => playLive(u.id)}>Play live</button>
                 {u.output_video_url && (
                   <a href={u.output_video_url} target="_blank" rel="noreferrer">Watch analyzed video</a>
                 )}

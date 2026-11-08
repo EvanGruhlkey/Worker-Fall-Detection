@@ -13,6 +13,7 @@ from enum import Enum
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import Response
 from sqlmodel import Session, func, select
+from sqlalchemy import or_
 
 from ..db import (
     EventType, FallEvent, Job, JobKind, JobStatus, ReviewStatus, get_session,
@@ -120,7 +121,12 @@ def uptime_ratio(intervals, start, end):
         return None
     covered = timedelta()
     cursor = start
-    for begin, finish in sorted(intervals):
+    complete_intervals = [
+        (begin, finish)
+        for begin, finish in intervals
+        if begin is not None and finish is not None
+    ]
+    for begin, finish in sorted(complete_intervals, key=lambda interval: interval[0]):
         begin, finish = max(begin, cursor), min(finish, end)
         if finish > begin:
             covered += finish - begin
@@ -269,7 +275,8 @@ def _camera_id(job):
 
 def build_uploads(session):
     jobs = session.exec(
-        select(Job).where(Job.kind == JobKind.video).order_by(Job.id.desc()).limit(RECENT_UPLOADS)
+        select(Job).where(or_(Job.kind == JobKind.video, Job.label == 'Video simulation'))
+        .order_by(Job.id.desc()).limit(RECENT_UPLOADS)
     ).all()
     uploads = []
     for job in jobs:

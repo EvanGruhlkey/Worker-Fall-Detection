@@ -65,8 +65,12 @@ def check_setup():
         shutil.copyfile(example, env_file)
         log("Created .env from .env.example. Edit it to change the camera or location.")
 
-    if not (ROOT / "models" / "yolo11n-pose.pt").exists():
-        fail("models/yolo11n-pose.pt is missing.")
+    sys.path.insert(0, str(ROOT / "src"))
+    from backend.config import Settings
+
+    model_path = Settings().model_path
+    if not model_path.is_file():
+        fail(f"Pose pipeline config is missing: {model_path}")
 
     check_database()
 
