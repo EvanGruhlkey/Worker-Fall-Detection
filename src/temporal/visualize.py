@@ -34,9 +34,9 @@ CRITICAL = "#d03b3b"
 
 PANELS = (
     # (title, y label, [(series key, legend label)], y limits)
-    ("Height above the feet", "body heights", [("hip_height", "hip"), ("head_height", "head"), ("box_height", "box height")], (0.0, 1.2)),
+    ("Height above the feet", "body heights", [("hip_height", "hip"), ("box_height", "box height")], (0.0, 1.2)),
     ("Torso angle", "degrees from upright", [("torso_angle", "torso")], (0.0, 100.0)),
-    ("Vertical velocity", "body heights / s", [("hip_velocity", "hip"), ("head_velocity", "head")], None),
+    ("Vertical velocity", "body heights / s", [("hip_velocity", "hip")], None),
     ("Fall probability", "p(fall)", [("probability", "classifier")], (0.0, 1.05)),
 )
 
@@ -47,8 +47,8 @@ class TrackSignals:
     def __init__(self, track_id):
         self.track_id = track_id
         self.time, self.frame = [], []
-        self.hip_height, self.head_height, self.box_height = [], [], []
-        self.torso_angle, self.hip_velocity, self.head_velocity = [], [], []
+        self.hip_height, self.box_height = [], []
+        self.torso_angle, self.hip_velocity = [], []
         self.probability, self.above = [], []
         self.events = []  # times at which the threshold gate fired
         self.previous_ids = []  # tracker IDs this person had before a handoff
@@ -66,11 +66,9 @@ class TrackSignals:
         self.time.append(float(time))
         self.frame.append(int(frame))
         self.hip_height.append(float(signals[SIGNAL_INDEX["hip_height"]]))
-        self.head_height.append(float(signals[SIGNAL_INDEX["head_height"]]))
         self.box_height.append(float(box_height))
         self.torso_angle.append(float(signals[SIGNAL_INDEX["torso_angle"]]) * 90.0)
         self.hip_velocity.append(float(signals[SIGNAL_INDEX["hip_velocity"]]))
-        self.head_velocity.append(float(signals[SIGNAL_INDEX["head_velocity"]]))
         self.probability.append(float(probability))
         self.above.append(bool(above))
 
@@ -98,11 +96,9 @@ class TrackSignals:
             "time": [round(t, 3) for t in self.time],
             "frame": list(self.frame),
             "hip_height": [round(v, 4) for v in self.hip_height],
-            "head_height": [round(v, 4) for v in self.head_height],
             "box_height": [round(v, 4) for v in self.box_height],
             "torso_angle": [round(v, 2) for v in self.torso_angle],
             "hip_velocity": [round(v, 4) for v in self.hip_velocity],
-            "head_velocity": [round(v, 4) for v in self.head_velocity],
             "probability": [None if np.isnan(v) else round(v, 4) for v in self.probability],
         }
 
@@ -138,8 +134,8 @@ def _draw_panels(fig, axes, signals, threshold, start, end, rolling):
             in_view = (t >= start) & (t <= end)
             peak = 2.0
             if signals is not None and in_view.any():
-                peak = max(peak, 1.15 * float(np.nanmax(np.abs(np.stack(
-                    [signals.series("hip_velocity")[in_view], signals.series("head_velocity")[in_view]])))))
+                peak = max(peak, 1.15 * float(np.nanmax(np.abs(
+                    signals.series("hip_velocity")[in_view]))))
             ax.set_ylim(-peak, peak)
         if title == "Fall probability":
             ax.axhline(threshold, color=INK_MUTED, linewidth=1)

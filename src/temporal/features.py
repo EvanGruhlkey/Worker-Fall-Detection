@@ -10,12 +10,12 @@ Per frame the feature vector is, in order:
 
 | block          | size | meaning                                                   |
 |----------------|------|-----------------------------------------------------------|
-| positions      | 51   | 17 joints x (x, y, confidence), normalized by stage 5     |
-| velocities     | 34   | 17 joints x (dx, dy) per second, body heights / s         |
-| accelerations  | 34   | 17 joints x (ddx, ddy) per second^2                       |
+| positions      | 36   | 12 joints x (x, y, confidence), normalized by stage 5     |
+| velocities     | 24   | 12 joints x (dx, dy) per second, body heights / s         |
+| accelerations  | 24   | 12 joints x (ddx, ddy) per second^2                       |
 | box            | 2    | box height / reference height, box width / height         |
 | box velocity   | 2    | per-second change of the two box features                 |
-| signals        | 5    | the interpretable motion signals listed in SIGNAL_NAMES   |
+| signals        | 3    | the interpretable motion signals listed in SIGNAL_NAMES   |
 
 Velocities are in body heights per second so that the same value means the
 same motion at 10, 15 or 25 frames per second; the frame rate is passed in.
@@ -29,12 +29,11 @@ from sliding_window import NUM_KEYPOINTS
 
 # Bump when the layout or meaning of the feature vector changes, so an old
 # checkpoint is refused rather than silently fed different numbers.
-FEATURE_VERSION = 1
+FEATURE_VERSION = 2
 
-# COCO-17 keypoint indices.
-NOSE, LEFT_EYE, RIGHT_EYE, LEFT_EAR, RIGHT_EAR = 0, 1, 2, 3, 4
-LEFT_SHOULDER, RIGHT_SHOULDER = 5, 6
-LEFT_HIP, RIGHT_HIP = 11, 12
+# COCO body points after removing facial keypoints 0-4.
+LEFT_SHOULDER, RIGHT_SHOULDER = 0, 1
+LEFT_HIP, RIGHT_HIP = 6, 7
 
 # YOLO still reports a position for joints it cannot see, with low confidence
 # and a lot of jitter. Below this the position is treated as missing and the
@@ -44,10 +43,8 @@ MIN_KEYPOINT_CONFIDENCE = 0.3
 
 SIGNAL_NAMES = (
     "hip_height",     # hip centre above the box bottom, in body heights
-    "head_height",    # head above the box bottom, in body heights
     "torso_angle",    # 0 = upright, 1 = horizontal (degrees / 90)
     "hip_velocity",   # upward hip speed in body heights / s (a fall is negative)
-    "head_velocity",  # upward head speed in body heights / s
 )
 NUM_SIGNALS = len(SIGNAL_NAMES)
 SIGNAL_INDEX = {name: index for index, name in enumerate(SIGNAL_NAMES)}
@@ -55,7 +52,7 @@ SIGNAL_INDEX = {name: index for index, name in enumerate(SIGNAL_NAMES)}
 _POSITIONS = NUM_KEYPOINTS * 3
 _VELOCITIES = NUM_KEYPOINTS * 2
 _BOX = 2
-NUM_FEATURES = _POSITIONS + 2 * _VELOCITIES + 2 * _BOX + NUM_SIGNALS  # 128
+NUM_FEATURES = _POSITIONS + 2 * _VELOCITIES + 2 * _BOX + NUM_SIGNALS  # 91
 SIGNAL_SLICE = slice(NUM_FEATURES - NUM_SIGNALS, NUM_FEATURES)
 
 
@@ -167,11 +164,9 @@ def compute_signals(xy, confidence, boxes, mask, fps):
     visible = confidence >= MIN_KEYPOINT_CONFIDENCE
     hip = _visible_midpoint(xy, visible, (LEFT_HIP, RIGHT_HIP))
     shoulder = _visible_midpoint(xy, visible, (LEFT_SHOULDER, RIGHT_SHOULDER))
-    head = _head_point(xy, visible)
 
     bottom = boxes[:, 3]
     hip_height = bottom - hip[:, 1]
-    head_height = bottom - head[:, 1]
 
     # Image y grows downward, so dy > 0 means the shoulders are above the hips.
     dx = shoulder[:, 0] - hip[:, 0]
@@ -180,12 +175,10 @@ def compute_signals(xy, confidence, boxes, mask, fps):
 
     pair = mask[1:] & mask[:-1]
     hip_velocity = np.zeros(len(mask), np.float32)
-    head_velocity = np.zeros(len(mask), np.float32)
     hip_velocity[1:][pair] = -(hip[1:, 1] - hip[:-1, 1])[pair] * fps
-    head_velocity[1:][pair] = -(head[1:, 1] - head[:-1, 1])[pair] * fps
 
     signals = np.stack(
-        [hip_height, head_height, torso_angle, hip_velocity, head_velocity], axis=1
+        [hip_height, torso_angle, hip_velocity], axis=1
     ).astype(np.float32)
     signals[~mask] = 0.0
     return signals
@@ -199,10 +192,3 @@ def _visible_midpoint(xy, visible, joints):
     weighted = (points * weights).sum(axis=1) / np.maximum(total, 1.0)
     plain = points.mean(axis=1)
     return np.where(total > 0, weighted, plain)
-
-
-def _head_point(xy, visible):
-    """The nose, or the visible eyes and ears when the nose is not visible."""
-    fallback = _visible_midpoint(xy, visible, (LEFT_EYE, RIGHT_EYE, LEFT_EAR, RIGHT_EAR))
-    nose_visible = visible[:, NOSE][:, None]
-    return np.where(nose_visible, xy[:, NOSE], fallback)

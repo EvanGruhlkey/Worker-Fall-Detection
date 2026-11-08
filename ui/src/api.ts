@@ -133,6 +133,29 @@ export async function uploadVideo(file: File): Promise<Upload> {
   return response.json();
 }
 
+/** Ask the backend which local camera indices OpenCV can access. */
+export async function listCameraOptions(): Promise<CameraOption[]> {
+  const response = await fetch("/api/cameras/options");
+  if (!response.ok) throw new Error(await errorMessage(response));
+  return response.json();
+}
+
+/** Start a local camera index or custom network stream. */
+export async function startCamera(source: string): Promise<void> {
+  const response = await fetch("/api/cameras", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ source }),
+  });
+  if (!response.ok) throw new Error(await errorMessage(response));
+}
+
+/** Stop a running camera session. */
+export async function stopCamera(jobId: number): Promise<void> {
+  const response = await fetch(`/api/cameras/${jobId}/stop`, { method: "POST" });
+  if (!response.ok) throw new Error(await errorMessage(response));
+}
+
 /** Set an event's review status (and optional notes). */
 export async function reviewEvent(id: number, status: EventStatus, notes?: string | null): Promise<void> {
   const response = await fetch(`/api/events/${id}`, {
