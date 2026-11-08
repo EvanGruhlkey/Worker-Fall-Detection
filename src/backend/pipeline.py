@@ -22,6 +22,7 @@ from .db import FallEvent, Job, JobStatus, get_engine, update_row, utc_now
 from .fall_detector import FallDetector
 from .location import current_site_location
 from .media import VideoWriter, encode_jpeg, write_clip
+from .storage import share
 
 log = logging.getLogger(__name__)
 
@@ -158,6 +159,7 @@ class FrameProcessor:
             session.add(job)
             session.commit()
             event_id = event.id
+            share(self._relative(snapshot))
 
         self.fall_count += 1
         log.warning(
@@ -184,6 +186,7 @@ class FrameProcessor:
         try:
             write_clip(path, [jpeg for _, jpeg in clip.frames], fps)
             update_row(FallEvent, clip.event_id, clip_path=self._relative(path))
+            share(self._relative(path))
         except Exception:
             log.exception("Could not write clip for event %s", clip.event_id)
 
@@ -246,6 +249,8 @@ def run_video_job(job_id, settings):
             encoding="utf-8",
         )
         processor.finish()
+        for output in (output_video, output_json):
+            share(output.relative_to(settings.data_dir).as_posix())
         update_row(
             Job, job_id,
             status=JobStatus.completed,

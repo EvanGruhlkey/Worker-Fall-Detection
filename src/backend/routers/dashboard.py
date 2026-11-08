@@ -15,7 +15,7 @@ from fastapi.responses import Response
 from sqlmodel import Session, func, select
 
 from ..db import (
-    EventType, FallEvent, Job, JobKind, JobStatus, ReviewStatus, as_utc, get_session,
+    EventType, FallEvent, Job, JobKind, JobStatus, ReviewStatus, get_session,
 )
 from ..deps import get_manager, get_settings
 from ..location import current_site_location
@@ -52,8 +52,14 @@ class Scope(str, Enum):
 
 
 def local_time_label(moment):
-    """'10:42:11 AM' in the server's local time zone."""
-    return as_utc(moment).astimezone().strftime("%I:%M:%S %p").lstrip("0")
+    """'10:42:11 AM' today, 'Oct 19, 10:42:11 AM' before, in the server's local time zone."""
+    local = moment.astimezone()
+    label = local.strftime("%I:%M:%S %p").lstrip("0")
+    today = datetime.now().astimezone().date()
+    if local.date() == today:
+        return label
+    year = f" {local.year}" if local.year != today.year else ""
+    return f"{local:%b} {local.day}{year}, {label}"
 
 
 def start_of_today(now):
@@ -75,7 +81,7 @@ def to_dashboard_event(event, source):
         color=color,
         confidence=None if event.confidence is None else round(event.confidence * 100),
         status=STATUS_LABELS[event.status],
-        detected_at=as_utc(event.detected_at),
+        detected_at=event.detected_at,
         source=source,
         job_id=event.job_id,
         camera=event.camera_name,
@@ -86,7 +92,7 @@ def to_dashboard_event(event, source):
         reason=event.reason,
         reviewer=event.reviewer,
         notes=event.notes,
-        reviewed_at=as_utc(event.reviewed_at),
+        reviewed_at=event.reviewed_at,
         snapshot_url=f"/api/events/{event.id}/snapshot" if event.snapshot_path else None,
         clip_url=f"/api/events/{event.id}/clip" if event.clip_path else None,
     )
@@ -191,11 +197,11 @@ def uptime_stat(session, active_ids, now):
             finish = now
         else:
             finish = job.finished_at or job.last_frame_at or job.started_at
-        intervals.append((as_utc(job.started_at), as_utc(finish)))
+        intervals.append((job.started_at, finish))
 
     # Measure from the first camera session if that is less than 24 h ago,
     # so a system installed an hour ago isn't reported as 4% up.
-    start = max(window_start, as_utc(first_start)) if first_start else None
+    start = max(window_start, first_start) if first_start else None
     ratio = uptime_ratio(intervals, start, now) if start else None
     if ratio is None:
         return DashboardStat(
@@ -274,7 +280,7 @@ def build_uploads(session):
             progress = min(1.0, job.frames_processed / job.total_frames)
         uploads.append(DashboardUpload(
             id=job.id, name=job.name, status=job.status, progress=progress,
-            fall_count=job.fall_count, error=job.error, created_at=as_utc(job.created_at),
+            fall_count=job.fall_count, error=job.error, created_at=job.created_at,
             output_video_url=f"/api/jobs/{job.id}/video" if job.output_video else None,
         ))
     return uploads
@@ -292,7 +298,7 @@ def build_location(settings, session, camera_job):
 def dashboard(
     scope: Scope = Scope.today,
     status: ReviewStatus | None = None,
-    limit: int = Query(100, ge=1, le=1000),
+    limit: int = Query(500, ge=1, le=1000),
     session: Session = Depends(get_session),
     settings=Depends(get_settings),
     manager=Depends(get_manager),
@@ -335,7 +341,7 @@ def export_events(
     writer.writerow(CSV_COLUMNS)
     for event, kind in query_events(session, scope, status, None, now):
         row = to_dashboard_event(event, kind)
-        reviewed = as_utc(event.reviewed_at)
+        reviewed = event.reviewed_at
         writer.writerow([
             event.id, row.detected_at.isoformat(), row.time, row.name, row.camera,
             row.location, row.coords, row.confidence, row.status, row.track_id,

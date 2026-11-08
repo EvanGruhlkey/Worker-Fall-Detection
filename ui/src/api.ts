@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CameraOption, Dashboard, EventStatus, Stat, Upload } from "./types";
+import type { Dashboard, EventScope, EventStatus, Stat, Upload } from "./types";
 
 const POLL_MS = 2500;
 const LOCATION_REFRESH_MS = 10 * 60 * 1000;
@@ -67,10 +67,11 @@ export function useReportLocation(): void {
 }
 
 /**
- * Dashboard data from the backend, refreshed every few seconds.
+ * Dashboard data from the backend, refreshed every few seconds. `scope`
+ * picks the events listed; changing it reloads at once.
  * Call `refresh()` after changing something to show it without waiting.
  */
-export function useDashboard(): { data: Dashboard; refresh: () => void } {
+export function useDashboard(scope: EventScope): { data: Dashboard; refresh: () => void } {
   const [data, setData] = useState<Dashboard>(() => placeholder("Connecting to backend…"));
   const loadRef = useRef<() => void>(() => {});
 
@@ -84,7 +85,7 @@ export function useDashboard(): { data: Dashboard; refresh: () => void } {
     async function load() {
       const request = ++latest;
       try {
-        const response = await fetch("/api/dashboard");
+        const response = await fetch(`/api/dashboard?scope=${scope}`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const body = (await response.json()) as Dashboard;
         if (!cancelled && request === latest) setData(body);
@@ -107,7 +108,7 @@ export function useDashboard(): { data: Dashboard; refresh: () => void } {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, []);
+  }, [scope]);
 
   const refresh = useCallback(() => loadRef.current(), []);
   return { data, refresh };

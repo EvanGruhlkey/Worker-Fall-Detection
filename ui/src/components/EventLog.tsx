@@ -1,24 +1,46 @@
 import { PILL, formatVideoTime } from "../format";
-import type { FallEvent } from "../types";
+import type { EventScope, FallEvent } from "../types";
 import Icon from "./Icon";
 
 interface Props {
   events: FallEvent[];
+  scope: EventScope;
+  onScopeChange: (scope: EventScope) => void;
   onSelect: (event: FallEvent) => void;
 }
 
-export default function EventLog({ events, onSelect }: Props) {
-  // TODO: wire up filtering and export once there is real data.
+const SCOPES: { value: EventScope; label: string }[] = [
+  { value: "today", label: "Today" },
+  { value: "all", label: "All time" },
+];
+
+export default function EventLog({ events, scope, onScopeChange, onSelect }: Props) {
   return (
     <div className="log">
       <div className="log-head">
         <div>
           <h2>Event log</h2>
-          <small>Today · All events · click an event to review it</small>
+          <small>
+            {scope === "today" ? "Today" : "All time, newest first"} · click an event to review it
+          </small>
         </div>
         <div className="actions">
-          <button className="btn"><Icon name="pulse" />All events<Icon name="chevron" size={12} /></button>
-          <button className="btn"><Icon name="download" />Export log</button>
+          <div className="segmented" role="group" aria-label="Events to show">
+            {SCOPES.map((s) => (
+              <button
+                key={s.value}
+                className={s.value === scope ? "active" : undefined}
+                aria-pressed={s.value === scope}
+                onClick={() => onScopeChange(s.value)}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          {/* The CSV holds the same events as the list, with every detail. */}
+          <a className="btn" href={`/api/dashboard/events.csv?scope=${scope}`} download>
+            <Icon name="download" />Export log
+          </a>
         </div>
       </div>
       <div className="table-wrap">
@@ -28,7 +50,7 @@ export default function EventLog({ events, onSelect }: Props) {
           </thead>
           <tbody>
             {events.length === 0 && (
-              <tr><td colSpan={5}><small>No events today</small></td></tr>
+              <tr><td colSpan={5}><small>{scope === "today" ? "No events today" : "No events yet"}</small></td></tr>
             )}
             {events.map((e) => (
               <tr

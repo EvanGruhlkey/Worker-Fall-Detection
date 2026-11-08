@@ -14,6 +14,9 @@ export interface Stat {
 
 export type EventStatus = "Unacknowledged" | "Needs review" | "Resolved" | "False alarm";
 
+/** Which events the log shows: today's, or every one ever recorded. */
+export type EventScope = "today" | "all";
+
 export interface FallEvent {
   id: number;
   time: string;

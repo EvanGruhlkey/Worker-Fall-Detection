@@ -1,21 +1,38 @@
-"""Database tables and session helpers (SQLite by default via SQLModel)."""
+"""Database tables and session helpers (PostgreSQL via SQLModel).
+
+The schema is created and upgraded by the Alembic migrations in
+``backend/migrations``, which run on startup. After changing a table here,
+generate a migration (see docs/database.md).
+"""
 
 from datetime import datetime, timezone
 from enum import Enum
+from pathlib import Path
 
-from sqlalchemy import event, inspect
+import sqlalchemy as sa
+from alembic import command
+from alembic.config import Config
+from sqlalchemy.engine import make_url
+from sqlalchemy.exc import OperationalError
 from sqlmodel import Field, Session, SQLModel, create_engine
+
+MIGRATIONS_DIR = Path(__file__).resolve().with_name("migrations")
+# Any fixed number; identifies the lock held while migrations run.
+MIGRATION_LOCK = 7_301_042
 
 
 def utc_now():
     return datetime.now(timezone.utc)
 
 
-def as_utc(value):
-    """SQLite drops the timezone; stored datetimes are always UTC."""
-    if value is None or value.tzinfo is not None:
-        return value
-    return value.replace(tzinfo=timezone.utc)
+def _timestamp(**kwargs):
+    """A timezone-aware column (timestamptz); values come back in UTC."""
+    return Field(sa_type=sa.DateTime(timezone=True), **kwargs)
+
+
+def _choice(enum_class, **kwargs):
+    """Store an enum as plain text, so adding a value needs no type change."""
+    return Field(sa_type=sa.Enum(enum_class, native_enum=False, length=32), **kwargs)
 
 
 class JobKind(str, Enum):
@@ -53,15 +70,18 @@ class Job(SQLModel, table=True):
     """One processing run: an uploaded video or a live camera session."""
 
     id: int | None = Field(default=None, primary_key=True)
-    kind: JobKind
+    kind: JobKind = _choice(JobKind)
+    # Computer that ran the job (FALL_STATION_NAME); None for rows from before.
+    station: str | None = Field(default=None, index=True)
     name: str
+    # Camera index/URL, or the upload's path on the station that ran it.
     source: str
     # Shown on the dashboard under the camera name, e.g. "North entrance".
     label: str | None = None
     # Overrides the site location for this camera; copied onto its events.
     location: str | None = None
     coords: str | None = None
-    status: JobStatus = JobStatus.queued
+    status: JobStatus = _choice(JobStatus, default=JobStatus.queued)
     frames_processed: int = 0
     total_frames: int | None = None
     fps: float | None = None
@@ -70,11 +90,11 @@ class Job(SQLModel, table=True):
     # Paths relative to the data directory.
     output_video: str | None = None
     output_json: str | None = None
-    created_at: datetime = Field(default_factory=utc_now)
-    started_at: datetime | None = None
+    created_at: datetime = _timestamp(default_factory=utc_now)
+    started_at: datetime | None = _timestamp(default=None)
     # Updated while frames are flowing, so uptime is right after a crash.
-    last_frame_at: datetime | None = None
-    finished_at: datetime | None = None
+    last_frame_at: datetime | None = _timestamp(default=None)
+    finished_at: datetime | None = _timestamp(default=None)
 
 
 class FallEvent(SQLModel, table=True):
@@ -86,7 +106,7 @@ class FallEvent(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     job_id: int = Field(foreign_key="job.id", index=True)
-    event_type: EventType = EventType.fall
+    event_type: EventType = _choice(EventType, default=EventType.fall)
     camera_name: str | None = None
     location: str | None = None
     coords: str | None = None
@@ -94,87 +114,93 @@ class FallEvent(SQLModel, table=True):
     frame_index: int
     # Position in the source video, in seconds (camera: since the session began).
     video_time: float
-    detected_at: datetime = Field(default_factory=utc_now, index=True)
+    detected_at: datetime = _timestamp(default_factory=utc_now, index=True)
     confidence: float
     reason: str
-    status: ReviewStatus = Field(default=ReviewStatus.unacknowledged, index=True)
+    status: ReviewStatus = _choice(ReviewStatus, default=ReviewStatus.unacknowledged, index=True)
     reviewer: str | None = None
     notes: str | None = None
-    reviewed_at: datetime | None = None
+    reviewed_at: datetime | None = _timestamp(default=None)
     snapshot_path: str | None = None
     clip_path: str | None = None
 
 
 class SiteLocation(SQLModel, table=True):
-    """Where the system is now, as last reported by the dashboard's browser.
+    """Where a station is, as last reported by its dashboard's browser.
 
-    A single row (id 1). It's kept across restarts, so events recorded before
+    One row per station. It's kept across restarts, so events recorded before
     the dashboard is opened again still get the last known location.
     """
 
-    id: int | None = Field(default=1, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
+    station: str | None = Field(default=None, unique=True)
     name: str | None = None
     latitude: float | None = None
     longitude: float | None = None
     # Browser's estimate of the error radius, in meters.
     accuracy: float | None = None
-    updated_at: datetime | None = None
+    updated_at: datetime | None = _timestamp(default=None)
 
-
-# Review statuses used before the dashboard integration.
-_STATUS_RENAMES = {"pending": "unacknowledged", "confirmed": "resolved"}
 
 _engine = None
 
 
-def _migrate_sqlite(engine):
-    """Bring an older SQLite database up to the current tables.
+def alembic_config(database_url):
+    config = Config()
+    config.set_main_option("script_location", str(MIGRATIONS_DIR))
+    # ConfigParser treats % as interpolation; passwords may contain it.
+    config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
+    return config
 
-    create_all() only creates missing tables, so new columns are added here
-    and old review statuses are renamed. Existing rows are kept.
-    """
-    inspector = inspect(engine)
-    with engine.begin() as connection:
-        for table in SQLModel.metadata.sorted_tables:
-            if not inspector.has_table(table.name):
-                continue
-            existing = {column["name"] for column in inspector.get_columns(table.name)}
-            for column in table.columns:
-                if column.name not in existing:
-                    column_type = column.type.compile(engine.dialect)
-                    connection.exec_driver_sql(
-                        f'ALTER TABLE "{table.name}" ADD COLUMN "{column.name}" {column_type}'
-                    )
-        connection.exec_driver_sql(
-            "UPDATE fallevent SET event_type = 'fall' WHERE event_type IS NULL"
-        )
-        for old, new in _STATUS_RENAMES.items():
-            connection.exec_driver_sql(
-                "UPDATE fallevent SET status = ? WHERE status = ?", (new, old)
-            )
+
+def create_db_engine(database_url):
+    return create_engine(
+        database_url,
+        # Reconnect quietly if the database restarted or the network dropped.
+        pool_pre_ping=True,
+        # A hosted database allows few connections in total (Supabase's free
+        # pooler: 15), and every station has its own pool.
+        pool_size=3,
+        max_overflow=2,
+        connect_args={
+            # Timestamps are stored and read back in UTC whatever the server's zone.
+            "options": "-c timezone=UTC",
+            # Server-side prepared statements break behind transaction poolers.
+            "prepare_threshold": None,
+        },
+    )
 
 
 def init_db(database_url):
+    """Connect, bring the schema up to date, and make the engine current."""
     global _engine
-    connect_args = {}
-    if database_url.startswith("sqlite"):
-        # Worker threads write to the database alongside request handlers.
-        connect_args = {"check_same_thread": False, "timeout": 30}
-    _engine = create_engine(database_url, connect_args=connect_args)
+    close_db()
+    engine = create_db_engine(database_url)
+    try:
+        with engine.begin() as connection:
+            # Stations starting together take turns; the others then find
+            # nothing left to do.
+            connection.execute(sa.text("SELECT pg_advisory_xact_lock(:key)"), {"key": MIGRATION_LOCK})
+            config = alembic_config(database_url)
+            config.attributes["connection"] = connection
+            command.upgrade(config, "head")
+    except OperationalError as error:
+        engine.dispose()
+        where = make_url(database_url).render_as_string(hide_password=True)
+        raise RuntimeError(
+            f"Could not connect to the database at {where}. Check that PostgreSQL "
+            "is running and the FALL_DB_* settings in .env are right "
+            "(see docs/database.md)."
+        ) from error
+    _engine = engine
+    return engine
 
-    if database_url.startswith("sqlite"):
 
-        @event.listens_for(_engine, "connect")
-        def _sqlite_pragmas(dbapi_connection, _record):
-            cursor = dbapi_connection.cursor()
-            cursor.execute("PRAGMA journal_mode=WAL")
-            cursor.execute("PRAGMA foreign_keys=ON")
-            cursor.close()
-
-    SQLModel.metadata.create_all(_engine)
-    if database_url.startswith("sqlite"):
-        _migrate_sqlite(_engine)
-    return _engine
+def close_db():
+    global _engine
+    if _engine is not None:
+        _engine.dispose()
+        _engine = None
 
 
 def get_engine():

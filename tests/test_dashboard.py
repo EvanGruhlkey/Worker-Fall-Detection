@@ -1,5 +1,4 @@
 import re
-import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -9,7 +8,7 @@ import pytest
 import ultralytics
 from sqlmodel import Session
 
-from backend.db import FallEvent, Job, JobKind, JobStatus, ReviewStatus, get_engine, init_db
+from backend.db import FallEvent, Job, JobKind, JobStatus, ReviewStatus, get_engine
 from backend.manager import JobManager
 from backend.pipeline import assess_frame
 from backend.routers.dashboard import uptime_ratio
@@ -97,6 +96,9 @@ def test_today_scope_hides_older_events(client):
     assert [e["reason"] for e in today] == ["today"]
     everything = client.get("/api/dashboard", params={"scope": "all"}).json()["events"]
     assert len(everything) == 2
+    # Older events carry their date, so they can't be mistaken for today's.
+    assert re.fullmatch(r"\d{1,2}:\d{2}:\d{2} [AP]M", everything[0]["time"])
+    assert re.fullmatch(r"[A-Z][a-z]{2} \d{1,2}, \d{1,2}:\d{2}:\d{2} [AP]M", everything[1]["time"])
 
 
 def test_status_filter(client):
@@ -241,40 +243,6 @@ def test_recovery_uses_last_frame_time(client, settings):
         recovered = session.get(Job, job.id)
     assert recovered.status == JobStatus.failed
     assert recovered.finished_at.replace(tzinfo=None) == last_frame.replace(tzinfo=None)
-
-
-def test_old_database_is_migrated(tmp_path):
-    path = tmp_path / "old.db"
-    connection = sqlite3.connect(path)
-    connection.executescript(
-        """
-        CREATE TABLE job (id INTEGER PRIMARY KEY, kind VARCHAR, name VARCHAR, source VARCHAR,
-            status VARCHAR, frames_processed INTEGER, total_frames INTEGER, fps FLOAT,
-            fall_count INTEGER, error VARCHAR, output_video VARCHAR, output_json VARCHAR,
-            created_at DATETIME, started_at DATETIME, finished_at DATETIME);
-        CREATE TABLE fallevent (id INTEGER PRIMARY KEY, job_id INTEGER REFERENCES job(id),
-            track_id INTEGER, frame_index INTEGER, video_time FLOAT, detected_at DATETIME,
-            confidence FLOAT, reason VARCHAR, status VARCHAR, reviewer VARCHAR, notes VARCHAR,
-            reviewed_at DATETIME, snapshot_path VARCHAR, clip_path VARCHAR);
-        INSERT INTO job VALUES (1, 'video', 'a.mp4', 'a.mp4', 'completed', 0, NULL, NULL, 2,
-            NULL, NULL, NULL, '2026-10-18 10:00:00', NULL, NULL);
-        INSERT INTO fallevent VALUES (1, 1, 3, 10, 1.0, '2026-10-18 10:00:01', 0.9, 'x',
-            'pending', NULL, NULL, NULL, NULL, NULL);
-        INSERT INTO fallevent VALUES (2, 1, 3, 20, 2.0, '2026-10-18 10:00:02', 0.9, 'x',
-            'confirmed', NULL, NULL, NULL, NULL, NULL);
-        """
-    )
-    connection.commit()
-    connection.close()
-
-    init_db(f"sqlite:///{path.as_posix()}")
-    with Session(get_engine()) as session:
-        first, second = session.get(FallEvent, 1), session.get(FallEvent, 2)
-        assert first.status == ReviewStatus.unacknowledged
-        assert second.status == ReviewStatus.resolved
-        assert first.event_type == "fall"
-        assert first.location is None
-        assert session.get(Job, 1).label is None
 
 
 def test_assess_frame():

@@ -15,9 +15,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import Settings
-from .db import init_db
+from .db import close_db, init_db
 from .manager import JobManager
 from .routers import dashboard, events, jobs, location
+from .storage import init_media
 
 
 def create_app(settings=None):
@@ -27,6 +28,8 @@ def create_app(settings=None):
     async def lifespan(app):
         settings.ensure_dirs()
         init_db(settings.database_url)
+        media = init_media(settings)
+        media.sync_in_background()
         manager = JobManager(settings)
         manager.recover_interrupted_jobs()
         manager.warm_up()
@@ -35,6 +38,8 @@ def create_app(settings=None):
         manager.start_configured_camera()
         yield
         manager.shutdown()
+        media.shutdown()
+        close_db()
 
     app = FastAPI(
         title="Oxy Worker Fall Detection API",
@@ -60,7 +65,12 @@ def create_app(settings=None):
 
     @app.get("/api/health", tags=["system"])
     def health():
-        return {"status": "ok", "model": settings.model_path.name}
+        return {
+            "status": "ok",
+            "model": settings.model_path.name,
+            "station": settings.station_name,
+            "shared_storage": bool(settings.storage_bucket),
+        }
 
     return app
 

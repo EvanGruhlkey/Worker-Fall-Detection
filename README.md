@@ -9,8 +9,8 @@
 ### Currently Working
 
 - **Pose detection and tracking** on a live camera or a prerecorded video. The live view shows skeletons, tracking IDs, FPS, and the number of detected people.
-- **Backend server** (`src/backend/`). Runs the camera through the models and a placeholder fall detector. Each detected fall is saved to a database with its time, camera, location, confidence, a snapshot and a short clip.
-- **Temporal classifier** (`src/temporal/`). Stages 2, 6 and 7 of the design: frame sampler, GRU/TCN classifier over each person's 30-frame window of joint positions, velocities and accelerations, and the threshold gate. The old `models/fall_gru.pt` bootstrap model needs retraining for the 12-point body-only features; `src/fall_pipeline.py` runs it over a video and plots every person's hip height, torso angle, vertical velocity and fall probability. See [docs/features/10-23-2026-temporal-classifier.md](docs/features/10-23-2026-temporal-classifier.md).
+- **Backend server** (`src/backend/`). Runs the camera through the models and a placeholder fall detector. Each detected fall is saved to the team's shared PostgreSQL database (Supabase) with its time, camera, location, confidence, a snapshot and a short clip; the snapshot and clip go to shared storage. Every laptop running the project sees every fall. See [docs/database.md](docs/database.md).
+- **Temporal classifier** (`src/temporal/`). Stages 2, 6 and 7 of the design: frame sampler, GRU/TCN classifier over each person's 30-frame window of joint positions, velocities and accelerations, and the threshold gate. A bootstrap model trained on synthetic skeletons is in `models/fall_gru.pt`; `src/fall_pipeline.py` runs it over a video and plots every person's hip/head height, torso angle, vertical velocity and fall probability. See [docs/features/10-23-2026-temporal-classifier.md](docs/features/10-23-2026-temporal-classifier.md).
 - **Dashboard** (`ui/`). Live annotated camera feed, stat cards (active incidents, cameras online, uptime, camera health), and an event log that updates every few seconds. Click an event to see its clip and confirm it or mark it a false alarm. Upload a recorded video to check it for falls; a test video is in `data/samples/`.
 
 **Full guide to running and testing everything: [docs/running-and-testing.md](docs/running-and-testing.md)**
@@ -34,6 +34,8 @@ uv sync
 This downloads Python 3.12 if needed, creates `.venv`, and installs the locked dependencies. You do not need to activate the virtual env; prefix commands with `uv run` instead.
 
 To add a dependency, use `uv add <package>` (this updates `pyproject.toml` and `uv.lock`). Commit both files.
+
+Events are stored in a shared PostgreSQL database and storage bucket in the cloud (Supabase), so there is nothing to install for them. Put the team's connection settings (from a teammate, never from git) in `.env`; see [docs/database.md: Setting up a station](docs/database.md#setting-up-a-station-each-laptop). That guide also covers viewing and editing the data, schema changes, backups, and handing the database over.
 
 The dashboard also needs [Node.js](https://nodejs.org) 18 or newer. Install its packages once:
 
@@ -111,7 +113,7 @@ Expected: `109 passed`. To check that the dashboard compiles, run `npm run build
 
 ### Incomplete
 
-The temporal classifier exists but has only been trained on synthetic skeletons, so the dashboard still uses the simple rule in `src/backend/fall_detector.py` by default; it needs labeled fall footage (OmniFall and site clips) before it can replace the rule. The X-CLIP verifier is not started. The dashboard's filter, export and settings buttons are not connected yet. Alerts appear only on the dashboard (no sound, SMS or email). <br><br>
+The temporal classifier exists but has only been trained on synthetic skeletons, so the dashboard still uses the simple rule in `src/backend/fall_detector.py` by default; it needs labeled fall footage (OmniFall and site clips) before it can replace the rule. The X-CLIP verifier is not started. The dashboard's settings button is not connected yet. Alerts appear only on the dashboard (no sound, SMS or email). <br><br>
 
 Team Members: Johnathan Miller, Evan Gruhlkey, Malcom Troy, Allen Basil, Benjamin Aleman
 
