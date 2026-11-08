@@ -5,16 +5,16 @@ FPS = 30
 
 def person(track_id, hip_y, torso_angle_horizontal=False, height=400):
     """A synthetic tracked person: upright, or lying with the torso horizontal."""
-    keypoints = [{"x": 0.0, "y": 0.0, "confidence": 0.0} for _ in range(17)]
+    keypoints = [{"x": 0.0, "y": 0.0, "confidence": 0.0} for _ in range(12)]
     if torso_angle_horizontal:
         shoulders, hips = (300.0, hip_y), (450.0, hip_y)
         bbox = [250.0, hip_y - 60, 650.0, hip_y + 60]
     else:
         shoulders, hips = (400.0, hip_y - 150), (400.0, hip_y)
         bbox = [350.0, hip_y - 200, 450.0, hip_y - 200 + height]
-    for index in (5, 6):
+    for index in (0, 1):
         keypoints[index] = {"x": shoulders[0], "y": shoulders[1], "confidence": 0.9}
-    for index in (11, 12):
+    for index in (6, 7):
         keypoints[index] = {"x": hips[0], "y": hips[1], "confidence": 0.9}
     return {"track_id": track_id, "bbox": bbox, "confidence": 0.9, "keypoints": keypoints}
 

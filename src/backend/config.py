@@ -5,6 +5,7 @@ Variables can also be put in a ``.env`` file in the project root (see
 """
 
 import os
+import socket
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -34,6 +35,28 @@ load_env_file(REPO_ROOT / ".env")
 def _env_path(name, default):
     value = os.environ.get(name)
     return Path(value).resolve() if value else default
+
+
+def database_url_from_env(database=None):
+    """PostgreSQL URL from FALL_DATABASE_URL, or else from the FALL_DB_* parts.
+
+    ``database`` replaces the database name (the tests use their own).
+    """
+    url = os.environ.get("FALL_DATABASE_URL")
+    if url:
+        parsed = make_url(url)
+    else:
+        parsed = URL.create(
+            "postgresql+psycopg",
+            username=os.environ.get("FALL_DB_USER", "fall"),
+            password=os.environ.get("FALL_DB_PASSWORD", "fall"),
+            host=os.environ.get("FALL_DB_HOST", "localhost"),
+            port=int(os.environ.get("FALL_DB_PORT", "5432")),
+            database=os.environ.get("FALL_DB_NAME", "fall_detection"),
+        )
+    if database:
+        parsed = parsed.set(database=database)
+    return parsed.render_as_string(hide_password=False)
 
 
 @dataclass
@@ -91,6 +114,30 @@ class Settings:
     classifier_path: Path | None = field(
         default_factory=lambda: _env_path("FALL_CLASSIFIER_PATH", None)
     )
+    # PostgreSQL holding jobs and fall events; see docs/database.md.
+    database_url: str = field(default_factory=database_url_from_env)
+    # This computer's name in the shared database. Its jobs and location are
+    # tagged with it, so restarting one station never touches another's.
+    station_name: str = field(
+        default_factory=lambda: os.environ.get("FALL_STATION_NAME") or socket.gethostname()
+    )
+    # S3-compatible bucket (Supabase Storage, AWS S3, ...) for snapshots, clips
+    # and annotated videos, so every station can play them. Empty: local only.
+    storage_bucket: str | None = field(
+        default_factory=lambda: os.environ.get("FALL_STORAGE_BUCKET") or None
+    )
+    storage_endpoint: str | None = field(
+        default_factory=lambda: os.environ.get("FALL_STORAGE_ENDPOINT") or None
+    )
+    storage_region: str = field(
+        default_factory=lambda: os.environ.get("FALL_STORAGE_REGION") or "us-east-1"
+    )
+    storage_key_id: str | None = field(
+        default_factory=lambda: os.environ.get("FALL_STORAGE_KEY_ID") or None
+    )
+    storage_secret: str | None = field(
+        default_factory=lambda: os.environ.get("FALL_STORAGE_SECRET") or None
+    )
 
     @property
     def input_dir(self):
@@ -103,12 +150,6 @@ class Settings:
     @property
     def events_dir(self):
         return self.data_dir / "events"
-
-    @property
-    def database_url(self):
-        return os.environ.get(
-            "FALL_DATABASE_URL", f"sqlite:///{(self.data_dir / 'falls.db').as_posix()}"
-        )
 
     def ensure_dirs(self):
         for directory in (self.input_dir, self.output_dir, self.events_dir):

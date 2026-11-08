@@ -33,6 +33,7 @@ Run the tests with `uv run pytest`.
 | GET | `/api/health` | Server is up |
 | POST | `/api/videos` | Upload a video (multipart form, field `file`); queues a job |
 | POST | `/api/cameras` | Start a live camera: `{"source": "0", "name": "Bay 3", "label": "Loading dock", "location": "Plant 2", "coords": "29.76, -95.37"}`; `source` is a camera index or `rtsp://...` URL. Only `source` is required, and `location` and `coords` default to the site settings |
+| GET | `/api/cameras/options` | Scan camera indices 0-4 and return the local cameras currently available to the dashboard picker |
 | POST | `/api/cameras/{job_id}/stop` | Stop a live camera |
 | GET | `/api/cameras/{job_id}/stream` | Live annotated feed (MJPEG) |
 | GET | `/api/jobs` | List jobs, newest first (`?kind=video\|camera`, `?status=...`, `?limit=`) |
@@ -170,7 +171,8 @@ Errors return `{"detail": "message"}` with a 4xx status.
 | `routers/location.py`, `location.py` | Browser-reported site location, place-name lookup, which location events use |
 | `routers/dashboard.py` | `/api/dashboard`: stored data in the UI's shapes, stat cards, CSV export |
 | `schemas.py` | JSON request/response models |
-| `db.py` | Database tables (`Job`, `FallEvent`), SQLite at `data/falls.db`. Older databases are upgraded automatically on startup |
+| `db.py` | Database tables (`Job`, `FallEvent`, `SiteLocation`) in the shared PostgreSQL. Migrations in `migrations/` are applied on startup ([database.md](database.md)) |
+| `storage.py` | Uploads snapshots, clips and annotated videos to the shared S3-compatible bucket; links to files recorded by other stations |
 | `pipeline.py` | Runs frames through the model and fall detector, records events and clips |
 | `manager.py` | Background threads: video queue (one at a time) and live cameras |
 | `fall_detector.py` | **Placeholder** rule-based fall detector (see below) |
@@ -195,9 +197,12 @@ Set these in `.env` in the project root (copy `.env.example`), or as environment
 | `FALL_SITE_LOCATION` | `Unspecified location`. Used until the dashboard reports the browser's location, or if location is blocked |
 | `FALL_SITE_COORDS` | empty |
 | `FALL_REVERSE_GEOCODE` | `1`. Set `0` to not send coordinates to OpenStreetMap; the name then shows the coordinates |
-| `FALL_CAMERA_SOURCE` | unset. Set it (e.g. `0`) to start that camera when the server boots |
+| `FALL_CAMERA_SOURCE` | unset. Cameras can be selected in the dashboard; set this (e.g. `0`) only to start one automatically when the server boots |
 | `FALL_CAMERA_NAME` / `FALL_CAMERA_LABEL` | `Camera <source>` / `Live camera` |
-| `FALL_DATABASE_URL` | SQLite file in the data dir |
+| `FALL_DATABASE_URL` | unset. The shared PostgreSQL (Supabase Session pooler URL, starting `postgresql+psycopg://`). See [database.md](database.md) |
+| `FALL_DB_HOST` / `FALL_DB_PORT` / `FALL_DB_NAME` / `FALL_DB_USER` / `FALL_DB_PASSWORD` | `localhost` / `5432` / `fall_detection` / `fall` / `fall`. A self-hosted server, used when `FALL_DATABASE_URL` is unset |
+| `FALL_STORAGE_ENDPOINT` / `FALL_STORAGE_REGION` / `FALL_STORAGE_BUCKET` / `FALL_STORAGE_KEY_ID` / `FALL_STORAGE_SECRET` | unset / `us-east-1` / unset. S3-compatible bucket for media; without a bucket, media stays on the station |
+| `FALL_STATION_NAME` | the computer's network name. This station's name on its jobs and location |
 
 ## Not done yet
 

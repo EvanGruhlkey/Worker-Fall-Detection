@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Dashboard, EventStatus, Stat, Upload } from "./types";
+import type { Dashboard, EventScope, EventStatus, Stat, Upload } from "./types";
 
 const POLL_MS = 2500;
 const LOCATION_REFRESH_MS = 10 * 60 * 1000;
@@ -67,10 +67,11 @@ export function useReportLocation(): void {
 }
 
 /**
- * Dashboard data from the backend, refreshed every few seconds.
+ * Dashboard data from the backend, refreshed every few seconds. `scope`
+ * picks the events listed; changing it reloads at once.
  * Call `refresh()` after changing something to show it without waiting.
  */
-export function useDashboard(): { data: Dashboard; refresh: () => void } {
+export function useDashboard(scope: EventScope): { data: Dashboard; refresh: () => void } {
   const [data, setData] = useState<Dashboard>(() => placeholder("Connecting to backend…"));
   const loadRef = useRef<() => void>(() => {});
 
@@ -84,7 +85,7 @@ export function useDashboard(): { data: Dashboard; refresh: () => void } {
     async function load() {
       const request = ++latest;
       try {
-        const response = await fetch("/api/dashboard");
+        const response = await fetch(`/api/dashboard?scope=${scope}`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const body = (await response.json()) as Dashboard;
         if (!cancelled && request === latest) setData(body);
@@ -107,7 +108,7 @@ export function useDashboard(): { data: Dashboard; refresh: () => void } {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, []);
+  }, [scope]);
 
   const refresh = useCallback(() => loadRef.current(), []);
   return { data, refresh };
@@ -130,6 +131,29 @@ export async function uploadVideo(file: File): Promise<Upload> {
   const response = await fetch("/api/videos", { method: "POST", body: form });
   if (!response.ok) throw new Error(await errorMessage(response));
   return response.json();
+}
+
+/** Ask the backend which local camera indices OpenCV can access. */
+export async function listCameraOptions(): Promise<CameraOption[]> {
+  const response = await fetch("/api/cameras/options");
+  if (!response.ok) throw new Error(await errorMessage(response));
+  return response.json();
+}
+
+/** Start a local camera index or custom network stream. */
+export async function startCamera(source: string): Promise<void> {
+  const response = await fetch("/api/cameras", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ source }),
+  });
+  if (!response.ok) throw new Error(await errorMessage(response));
+}
+
+/** Stop a running camera session. */
+export async function stopCamera(jobId: number): Promise<void> {
+  const response = await fetch(`/api/cameras/${jobId}/stop`, { method: "POST" });
+  if (!response.ok) throw new Error(await errorMessage(response));
 }
 
 /** Set an event's review status (and optional notes). */

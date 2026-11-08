@@ -6,11 +6,12 @@ import EventReview from "./components/EventReview";
 import { TitleBar, TopBar } from "./components/Header";
 import StatCard from "./components/StatCard";
 import VideoUpload from "./components/VideoUpload";
-import type { FallEvent } from "./types";
+import type { EventScope, FallEvent } from "./types";
 
 export default function App() {
   useReportLocation();
-  const { data, refresh } = useDashboard();
+  const [scope, setScope] = useState<EventScope>("today");
+  const { data, refresh } = useDashboard(scope);
   const { location, stats, camera, events, uploads } = data;
 
   // Keep the latest copy of the selected event (status, clip URL) as data refreshes.
@@ -33,11 +34,11 @@ export default function App() {
           <div className="feed-col">
             <h2>Camera feed <span className="count">1</span></h2>
             <div style={{ marginTop: 12 }}>
-              <CameraFeed camera={camera} location={location} />
+              <CameraFeed camera={camera} location={location} onChanged={refresh} />
             </div>
             <VideoUpload uploads={uploads} onUploaded={refresh} />
           </div>
-          <EventLog events={events} onSelect={setSelected} />
+          <EventLog events={events} scope={scope} onScopeChange={setScope} onSelect={setSelected} />
         </section>
       </main>
       {reviewing && (

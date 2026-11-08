@@ -2,7 +2,8 @@
 
 Which location an event or the dashboard header uses, in order:
 1. the camera's own location, if it was started with one,
-2. the last location reported by the dashboard's browser (stored in the database),
+2. the last location reported by this station's dashboard browser (stored in the
+   database, one row per station),
 3. FALL_SITE_LOCATION / FALL_SITE_COORDS.
 """
 
@@ -12,7 +13,7 @@ import math
 import urllib.parse
 import urllib.request
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from .db import SiteLocation, get_engine, utc_now
 
@@ -63,10 +64,16 @@ def reverse_geocode(latitude, longitude, timeout=5):
     return ", ".join(parts) or None
 
 
+def _station_site(session, settings):
+    return session.exec(
+        select(SiteLocation).where(SiteLocation.station == settings.station_name)
+    ).first()
+
+
 def update_site_location(settings, latitude, longitude, accuracy=None):
     """Store a location reported by the browser; returns the stored row."""
     with Session(get_engine()) as session:
-        site = session.get(SiteLocation, 1) or SiteLocation(id=1)
+        site = _station_site(session, settings) or SiteLocation(station=settings.station_name)
 
         name = None
         moved = site.latitude is None or distance_meters(
@@ -96,7 +103,7 @@ def current_site_location(settings, session=None):
     if session is None:
         with Session(get_engine()) as own_session:
             return current_site_location(settings, own_session)
-    site = session.get(SiteLocation, 1)
+    site = _station_site(session, settings)
     if site and site.latitude is not None:
         return site.name, format_coords(site.latitude, site.longitude)
     return settings.site_location, settings.site_coords

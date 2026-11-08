@@ -14,6 +14,9 @@ export interface Stat {
 
 export type EventStatus = "Unacknowledged" | "Needs review" | "Resolved" | "False alarm";
 
+/** Which events the log shows: today's, or every one ever recorded. */
+export type EventScope = "today" | "all";
+
 export interface FallEvent {
   id: number;
   time: string;
@@ -59,7 +62,14 @@ export interface CameraInfo {
   label: string;
   fps: number;
   online: boolean;
+  job_id?: number | null;
+  source?: string | null; // local camera index; credentials in stream URLs stay server-side
   stream_url?: string | null; // MJPEG feed with pose overlay, while online
+}
+
+export interface CameraOption {
+  source: string;
+  label: string;
 }
 
 export interface Location {
