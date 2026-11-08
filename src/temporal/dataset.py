@@ -28,6 +28,7 @@ import numpy as np
 from sliding_window import TrackWindows
 
 from .features import extract_features
+from .pose_io import load_pose_json
 from .sampler import FrameSampler
 
 
@@ -107,7 +108,7 @@ def samples_from_sequences(sequences, **options):
 def samples_from_pose_json(path, falls=(), falls_seconds=(), *, target_fps=15.0, name=None, **options):
     """Windows from a ``yolo_pose.py`` JSON file, resampled to ``target_fps``."""
     path = Path(path)
-    data = json.loads(path.read_text(encoding="utf-8"))
+    data = load_pose_json(path)
     source_fps = float(data["metadata"].get("fps") or 30.0)
     sampler = FrameSampler(source_fps, target_fps)
 

@@ -4,6 +4,7 @@ import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
+import cv2
 import numpy as np
 from sqlmodel import Session, select
 
@@ -13,6 +14,8 @@ from .db import Job, JobKind, JobStatus, get_engine, utc_now
 from .pipeline import CameraWorker, run_video_job
 
 log = logging.getLogger(__name__)
+
+CAMERA_SCAN_LIMIT = 5
 
 
 class JobManager:
@@ -111,6 +114,29 @@ class JobManager:
 
     def active_cameras(self):
         return {job_id: w for job_id, w in self._cameras.items() if w.is_alive()}
+
+    def camera_options(self):
+        """Return local camera indices OpenCV can currently open.
+
+        A running camera is included without opening it a second time. Network
+        streams cannot be discovered, so the dashboard accepts those as a
+        custom source instead.
+        """
+        active_sources = {worker.source for worker in self.active_cameras().values()}
+        available = []
+        for index in range(CAMERA_SCAN_LIMIT):
+            source = str(index)
+            if source in active_sources:
+                available.append(source)
+                continue
+
+            camera = cv2.VideoCapture(index)
+            try:
+                if camera.isOpened():
+                    available.append(source)
+            finally:
+                camera.release()
+        return available
 
     def stop_camera(self, job_id, wait=True):
         worker = self._cameras.get(job_id)

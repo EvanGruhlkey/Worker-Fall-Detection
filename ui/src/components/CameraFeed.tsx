@@ -1,8 +1,9 @@
 import type { CameraInfo, Location } from "../types";
+import CameraControls from "./CameraControls";
 import Icon from "./Icon";
 
 /** Live feed from the backend, with pose skeletons, track IDs and fall alerts drawn on. */
-export default function CameraFeed({ camera, location }: { camera: CameraInfo; location: Location }) {
+export default function CameraFeed({ camera, location, onChanged }: { camera: CameraInfo; location: Location; onChanged: () => void }) {
   const live = camera.online && camera.stream_url;
   return (
     <article className="camera">
@@ -27,6 +28,7 @@ export default function CameraFeed({ camera, location }: { camera: CameraInfo; l
         </div>
         {camera.online && <span className="online"><Icon name="wifi" />Online</span>}
       </div>
+      <CameraControls camera={camera} onChanged={onChanged} />
     </article>
   );
 }

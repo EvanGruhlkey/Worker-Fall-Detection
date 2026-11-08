@@ -22,9 +22,11 @@ import math
 from collections import deque
 from dataclasses import dataclass, field
 
-# COCO-17 keypoint indices.
-LEFT_SHOULDER, RIGHT_SHOULDER = 5, 6
-LEFT_HIP, RIGHT_HIP = 11, 12
+# Indices after removing COCO facial points 0-4. This makes the retained point
+# order shoulders, elbows, wrists, hips, knees and ankles.
+LEFT_SHOULDER, RIGHT_SHOULDER = 0, 1
+LEFT_HIP, RIGHT_HIP = 6, 7
+BODY_KEYPOINT_COUNT = 12
 
 
 @dataclass
@@ -93,6 +95,8 @@ class FallDetector:
         x1, y1, x2, y2 = person["bbox"]
         width, height = max(x2 - x1, 1e-6), max(y2 - y1, 1e-6)
         keypoints = person["keypoints"]
+        if len(keypoints) != BODY_KEYPOINT_COUNT:
+            raise ValueError("Each person must have exactly 12 body keypoints")
 
         shoulders = _midpoint(
             keypoints, LEFT_SHOULDER, RIGHT_SHOULDER, self.min_keypoint_confidence

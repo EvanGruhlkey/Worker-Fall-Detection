@@ -29,7 +29,7 @@ There are two programs, and they run in separate terminals:
 
 ### What happens to each camera frame
 
-1. **Pose estimation** (`src/yolo_pose.py`). The YOLO11 pose model finds every person in the frame and places 17 body keypoints on each one (shoulders, hips, knees, and so on).
+1. **Pose estimation** (`src/yolo_pose.py`). The YOLO11 pose model finds every person in the frame. The application discards facial points 0-4 and keeps the 12 body keypoints (shoulders through ankles).
 2. **Tracking** (ByteTrack, inside the same call). Each person gets an ID number that stays the same from frame to frame ("ID 3"), so the system can follow one person's movement over time.
 3. **Fall detection** (`src/backend/fall_detector.py`). For each tracked person, the detector checks whether their **hips dropped by at least 30% of their body height within 1.5 seconds** and they then **stayed roughly horizontal for 0.5 seconds**. If both are true, it reports a fall with a confidence score. ByteTrack often gives a person a new ID in the middle of a fall, because their box suddenly turns from tall to wide. So when a new ID appears where another vanished less than a second earlier, the detector carries the old ID's history over. This is a simple placeholder rule. Setting `FALL_CLASSIFIER_PATH` in `.env` swaps it for the temporal classifier (`src/temporal/`), which scores each person's last 30 frames of joint positions, velocities and accelerations and fires when the probability stays above 0.8 for 5 frames. The only checkpoint so far was trained on synthetic skeletons, so the rule stays the default (see [What is not built yet](#what-is-not-built-yet)).
 4. **Recording the event** (`src/backend/pipeline.py`). When a fall is detected, the backend:
@@ -137,7 +137,7 @@ Settings live in `.env` in the project root. `run.py` creates it from `.env.exam
 
 | Setting | What it does | Default in `.env.example` |
 |---|---|---|
-| `FALL_CAMERA_SOURCE` | Camera to start automatically: `0` is the built-in webcam, `1` the next camera, or an `rtsp://...` URL for an IP camera. Leave it empty for no camera. | `0` |
+| `FALL_CAMERA_SOURCE` | Optional camera to start automatically. Leave it empty to choose a local camera or network stream from the dashboard. | empty |
 | `FALL_CAMERA_NAME` / `FALL_CAMERA_LABEL` | Camera name and description on the dashboard | `Camera 01` / `Webcam` |
 | `FALL_SITE_LOCATION` / `FALL_SITE_COORDS` | Location used **only** until the browser reports this computer's location, or if location is blocked | `Unspecified location` / empty |
 | `FALL_CLASSIFIER_PATH` | Path to a temporal classifier checkpoint (for example `models/fall_gru.pt`). Empty keeps the rule-based fall detector. | empty |
@@ -216,6 +216,8 @@ If the cards say **"Connecting to backend…"** or **"Backend offline"**, the ba
 How it works: the browser finds the position, usually from nearby Wi-Fi networks, and the dashboard sends it to the backend when the page loads and every 10 minutes after that. The backend asks OpenStreetMap for the city name only when you've moved more than 500 m, so it doesn't look it up on every page load. Accuracy is typically 20–100 m on a laptop with Wi-Fi.
 
 ### Test 4: live camera feed
+
+Choose a source under **Camera feed** and click **Start camera**. Use **Rescan** after plugging in a new camera. To use an IP camera, choose **Network stream URL…** and enter its `rtsp://` or other OpenCV-compatible URL. You can switch or stop cameras from the same controls.
 
 **Expected:** the camera panel shows your webcam with:
 - a coloured skeleton over each person,
@@ -329,7 +331,7 @@ uv run src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-
 | Problem | Fix |
 |---|---|
 | Dashboard says "Backend offline" | The backend isn't running, or it crashed. Check the `[backend]` lines for an error, and that it printed `Application startup complete`. |
-| "Cameras online 0" / camera panel says OFFLINE | `FALL_CAMERA_SOURCE` is empty in `.env`, or another app is using the webcam. Look for `Could not open camera 0` in the terminal. Try `1` if you have more than one camera. |
+| "Cameras online 0" / camera panel says OFFLINE | Select a source in the camera picker and click **Start camera**. If no choices appear, close apps using the webcam and click **Rescan**. |
 | Camera starts, then goes offline | The terminal shows `Lost connection to camera`. Unplug and replug the camera, then restart the backend. |
 | Very low FPS | Normal on CPU (about 5 FPS). Close other heavy programs. A computer with an NVIDIA GPU runs much faster. |
 | `npm` / `node` not found | Install Node.js and open a new terminal. |

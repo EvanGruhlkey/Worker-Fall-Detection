@@ -1,4 +1,3 @@
-import json
 import sys
 from pathlib import Path
 
@@ -18,12 +17,12 @@ TOL = {"rtol": 1e-6, "atol": 1e-6}
 
 
 def make_person(track_id, x=100.0, y=200.0, height=100.0, width=40.0, conf=0.9):
-    """A fake person whose 17 keypoints all sit at the box center."""
+    """A fake person whose 12 body keypoints all sit at the box center."""
     return {
         "track_id": track_id,
         "bbox": [x - width / 2, y - height / 2, x + width / 2, y + height / 2],
         "confidence": 0.9,
-        "keypoints": [{"x": x, "y": y, "confidence": conf}] * 17,
+        "keypoints": [{"x": x, "y": y, "confidence": conf}] * 12,
     }
 
 
@@ -43,7 +42,7 @@ def test_window_keeps_newest_frames_in_order():
     window = windows.window(1)
     assert window.is_full
     assert window.end_frame == 4
-    assert window.keypoints.shape == (3, 17, 3)
+    assert window.keypoints.shape == (3, 12, 3)
     # Frames 2, 3, 4 remain, oldest first.
     np.testing.assert_allclose(confidences(window), [0.2, 0.3, 0.4], **TOL)
     # x is relative to the newest box center, scaled by box height (100).
@@ -56,7 +55,7 @@ def test_flatten_puts_each_joints_x_y_conf_side_by_side():
     window = windows.window(1)
 
     flat = window.flatten()
-    assert flat.shape == (2, 51)
+    assert flat.shape == (2, 36)
     assert flat.dtype == np.float32
     np.testing.assert_array_equal(flat[1, 3:6], window.keypoints[1, 1])
 
@@ -207,7 +206,7 @@ def test_invalid_settings_are_rejected(kwargs):
 
 def test_normalization_keeps_the_drop():
     # Standing, then the box falls and becomes short and wide.
-    keypoints = np.zeros((2, 17, 3), np.float32)
+    keypoints = np.zeros((2, 12, 3), np.float32)
     keypoints[0, :, 1] = 150.0
     keypoints[1, :, 1] = 280.0
     boxes = np.array([[80, 100, 120, 300], [0, 260, 200, 300]], np.float32)
@@ -222,7 +221,7 @@ def test_normalization_keeps_the_drop():
 
 
 def test_normalization_ignores_position_and_distance():
-    keypoints = np.zeros((1, 17, 3), np.float32)
+    keypoints = np.zeros((1, 12, 3), np.float32)
     keypoints[0, :, :2] = [110.0, 120.0]
     near = normalize_window(keypoints, np.array([[80, 100, 120, 300]], np.float32))
 
@@ -237,8 +236,8 @@ def test_normalization_ignores_position_and_distance():
 
 def test_normalization_leaves_confidence_and_input_untouched():
     rng = np.random.default_rng(0)
-    keypoints = rng.uniform(0, 500, (3, 17, 3)).astype(np.float32)
-    keypoints[..., 2] = rng.uniform(0, 1, (3, 17))
+    keypoints = rng.uniform(0, 500, (3, 12, 3)).astype(np.float32)
+    keypoints[..., 2] = rng.uniform(0, 1, (3, 12))
     original = keypoints.copy()
     boxes = np.array([[0, 0, 50, 100]] * 3, np.float32)
 
@@ -249,7 +248,7 @@ def test_normalization_leaves_confidence_and_input_untouched():
 
 
 def test_zero_size_box_does_not_produce_nan():
-    keypoints = np.ones((2, 17, 3), np.float32)
+    keypoints = np.ones((2, 12, 3), np.float32)
     boxes = np.array([[5, 5, 5, 5], [5, 5, 5, 5]], np.float32)
 
     normalized, box_features = normalize_window(keypoints, boxes)
@@ -263,7 +262,9 @@ def test_zero_size_box_does_not_produce_nan():
 
 @pytest.mark.skipif(not SAMPLE_JSON.is_file(), reason="sample pose output not present")
 def test_replay_of_real_pose_output():
-    data = json.loads(SAMPLE_JSON.read_text(encoding="utf-8"))
+    from temporal.pose_io import load_pose_json
+
+    data = load_pose_json(SAMPLE_JSON)
     windows = TrackWindows()
     checked = 0
 
@@ -271,7 +272,7 @@ def test_replay_of_real_pose_output():
         people = {p["track_id"]: p for p in frame["people"]}
         for track_id in windows.update(frame["frame_index"], frame["people"]):
             window = windows.window(track_id)
-            assert window.flatten().shape == (30, 51)
+            assert window.flatten().shape == (30, 36)
             assert np.isfinite(window.keypoints).all()
             assert np.isfinite(window.box_features).all()
             # Padding only ever sits at the start.

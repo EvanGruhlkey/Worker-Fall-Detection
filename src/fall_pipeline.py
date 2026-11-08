@@ -4,7 +4,7 @@ Reads a video (or a pose JSON that ``yolo_pose.py`` already produced), drops
 frames to the classifier's rate, runs YOLO pose + ByteTrack, keeps a sliding
 window per person, scores every full window with the temporal classifier,
 applies the threshold gate, and records the motion signals the classifier
-sees (hip and head height, torso angle, vertical velocity) for every person.
+sees (hip height, torso angle, vertical velocity) for every person.
 
     uv run src/fall_pipeline.py --input data/input/test.mp4
     uv run src/fall_pipeline.py --input data/samples/synthetic_fall.mp4 --classifier models/fall_gru.pt
@@ -37,6 +37,7 @@ from temporal.detector import handoff_lost_tracks, score_tracks  # noqa: E402
 from temporal.features import window_signals  # noqa: E402
 from temporal.gate import ThresholdGate  # noqa: E402
 from temporal.model import load_checkpoint  # noqa: E402
+from temporal.pose_io import load_pose_json  # noqa: E402
 from temporal.sampler import FrameSampler  # noqa: E402
 from temporal.visualize import (  # noqa: E402
     SignalPanel,
@@ -73,7 +74,7 @@ def _video_frames(path, max_frames=None):
 
 
 def _json_frames(path, max_frames=None):
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    data = load_pose_json(path)
     fps = float(data["metadata"].get("fps") or 30.0)
     frames = sorted(data["frames"], key=lambda f: f["frame_index"])
     if max_frames is not None:

@@ -17,7 +17,7 @@ How to run and test it: [../running-and-testing.md](../running-and-testing.md).
 - **Stat cards are calculated from real data.** Active incidents (open events), cameras online, detection uptime (share of the last 24 h with a camera running) and camera health.
 - **Camera health check** (`pipeline.py`). Every 15th frame is checked: a nearly uniform image means *Obstructed*, very few edges means *Blurry*.
 - **Accurate uptime after a crash.** Camera sessions record the time of their last frame. When the server restarts, an interrupted session is closed at that time instead of the restart time, so downtime isn't counted as uptime.
-- **Camera settings.** `POST /api/cameras` accepts `label`, `location` and `coords`. `FALL_CAMERA_SOURCE` starts a camera when the server boots, since the dashboard has no start button. `FALL_SITE_LOCATION` and `FALL_SITE_COORDS` set the default location.
+- **Camera settings.** The dashboard discovers local cameras and provides start, switch and stop controls, plus a custom network-stream option. `FALL_CAMERA_SOURCE` remains available for optional automatic startup. `FALL_SITE_LOCATION` and `FALL_SITE_COORDS` set the default location.
 - **CSV export** at `GET /api/dashboard/events.csv`, ready for the "Export log" button.
 
 ## Frontend changes (`ui/`)
