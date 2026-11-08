@@ -1,4 +1,5 @@
 data/input/*
+data/*.zip
 data/output/*
 .venv/
 .DS_Store
