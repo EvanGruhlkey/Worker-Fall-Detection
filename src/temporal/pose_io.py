@@ -1,7 +1,7 @@
 """Read pose JSON files from either pose pipeline into one shape.
 
 Two writers produce pose files, with the same per-person fields (``track_id``,
-``bbox``, ``confidence``, 17 ``keypoints``) but different frame bookkeeping:
+``bbox``, ``confidence``, 12 body ``keypoints``) but different frame bookkeeping:
 
 - ``yolo_pose.py`` (and the backend's upload jobs) keep every source frame:
   ``metadata.fps`` is the video's rate and each frame has ``frame_index``.
@@ -70,6 +70,17 @@ def load_pose_json(path):
     data = json.loads(path.read_text(encoding="utf-8"))
     metadata = data.get("metadata", {})
     frames = data.get("frames", [])
+    keypoint_format = metadata.get("keypoint_format")
+    if keypoint_format not in (None, "COCO-17", "COCO-body-12"):
+        raise ValueError(f"Unsupported keypoint format: {keypoint_format!r}")
+    expected = {"COCO-17": 17, "COCO-body-12": 12}.get(keypoint_format)
+    for frame in frames:
+        for person in frame["people"]:
+            points = person["keypoints"]
+            if len(points) not in (12, 17) or (expected is not None and len(points) != expected):
+                raise ValueError("Pose JSON must contain COCO-17 or COCO-body-12 keypoints")
+            if len(points) == 17:
+                person["keypoints"] = points[5:]
     if not frames:
         raise ValueError(f"{path}: no frames")
     if "source_frame" in frames[0]:

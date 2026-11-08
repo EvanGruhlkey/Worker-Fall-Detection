@@ -29,20 +29,18 @@ from temporal.synthetic import ACTIVITIES, generate_dataset, generate_sequence  
 from temporal.train import evaluate, train_model  # noqa: E402
 from temporal.visualize import SignalPanel, TrackSignals, compose, plot_track_timeline  # noqa: E402
 
-BOOTSTRAP_CHECKPOINT = REPO_ROOT / "models" / "fall_gru.pt"
 FPS = 15.0
 
 
 def person(track_id, hip_y, *, x=400.0, height=400.0, lying=False, conf=0.9):
-    """An upright (or lying) stick figure with shoulders, hips and nose placed."""
-    keypoints = [{"x": x, "y": hip_y, "confidence": conf} for _ in range(17)]
+    """An upright or lying body with shoulders and hips placed."""
+    keypoints = [{"x": x, "y": hip_y, "confidence": conf} for _ in range(12)]
     if lying:
-        shoulders, nose = (x + 150.0, hip_y), (x + 220.0, hip_y)
+        shoulders = (x + 150.0, hip_y)
         bbox = [x - 200.0, hip_y - 50.0, x + 250.0, hip_y + 50.0]
     else:
-        shoulders, nose = (x, hip_y - 150.0), (x, hip_y - 200.0)
+        shoulders = (x, hip_y - 150.0)
         bbox = [x - 50.0, hip_y - height / 2, x + 50.0, hip_y + height / 2]
-    keypoints[F.NOSE] = {"x": nose[0], "y": nose[1], "confidence": conf}
     for index in (F.LEFT_SHOULDER, F.RIGHT_SHOULDER):
         keypoints[index] = {"x": shoulders[0], "y": shoulders[1], "confidence": conf}
     for index in (F.LEFT_HIP, F.RIGHT_HIP):
@@ -63,12 +61,12 @@ def window_from(frames, window_size=30):
 def test_feature_vector_has_documented_layout():
     window = window_from([[person(1, 300.0)] for _ in range(30)])
     feats = F.extract_features(window, FPS)
-    assert feats.shape == (30, F.NUM_FEATURES)
+    assert feats.shape == (30, 91)
     assert feats.dtype == np.float32
     assert len(F.feature_names()) == F.NUM_FEATURES
     assert F.feature_names()[F.SIGNAL_SLICE] == list(F.SIGNAL_NAMES)
     # A person standing still has no velocity or acceleration anywhere.
-    assert not feats[:, 51:119].any()
+    assert not feats[:, 36:84].any()
 
 
 def test_padded_frames_are_zero_and_no_velocity_crosses_the_padding():
@@ -76,8 +74,8 @@ def test_padded_frames_are_zero_and_no_velocity_crosses_the_padding():
     feats = F.extract_features(window, FPS)
     assert not feats[:25].any()
     # First real frame has no previous real frame, so its velocity is zero.
-    assert not feats[25, 51:85].any()
-    assert feats[26, 51:85].any()
+    assert not feats[25, 36:60].any()
+    assert feats[26, 36:60].any()
 
 
 def test_velocity_is_in_body_heights_per_second():
@@ -85,7 +83,7 @@ def test_velocity_is_in_body_heights_per_second():
     # 10 / 400 * 15 = 0.375 heights per second, downward.
     window = window_from([[person(1, 300.0 + 10 * i)] for i in range(30)])
     feats = F.extract_features(window, FPS)
-    hip_y_velocity = feats[-1, 51 + F.LEFT_HIP * 2 + 1]
+    hip_y_velocity = feats[-1, 36 + F.LEFT_HIP * 2 + 1]
     np.testing.assert_allclose(hip_y_velocity, 0.375, atol=1e-3)
     signal = feats[-1, F.SIGNAL_SLICE][F.SIGNAL_INDEX["hip_velocity"]]
     np.testing.assert_allclose(signal, -0.375, atol=1e-3)  # upward positive
@@ -102,18 +100,18 @@ def test_signals_distinguish_upright_from_lying():
     assert lying[F.SIGNAL_INDEX["torso_angle"]] > 0.95
     assert upright[F.SIGNAL_INDEX["hip_height"]] > 0.4
     assert lying[F.SIGNAL_INDEX["hip_height"]] < 0.2
-    assert lying[F.SIGNAL_INDEX["head_height"]] < 0.2
+    assert lying[F.SIGNAL_INDEX["hip_height"]] < 0.2
 
 
 def test_missing_joint_is_carried_forward_not_jumped():
     frames = [[person(1, 300.0)] for _ in range(6)]
-    # Frame 3: the nose is lost; YOLO reports junk far away with low confidence.
-    frames[3][0]["keypoints"][F.NOSE] = {"x": 9000.0, "y": 9000.0, "confidence": 0.1}
+    # Frame 3: the left wrist is lost; YOLO reports junk far away with low confidence.
+    frames[3][0]["keypoints"][4] = {"x": 9000.0, "y": 9000.0, "confidence": 0.1}
     feats = F.extract_features(window_from(frames, window_size=6), FPS)
-    nose_x = feats[:, F.NOSE * 3]
-    np.testing.assert_allclose(nose_x, nose_x[0], atol=1e-5)
-    assert not feats[:, 51:85].any()  # no velocity spike from the junk point
-    assert feats[3, F.NOSE * 3 + 2] == pytest.approx(0.1)  # confidence is kept
+    wrist_x = feats[:, 4 * 3]
+    np.testing.assert_allclose(wrist_x, wrist_x[0], atol=1e-5)
+    assert not feats[:, 36:60].any()  # no velocity spike from the junk point
+    assert feats[3, 4 * 3 + 2] == pytest.approx(0.1)  # confidence is kept
 
 
 # Model and checkpoints
@@ -213,7 +211,7 @@ def test_synthetic_sequences_are_valid_pose_output(activity):
     assert len(sequence.frames) >= 30
     for people in sequence.frames:
         for p in people:
-            assert len(p["keypoints"]) == 17
+            assert len(p["keypoints"]) == 12
             x1, y1, x2, y2 = p["bbox"]
             assert x2 > x1 and y2 > y1
             assert np.isfinite([[k["x"], k["y"], k["confidence"]] for k in p["keypoints"]]).all()
@@ -397,7 +395,7 @@ def test_far_away_new_id_is_not_merged():
 def test_signal_panel_renders_an_image_of_the_requested_size(tmp_path):
     history = TrackSignals(7)
     for index in range(40):
-        signals = np.array([0.5, 0.9, 0.1, -0.2, 0.1], np.float32)
+        signals = np.array([0.5, 0.1, -0.2], np.float32)
         history.append(index / FPS, index, signals, 1.0, probability=0.3, above=False)
     history.events.append(1.0)
     panel = SignalPanel(width=320, height=360)
@@ -413,12 +411,11 @@ def test_signal_panel_renders_an_image_of_the_requested_size(tmp_path):
     assert history.to_dict()["events"] == [1.0]
 
 
-# The bootstrap checkpoint, end to end through the drop-in detector
+# Body-only classifier, end to end through the drop-in detector
 
 
-@pytest.mark.skipif(not BOOTSTRAP_CHECKPOINT.is_file(), reason="bootstrap checkpoint not trained")
-def test_bootstrap_detector_flags_a_synthetic_fall_and_not_a_crouch():
-    detector = TemporalFallDetector(BOOTSTRAP_CHECKPOINT, cooldown_seconds=30.0)
+def test_bootstrap_detector_flags_a_synthetic_fall_and_not_a_crouch(body_checkpoint):
+    detector = TemporalFallDetector(body_checkpoint, cooldown_seconds=30.0)
     rng = np.random.default_rng(7)
 
     fall = generate_sequence(rng, "fall", 15)
@@ -430,21 +427,34 @@ def test_bootstrap_detector_flags_a_synthetic_fall_and_not_a_crouch():
     assert "classifier" in detections[0].reason
 
     for activity in ("crouch", "walk", "lie_still"):
-        detector = TemporalFallDetector(BOOTSTRAP_CHECKPOINT)
+        detector = TemporalFallDetector(body_checkpoint)
         sequence = generate_sequence(rng, activity, 15)
         assert not any(detector.update(people, i / 15) for i, people in enumerate(sequence.frames)), activity
 
 
-@pytest.mark.skipif(not BOOTSTRAP_CHECKPOINT.is_file(), reason="bootstrap checkpoint not trained")
-def test_tracker_id_switch_mid_fall_still_fires_exactly_once():
+def test_tracker_id_switch_mid_fall_still_fires_exactly_once(body_checkpoint):
     fall = generate_sequence(np.random.default_rng(11), "fall", 15)
     first, last = fall.fall_interval
     switch = (first + last) // 2
     for index, people in enumerate(fall.frames):
         for p in people:
             p["track_id"] = 2 if index >= switch else 1
-    detector = TemporalFallDetector(BOOTSTRAP_CHECKPOINT)
+    detector = TemporalFallDetector(body_checkpoint)
     detections = []
     for index, people in enumerate(fall.frames):
         detections += detector.update(people, index / 15)
     assert [d.track_id for d in detections] == [2]
+
+
+@pytest.fixture(scope="module")
+def body_checkpoint(tmp_path_factory):
+    """Train a test-only checkpoint; the production model still needs retraining."""
+    train, val, _ = split_by_source(
+        samples_from_sequences(generate_dataset(250, seed=0)), seed=0
+    )
+    model, _ = train_model(
+        train, val, arch="gru", epochs=20, hidden_size=32, log=lambda *_: None
+    )
+    path = tmp_path_factory.mktemp("body-model") / "model.pt"
+    save_checkpoint(path, model, fps=15, window_size=30, threshold=0.8)
+    return path

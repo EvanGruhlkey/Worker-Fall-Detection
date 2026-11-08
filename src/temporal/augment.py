@@ -23,12 +23,8 @@ from dataclasses import dataclass, replace
 
 import numpy as np
 
-# COCO-17 left/right keypoint pairs (eyes, ears, shoulders, elbows, wrists,
-# hips, knees, ankles).
-_PAIRS = ((1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12), (13, 14), (15, 16))
-MIRROR_ORDER = list(range(17))
-for _left, _right in _PAIRS:
-    MIRROR_ORDER[_left], MIRROR_ORDER[_right] = _right, _left
+# Swap each left/right body-joint pair.
+MIRROR_ORDER = [1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10]
 
 
 @dataclass(frozen=True)
@@ -60,9 +56,9 @@ def augment_clip(clip, rng, config=AugmentConfig()):
         height = max(y2 - y1, 1.0)
         corners = [point(x, y) for x, y in ((x1, y1), (x2, y1), (x1, y2), (x2, y2))]
         xs, ys = [c[0] for c in corners], [c[1] for c in corners]
-        source = [original["keypoints"][j] for j in (MIRROR_ORDER if mirror else range(17))]
-        noise = rng.normal(0.0, config.jitter * height, size=(17, 2))
-        unseen = rng.random(17) < config.joint_dropout
+        source = [original["keypoints"][j] for j in (MIRROR_ORDER if mirror else range(12))]
+        noise = rng.normal(0.0, config.jitter * height, size=(12, 2))
+        unseen = rng.random(12) < config.joint_dropout
         keypoints = []
         for j, kp in enumerate(source):
             x, y = point(kp["x"], kp["y"])

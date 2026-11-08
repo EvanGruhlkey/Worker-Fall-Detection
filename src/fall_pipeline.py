@@ -4,7 +4,7 @@ Reads a video (or a pose JSON that ``yolo_pose.py`` already produced), drops
 frames to the classifier's rate, runs YOLO pose + ByteTrack, keeps a sliding
 window per person, scores every full window with the temporal classifier,
 applies the threshold gate, and records the motion signals the classifier
-sees (hip and head height, torso angle, vertical velocity) for every person.
+sees (hip height, torso angle, vertical velocity) for every person.
 
     uv run src/fall_pipeline.py --input data/input/test.mp4
     uv run src/fall_pipeline.py --input data/samples/synthetic_fall.mp4 --classifier models/fall_gru.pt

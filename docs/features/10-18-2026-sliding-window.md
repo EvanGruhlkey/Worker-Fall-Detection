@@ -13,7 +13,7 @@ the whole window is handed to the classifier.
 
 ```
 YOLO pose (stage 3) -> ByteTrack (stage 4) -> TrackWindows (stage 5) -> classifier (stage 6)
-  bbox + 17 keypoints     + track_id            (30, 17, 3) per person     fall probability
+  bbox + 12 keypoints     + track_id            (30, 12, 3) per person     fall probability
 ```
 
 ## Implementation
@@ -59,8 +59,8 @@ YOLO pose (stage 3) -> ByteTrack (stage 4) -> TrackWindows (stage 5) -> classifi
 
 | Field          | Shape            | Meaning                                         |
 |----------------|------------------|-------------------------------------------------|
-| `keypoints`    | (30, 17, 3)      | normalized x, y and raw keypoint confidence     |
-| `flatten()`    | (30, 51)         | classifier input                                |
+| `keypoints`    | (30, 12, 3)      | normalized x, y and raw keypoint confidence     |
+| `flatten()`    | (30, 36)         | classifier input                                |
 | `box_features` | (30, 2)          | relative bbox height, bbox width / height       |
 | `mask`         | (30,)            | True for real frames, False for padding         |
 | `end_frame`    | int              | frame index of the newest frame                 |
@@ -76,7 +76,7 @@ for frame_index, frame in enumerate(frames):
     for track_id in windows.update(frame_index, people):
         window = windows.window(track_id)
         if window.is_full:
-            x = window.flatten()  # (30, 51)
+            x = window.flatten()  # (30, 36)
 ```
 
 Call `update()` for every processed frame, even one with no people, so missing

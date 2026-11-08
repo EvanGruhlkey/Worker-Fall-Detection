@@ -10,7 +10,7 @@ from sqlmodel import Session, select
 
 from ..db import Job, JobKind, JobStatus, get_session
 from ..deps import data_file_response, get_manager, get_settings
-from ..schemas import CameraStart, JobRead
+from ..schemas import CameraOption, CameraStart, JobRead
 
 router = APIRouter(prefix="/api", tags=["jobs"])
 
@@ -123,6 +123,15 @@ def start_camera(body: CameraStart, manager=Depends(get_manager)):
     except ValueError as error:
         raise HTTPException(409, str(error)) from error
     return to_job_read(job, manager)
+
+
+@router.get("/cameras/options", response_model=list[CameraOption])
+def camera_options(manager=Depends(get_manager)):
+    """Discover local cameras that can be selected in the dashboard."""
+    return [
+        CameraOption(source=source, label=f"Camera {source}")
+        for source in manager.camera_options()
+    ]
 
 
 @router.post("/cameras/{job_id}/stop", response_model=JobRead)

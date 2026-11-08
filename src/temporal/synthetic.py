@@ -2,7 +2,7 @@
 
 There is no labeled site footage yet, so this module animates a 17-joint stick
 figure through everyday activities (standing, walking, crouching, bending,
-sitting, lying) and through falls, and renders each as the ``people`` lists
+sitting, lying) and through falls, and outputs the 12 body joints as the ``people`` lists
 that ``yolo_pose.process_frame`` would produce. The sequences then run through
 the real stage 5 window and feature code, so a model trained on them is wired
 up exactly like one trained on real footage.
@@ -313,7 +313,7 @@ def generate_sequence(rng, activity=None, fps=None):
                     "confidence": float(rng.uniform(0.6, 0.95)),
                     "keypoints": [
                         {"x": float(px), "y": float(py), "confidence": float(c)}
-                        for (px, py), c in zip(frame_pixels, frame_confidence)
+                        for (px, py), c in zip(frame_pixels[5:], frame_confidence[5:])
                     ],
                 }
             ]

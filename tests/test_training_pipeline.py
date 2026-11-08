@@ -20,7 +20,7 @@ FPS = 12.0
 
 
 def person(track_id, hip_y=300.0, x=400.0):
-    keypoints = [{"x": x + j, "y": hip_y - 10.0 * j, "confidence": 0.9} for j in range(17)]
+    keypoints = [{"x": x + j, "y": hip_y - 10.0 * j, "confidence": 0.9} for j in range(12)]
     return {"track_id": track_id, "bbox": [x - 50, hip_y - 200, x + 50, hip_y + 200], "confidence": 0.9,
             "keypoints": keypoints}
 
@@ -53,7 +53,7 @@ def test_margin_drops_windows_with_part_of_a_fall_but_keeps_the_rest():
 
 
 def test_mirror_swaps_left_and_right_joints():
-    assert MIRROR_ORDER[F.LEFT_HIP] == F.RIGHT_HIP and MIRROR_ORDER[F.NOSE] == F.NOSE
+    assert MIRROR_ORDER[F.LEFT_HIP] == F.RIGHT_HIP
     config = AugmentConfig(mirror=1.0, rotation_degrees=0, stretch=(1, 1), jitter=0, joint_dropout=0, speed=(1, 1))
     original = clip()
     mirrored = augment_clip(original, np.random.default_rng(0), config)

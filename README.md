@@ -54,7 +54,7 @@ uv run run.py
 
 Allow location access when the browser asks, so events are stamped with where the laptop is. Press Ctrl+C to stop both.
 
-Settings (which camera to use, fallback location) are in `.env`, created from `.env.example` on the first run. See [docs/running-and-testing.md](docs/running-and-testing.md) for every setting, a step-by-step test of each feature with the expected results, and troubleshooting. API reference: [docs/backend-api.md](docs/backend-api.md).
+Choose and switch cameras from the dashboard. Optional startup-camera and fallback-location settings are in `.env`, created from `.env.example` on the first run. See [docs/running-and-testing.md](docs/running-and-testing.md) for every setting, a step-by-step test of each feature with the expected results, and troubleshooting. API reference: [docs/backend-api.md](docs/backend-api.md).
 
 ### Live camera
 
@@ -84,7 +84,7 @@ Outputs are saved as `data/output/YourVideo.mp4` and `data/output/YourVideo.json
 
 ### Sliding window
 
-`src/sliding_window.py` keeps the last 30 frames of keypoints for each tracked person and turns them into a normalized `(30, 51)` window, the input for the temporal classifier. See [docs/features/10-18-2026-sliding-window.md](docs/features/10-18-2026-sliding-window.md).
+`src/sliding_window.py` keeps the last 30 frames of the 12 body keypoints for each tracked person and turns them into a normalized `(30, 36)` window, the input for the temporal classifier. The five facial keypoints (COCO indices 0-4) are discarded. See [docs/features/10-18-2026-sliding-window.md](docs/features/10-18-2026-sliding-window.md).
 
 ### Temporal classifier
 
@@ -118,3 +118,5 @@ The temporal classifier exists but has only been trained on synthetic skeletons,
 Team Members: Johnathan Miller, Evan Gruhlkey, Malcom Troy, Allen Basil, Benjamin Aleman
 
 Sponsor: Maksym Pryporov - Maksym_Pryporov@oxy.com
+
+The body-only temporal features require a newly trained checkpoint. Leave `FALL_CLASSIFIER_PATH` empty to use the rule detector until retraining is complete. Existing 17-point pose JSON files still load; their facial points are removed at the file boundary.

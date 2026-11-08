@@ -51,6 +51,11 @@ class CameraStart(BaseModel):
     height: int | None = Field(None, gt=0)
 
 
+class CameraOption(BaseModel):
+    source: str
+    label: str
+
+
 class EventRead(BaseModel):
     id: int
     job_id: int
@@ -129,6 +134,9 @@ class DashboardCamera(BaseModel):
     fps: float
     online: bool
     job_id: int | None = None
+    source: str | None = Field(
+        None, description="Local camera index; stream URLs are not exposed"
+    )
     health: str = "offline"
     stream_url: str | None = None
 

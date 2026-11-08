@@ -14,7 +14,7 @@ video -> 2. frame sampler -> 3. YOLO pose -> 4. ByteTrack -> 5. TrackWindows
 ```
 
 It also adds what we need to *see* what the classifier sees: for every
-tracked person, plots of hip and head height, torso angle, vertical velocity
+tracked person, plots of hip height, torso angle, vertical velocity
 and fall probability over time, both as a scrolling panel next to the
 annotated video and as full-length PNGs. These are the "joint height and
 velocity over a 2 second window" curves from the guide's figure, computed from
@@ -51,16 +51,16 @@ camera's native 30 fps.
 
 The guide (section 5.1) says to feed joint velocities and accelerations as
 explicit inputs, not only positions. `extract_features(window, fps)` turns a
-`Window` into a `(30, 128)` matrix per frame:
+`Window` into a `(30, 91)` matrix per frame:
 
 | block         | size | meaning                                                      |
 |---------------|------|--------------------------------------------------------------|
-| positions     | 51   | the window's normalized x, y, confidence for 17 joints       |
-| velocities    | 34   | per-joint dx, dy in **body heights per second**              |
-| accelerations | 34   | per-joint change of velocity per second                      |
+| positions     | 36   | the window's normalized x, y, confidence for 12 body joints       |
+| velocities    | 24   | per-joint dx, dy in **body heights per second**              |
+| accelerations | 24   | per-joint change of velocity per second                      |
 | box           | 2    | box height / reference height, width / height (from stage 5) |
 | box velocity  | 2    | change of the two box features per second                    |
-| signals       | 5    | the interpretable signals below                              |
+| signals       | 3    | the interpretable signals below                              |
 
 - **Per-second units.** Velocities are multiplied by the frame rate, so the
   same motion gives the same number at 10, 12.5 or 15 fps.
@@ -71,9 +71,9 @@ explicit inputs, not only positions. `extract_features(window, fps)` turns a
   0.3 and jittery coordinates). Joints below confidence 0.3 take the last good
   position (the guide's carry-forward rule), the raw confidence is kept so the
   model can learn to distrust them, and no velocity spike results.
-- **Signals.** Five values the plots show and the model also receives:
-  hip and head height above the box bottom (in body heights), torso angle
-  (0 upright, 1 horizontal), hip and head vertical velocity (upward positive,
+- **Signals.** Three values the plots show and the model also receives:
+  hip height above the box bottom (in body heights), torso angle
+  (0 upright, 1 horizontal), hip vertical velocity (upward positive,
   so a fall is a negative spike as in the guide's figure). Heights are
   measured from the person's own box bottom, so they do not depend on the
   window's origin and read the same across a whole video.
@@ -267,3 +267,20 @@ uv run scripts/train_temporal.py --manifest data/labels/manifest.json
 echo FALL_CLASSIFIER_PATH=models/fall_gru.pt >> .env
 uv run run.py
 ```
+
+
+## Body-only feature version 2
+
+The pipeline now outputs 12 body keypoints, excluding the nose, eyes, and ears. Temporal windows contain 91 features per frame. The three motion signals are hip height, torso angle, and hip vertical velocity. Plots and saved signal JSON contain no head signals.
+
+Existing COCO-17 pose JSON files are converted to the 12 body points when loaded for training or offline replay. Files declaring an unknown keypoint layout are rejected.
+
+The committed `models/fall_gru.pt` was trained with feature version 1 and is incompatible. Loading it reports that retraining is required. Leave `FALL_CLASSIFIER_PATH` empty to use the body-only rule detector until a version 2 classifier is ready. The model is not silently replaced or retrained by this change.
+
+To train a new bootstrap model without overwriting the old checkpoint:
+
+```sh
+uv run scripts/train_temporal.py --synthetic 1500 --output models/fall_gru_body12.pt
+```
+
+Use labeled site footage for the final model and validate missed falls and false alarms before deployment.

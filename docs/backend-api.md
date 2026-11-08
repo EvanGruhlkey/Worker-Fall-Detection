@@ -33,6 +33,7 @@ Run the tests with `uv run pytest`.
 | GET | `/api/health` | Server is up |
 | POST | `/api/videos` | Upload a video (multipart form, field `file`); queues a job |
 | POST | `/api/cameras` | Start a live camera: `{"source": "0", "name": "Bay 3", "label": "Loading dock", "location": "Plant 2", "coords": "29.76, -95.37"}`; `source` is a camera index or `rtsp://...` URL. Only `source` is required, and `location` and `coords` default to the site settings |
+| GET | `/api/cameras/options` | Scan camera indices 0-4 and return the local cameras currently available to the dashboard picker |
 | POST | `/api/cameras/{job_id}/stop` | Stop a live camera |
 | GET | `/api/cameras/{job_id}/stream` | Live annotated feed (MJPEG) |
 | GET | `/api/jobs` | List jobs, newest first (`?kind=video\|camera`, `?status=...`, `?limit=`) |
@@ -196,7 +197,7 @@ Set these in `.env` in the project root (copy `.env.example`), or as environment
 | `FALL_SITE_LOCATION` | `Unspecified location`. Used until the dashboard reports the browser's location, or if location is blocked |
 | `FALL_SITE_COORDS` | empty |
 | `FALL_REVERSE_GEOCODE` | `1`. Set `0` to not send coordinates to OpenStreetMap; the name then shows the coordinates |
-| `FALL_CAMERA_SOURCE` | unset. Set it (e.g. `0`) to start that camera when the server boots |
+| `FALL_CAMERA_SOURCE` | unset. Cameras can be selected in the dashboard; set this (e.g. `0`) only to start one automatically when the server boots |
 | `FALL_CAMERA_NAME` / `FALL_CAMERA_LABEL` | `Camera <source>` / `Live camera` |
 | `FALL_DATABASE_URL` | unset. The shared PostgreSQL (Supabase Session pooler URL, starting `postgresql+psycopg://`). See [database.md](database.md) |
 | `FALL_DB_HOST` / `FALL_DB_PORT` / `FALL_DB_NAME` / `FALL_DB_USER` / `FALL_DB_PASSWORD` | `localhost` / `5432` / `fall_detection` / `fall` / `fall`. A self-hosted server, used when `FALL_DATABASE_URL` is unset |
