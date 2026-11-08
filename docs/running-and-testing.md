@@ -31,7 +31,7 @@ There are two programs, and they run in separate terminals:
 
 1. **Pose estimation** (`src/yolo_pose.py`). The YOLO11 pose model finds every person in the frame. The application discards facial points 0-4 and keeps the 12 body keypoints (shoulders through ankles).
 2. **Tracking** (ByteTrack, inside the same call). Each person gets an ID number that stays the same from frame to frame ("ID 3"), so the system can follow one person's movement over time.
-3. **Fall detection** (`src/backend/fall_detector.py`). For each tracked person, the detector checks whether their **hips dropped by at least 30% of their body height within 1.5 seconds** and they then **stayed roughly horizontal for 0.5 seconds**. If both are true, it reports a fall with a confidence score. ByteTrack often gives a person a new ID in the middle of a fall, because their box suddenly turns from tall to wide. So when a new ID appears where another vanished less than a second earlier, the detector carries the old ID's history over. This is a simple placeholder rule. It will be replaced by the trained temporal classifier (see [What is not built yet](#what-is-not-built-yet)).
+3. **Fall detection** (`src/backend/fall_detector.py`). For each tracked person, the detector checks whether their **hips dropped by at least 30% of their body height within 1.5 seconds** and they then **stayed roughly horizontal for 0.5 seconds**. If both are true, it reports a fall with a confidence score. ByteTrack often gives a person a new ID in the middle of a fall, because their box suddenly turns from tall to wide. So when a new ID appears where another vanished less than a second earlier, the detector carries the old ID's history over. This is a simple placeholder rule. Setting `FALL_CLASSIFIER_PATH` in `.env` swaps it for the temporal classifier (`src/temporal/`), which scores each person's last 30 frames of joint positions, velocities and accelerations and fires when the probability stays above 0.8 for 5 frames. The only checkpoint so far was trained on synthetic skeletons, so the rule stays the default (see [What is not built yet](#what-is-not-built-yet)).
 4. **Recording the event** (`src/backend/pipeline.py`). When a fall is detected, the backend:
    - saves a row in the database (`data/falls.db`) with the time, camera, location, coordinates, confidence, and the reason ("hip dropped 46% of body height in 0.7s; torso 74 deg from vertical"),
    - saves a **snapshot** JPEG of that moment,
@@ -140,6 +140,7 @@ Settings live in `.env` in the project root. `run.py` creates it from `.env.exam
 | `FALL_CAMERA_SOURCE` | Optional camera to start automatically. Leave it empty to choose a local camera or network stream from the dashboard. | empty |
 | `FALL_CAMERA_NAME` / `FALL_CAMERA_LABEL` | Camera name and description on the dashboard | `Camera 01` / `Webcam` |
 | `FALL_SITE_LOCATION` / `FALL_SITE_COORDS` | Location used **only** until the browser reports this computer's location, or if location is blocked | `Unspecified location` / empty |
+| `FALL_CLASSIFIER_PATH` | Path to a temporal classifier checkpoint (for example `models/fall_gru.pt`). Empty keeps the rule-based fall detector. | empty |
 | `FALL_REVERSE_GEOCODE` | `1` looks up the city name for the browser's coordinates with OpenStreetMap. `0` keeps the coordinates on this computer and shows them instead of a city name. | `1` |
 
 The rest of the settings are in [backend-api.md](backend-api.md#settings). A variable set in the terminal overrides the same variable in `.env`.
@@ -169,7 +170,7 @@ Then open **http://localhost:5173**. The dashboard sends every request that star
 uv run pytest -v
 ```
 
-**Expected:** `69 passed`. The first run takes about 20–40 seconds, because some tests run the real YOLO model.
+**Expected:** `109 passed`. The first run takes about 20–40 seconds, because some tests run the real YOLO model.
 
 | Test file | Tests | What it checks |
 |---|---|---|
@@ -344,7 +345,7 @@ uv run src/yolo_pose.py --input data/input/YourVideo.mp4 --model models/yolo11n-
 
 ## What is not built yet
 
-- **Temporal classifier (stage 6).** `src/sliding_window.py` already turns each person's last 30 frames into the classifier's input, but no trained model exists yet. Until then, falls come from the rule in `fall_detector.py`. When the model is ready, only `FallDetector.update()` needs to change; the events, database and dashboard stay the same. Train the model at the same FPS the live system runs at. 30 frames is 6 seconds at 5 FPS, but only 1 second at 30 FPS.
+- **Temporal classifier (stage 6): built, not yet trained on real falls.** `src/temporal/` has the frame sampler, feature extraction, GRU/TCN model, threshold gate and a drop-in `TemporalFallDetector`. `models/fall_gru.pt` was trained on synthetic skeletons only, so the dashboard keeps the rule in `fall_detector.py` unless `FALL_CLASSIFIER_PATH` is set. Next step: collect labeled footage (OmniFall plus site clips), run it through `yolo_pose.py`, list it in a manifest and train with `scripts/train_temporal.py --manifest`. Details and the plotting tool: [features/10-23-2026-temporal-classifier.md](features/10-23-2026-temporal-classifier.md).
 - **Dashboard buttons.** "All events" (filter), "Export log" and "Settings" aren't hooked up yet. The backend already supports filtering and CSV export; the buttons just need to be connected.
 - **Alerts beyond the dashboard.** There are no sounds, push notifications, SMS or email yet. The dashboard checks for new events every 2.5 s.
 - **Several cameras on the dashboard.** The backend can run several, but the dashboard shows one.

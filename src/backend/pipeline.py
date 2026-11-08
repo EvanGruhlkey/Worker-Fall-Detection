@@ -47,6 +47,16 @@ def assess_frame(frame):
     return "good"
 
 
+def build_detector(settings):
+    """The trained temporal classifier if one is configured, else the rule."""
+    if settings.classifier_path:
+        from temporal.detector import TemporalFallDetector
+
+        log.info("Using temporal classifier %s", settings.classifier_path)
+        return TemporalFallDetector(settings.classifier_path)
+    return FallDetector()
+
+
 class _PendingClip:
     def __init__(self, event_id, frames, end_time):
         self.event_id = event_id
@@ -61,7 +71,7 @@ class FrameProcessor:
         self.job_id = job_id
         self.settings = settings
         self.model = load_pose_model(settings.model_path)
-        self.detector = detector or FallDetector()
+        self.detector = detector or build_detector(settings)
         self.event_dir = settings.events_dir / str(job_id)
         self.event_dir.mkdir(parents=True, exist_ok=True)
 

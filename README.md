@@ -10,6 +10,7 @@
 
 - **Pose detection and tracking** on a live camera or a prerecorded video. The live view shows skeletons, tracking IDs, FPS, and the number of detected people.
 - **Backend server** (`src/backend/`). Runs the camera through the models and a placeholder fall detector. Each detected fall is saved to a database with its time, camera, location, confidence, a snapshot and a short clip.
+- **Temporal classifier** (`src/temporal/`). Stages 2, 6 and 7 of the design: frame sampler, GRU/TCN classifier over each person's 30-frame window of joint positions, velocities and accelerations, and the threshold gate. The old `models/fall_gru.pt` bootstrap model needs retraining for the 12-point body-only features; `src/fall_pipeline.py` runs it over a video and plots every person's hip height, torso angle, vertical velocity and fall probability. See [docs/features/10-23-2026-temporal-classifier.md](docs/features/10-23-2026-temporal-classifier.md).
 - **Dashboard** (`ui/`). Live annotated camera feed, stat cards (active incidents, cameras online, uptime, camera health), and an event log that updates every few seconds. Click an event to see its clip and confirm it or mark it a false alarm. Upload a recorded video to check it for falls; a test video is in `data/samples/`.
 
 **Full guide to running and testing everything: [docs/running-and-testing.md](docs/running-and-testing.md)**
@@ -83,18 +84,37 @@ Outputs are saved as `data/output/YourVideo.mp4` and `data/output/YourVideo.json
 
 `src/sliding_window.py` keeps the last 30 frames of the 12 body keypoints for each tracked person and turns them into a normalized `(30, 36)` window, the input for the temporal classifier. The five facial keypoints (COCO indices 0-4) are discarded. See [docs/features/10-18-2026-sliding-window.md](docs/features/10-18-2026-sliding-window.md).
 
+### Temporal classifier
+
+Run the skeleton pipeline (frame sampler, pose, tracking, window, classifier, gate) over a video and get the motion-signal plots:
+
+```bash
+uv run src/fall_pipeline.py --input data/input/YourVideo.mp4 --classifier models/fall_gru.pt
+```
+
+Outputs go to `data/output/YourVideo_temporal/`: `signals.mp4` (annotated video with a scrolling signal panel), `track_<id>.png` (full-length plots per person) and `signals.json`. Leave out `--classifier` to get the plots without a model. To (re)train the bootstrap model on synthetic data, or a model on labeled footage:
+
+```bash
+uv run scripts/train_temporal.py --synthetic 1500 --arch gru      # ~1 minute on a CPU
+uv run scripts/train_temporal.py --manifest data/labels/manifest.json
+```
+
+To use the classifier in the dashboard instead of the rule, set `FALL_CLASSIFIER_PATH=models/fall_gru.pt` in `.env`.
+
 ### Tests
 
 ```bash
 uv run pytest tests -v
 ```
 
-Expected: `69 passed`. To check that the dashboard compiles, run `npm run build` in `ui/`.
+Expected: `109 passed`. To check that the dashboard compiles, run `npm run build` in `ui/`.
 
 ### Incomplete
 
-The temporal classifier and the X-CLIP verifier are not implemented yet. Until the classifier is ready, falls are flagged by a simple rule in `src/backend/fall_detector.py`. The dashboard's filter, export and settings buttons are not connected yet. Alerts appear only on the dashboard (no sound, SMS or email). <br><br>
+The temporal classifier exists but has only been trained on synthetic skeletons, so the dashboard still uses the simple rule in `src/backend/fall_detector.py` by default; it needs labeled fall footage (OmniFall and site clips) before it can replace the rule. The X-CLIP verifier is not started. The dashboard's filter, export and settings buttons are not connected yet. Alerts appear only on the dashboard (no sound, SMS or email). <br><br>
 
 Team Members: Johnathan Miller, Evan Gruhlkey, Malcom Troy, Allen Basil, Benjamin Aleman
 
 Sponsor: Maksym Pryporov - Maksym_Pryporov@oxy.com
+
+The body-only temporal features require a newly trained checkpoint. Leave `FALL_CLASSIFIER_PATH` empty to use the rule detector until retraining is complete. Existing 17-point pose JSON files still load; their facial points are removed at the file boundary.

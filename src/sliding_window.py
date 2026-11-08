@@ -20,6 +20,9 @@ class Window:
     box_features: (window_size, 2) bbox height relative to the window's
                   reference height, and bbox width / height
     mask:         (window_size,) True for real frames, False for left padding
+    boxes:        (window_size, 4) xyxy boxes in the same normalized frame as
+                  the keypoints, so joint heights above the box bottom can be
+                  measured (see temporal.features)
     """
 
     track_id: int
@@ -27,6 +30,7 @@ class Window:
     keypoints: np.ndarray
     box_features: np.ndarray
     mask: np.ndarray
+    boxes: np.ndarray | None = None
 
     @property
     def is_full(self):
@@ -78,6 +82,32 @@ class TrackWindows:
 
     def __contains__(self, track_id):
         return track_id in self._tracks
+
+    def track_ids(self):
+        return list(self._tracks)
+
+    def last_seen(self, track_id):
+        """Frame index the track was last updated on, or None."""
+        track = self._tracks.get(track_id)
+        return None if track is None else track.last_frame
+
+    def last_box(self, track_id):
+        """Raw xyxy box from the track's newest frame, or None."""
+        track = self._tracks.get(track_id)
+        if track is None or not track.boxes:
+            return None
+        return track.boxes[-1].copy()
+
+    def rename(self, old_id, new_id):
+        """Carry a track's history over to a new ID.
+
+        ByteTrack often hands a falling person a new ID when their box turns
+        from tall to wide. Without this the new ID starts an empty window and
+        the fall is never inside one. The caller decides which IDs match.
+        """
+        if new_id in self._tracks:
+            raise ValueError(f"Track ID {new_id} already exists")
+        self._tracks[new_id] = self._tracks.pop(old_id)
 
     def update(self, frame_index, people):
         """Add one frame of tracked people. Return the track IDs updated.
@@ -135,9 +165,9 @@ class TrackWindows:
         if track is None or not track.keypoints:
             return None
 
-        keypoints, box_features = normalize_window(
-            np.stack(track.keypoints), np.stack(track.boxes)
-        )
+        raw_boxes = np.stack(track.boxes)
+        keypoints, box_features = normalize_window(np.stack(track.keypoints), raw_boxes)
+        boxes = normalize_boxes(raw_boxes)
 
         # Left-pad short tracks so every window has the same shape.
         padding = self.window_size - len(keypoints)
@@ -150,8 +180,9 @@ class TrackWindows:
             box_features = np.concatenate(
                 [np.zeros((padding, 2), np.float32), box_features]
             )
+            boxes = np.concatenate([np.zeros((padding, 4), np.float32), boxes])
 
-        return Window(track_id, track.last_frame, keypoints, box_features, mask)
+        return Window(track_id, track.last_frame, keypoints, box_features, mask, boxes)
 
     def _fill_gap(self, track, missing):
         if missing <= 0:
@@ -189,9 +220,7 @@ def normalize_window(keypoints, boxes):
     """
     widths = boxes[:, 2] - boxes[:, 0]
     heights = boxes[:, 3] - boxes[:, 1]
-    scale = max(float(heights.max()), 1.0)
-    center_x = (boxes[-1, 0] + boxes[-1, 2]) / 2
-    center_y = (boxes[-1, 1] + boxes[-1, 3]) / 2
+    center_x, center_y, scale = window_reference(boxes)
 
     normalized = keypoints.copy()
     normalized[..., 0] = (keypoints[..., 0] - center_x) / scale
@@ -202,3 +231,19 @@ def normalize_window(keypoints, boxes):
         [heights / scale, widths / np.maximum(heights, 1.0)], axis=1
     ).astype(np.float32)
     return normalized, box_features
+
+
+def window_reference(boxes):
+    """Return (center_x, center_y, scale) shared by every frame in a window."""
+    heights = boxes[:, 3] - boxes[:, 1]
+    scale = max(float(heights.max()), 1.0)
+    center_x = (boxes[-1, 0] + boxes[-1, 2]) / 2
+    center_y = (boxes[-1, 1] + boxes[-1, 3]) / 2
+    return center_x, center_y, scale
+
+
+def normalize_boxes(boxes):
+    """Express (T, 4) xyxy boxes in the window's normalized frame."""
+    center_x, center_y, scale = window_reference(boxes)
+    offset = np.array([center_x, center_y, center_x, center_y], np.float32)
+    return ((boxes - offset) / scale).astype(np.float32)

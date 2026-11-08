@@ -1,4 +1,3 @@
-import json
 import sys
 from pathlib import Path
 
@@ -263,9 +262,9 @@ def test_zero_size_box_does_not_produce_nan():
 
 @pytest.mark.skipif(not SAMPLE_JSON.is_file(), reason="sample pose output not present")
 def test_replay_of_real_pose_output():
-    data = json.loads(SAMPLE_JSON.read_text(encoding="utf-8"))
-    if data.get("metadata", {}).get("keypoint_format") != "COCO-body-12":
-        pytest.skip("sample pose output uses the retired 17-keypoint format")
+    from temporal.pose_io import load_pose_json
+
+    data = load_pose_json(SAMPLE_JSON)
     windows = TrackWindows()
     checked = 0
 
