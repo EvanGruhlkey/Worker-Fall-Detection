@@ -16,7 +16,7 @@ from pathlib import Path
 import cv2
 from ultralytics import YOLO
 
-from yolo_pose import DEFAULT_IMAGE_SIZE, parse_image_size, resolve_image_size
+from detectors.yolo_pose import DEFAULT_IMAGE_SIZE, parse_image_size, resolve_image_size
 
 WINDOW_NAME = "Worker Fall Detection - Live"
 

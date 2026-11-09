@@ -79,12 +79,19 @@ def train_model(
     log=print,
     **model_config,
 ):
-    """Train a classifier; return (model, history) with the best-epoch weights."""
+    """Train a classifier; return (model, history) with the best-epoch weights.
+
+    With no ``val_samples`` (the final model, trained on everything) there is
+    nothing to pick an epoch by, so all ``epochs`` run and the last weights are
+    kept; choose ``epochs`` from cross-validation.
+    """
     torch.manual_seed(seed)
     np.random.seed(seed)
 
     x_train, m_train, y_train = stack(train_samples)
-    x_val, m_val, y_val = stack(val_samples)
+    validate = bool(val_samples)
+    if validate:
+        x_val, m_val, y_val = stack(val_samples)
     mean, std = feature_scaling(x_train, m_train)
 
     model = build_model(arch, **model_config).to(device)
@@ -119,6 +126,11 @@ def train_model(
         scheduler.step()
 
         train_loss = total_loss / len(order)
+        if not validate:
+            history.append({"epoch": epoch, "train_loss": round(train_loss, 4)})
+            best_epoch, best_state = epoch, None
+            log(f"epoch {epoch:3d}/{epochs}  train loss {train_loss:.4f}  ({time.perf_counter() - started:.0f}s)")
+            continue
         val_probabilities = predict(model, x_val, m_val, device=device)
         val_loss = float(
             criterion(
@@ -147,7 +159,8 @@ def train_model(
             f"F1 {val_metrics['f1']:.3f}  ({time.perf_counter() - started:.0f}s)"
         )
 
-    model.load_state_dict(best_state)
+    if best_state is not None:
+        model.load_state_dict(best_state)
     model.eval()
     return model, {"epochs": history, "best_epoch": best_epoch, "best_val_f1": best_f1}
 

@@ -1,12 +1,15 @@
-data/input/*
-data/*.zip
-data/output/*
+# Training videos are versioned (labels: data/labels/clips.csv)
 .venv/
+.venv-amd/
+data/output/amd_comparison/
+data/output/rig_batch_gpu_profiles/
+models/comparison/
 .DS_Store
 __pycache__/
 .pytest_cache/
 pytest-cache-files-*/
 data/events/
+runs/
 # Old SQLite database (copy it with scripts/sqlite_to_postgres.py)
 data/falls.db*
 # Database backups (scripts/backup.py)
@@ -14,3 +17,5 @@ backups/
 
 # Local settings (copy from .env.example)
 .env
+.env.localtest
+data/local-test/

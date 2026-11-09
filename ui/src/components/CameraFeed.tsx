@@ -14,11 +14,11 @@ export default function CameraFeed({ camera, location, onChanged }: { camera: Ca
         ) : (
           <div className="placeholder">
             <Icon name="cam" size={40} className="big" />
-            <span>Camera offline</span>
+            <span>{camera.label === "Video simulation" ? "Video finished · click Play live to replay" : "Camera offline"}</span>
           </div>
         )}
-        <span className="badge live-badge"><i className="dot" />LOCAL CAM</span>
-        <span className="badge fps">{live ? `LIVE · ${camera.fps} FPS` : "OFFLINE"}</span>
+        <span className="badge live-badge"><i className="dot" />{camera.label === "Video simulation" ? "VIDEO TEST" : "LOCAL CAM"}</span>
+        <span className="badge fps">{live ? `LIVE · ${camera.fps} FPS` : camera.label === "Video simulation" ? "ENDED" : "OFFLINE"}</span>
         <span className="badge loc-badge"><Icon name="pin" />{location.name}</span>
       </div>
       <div className="cam-info">

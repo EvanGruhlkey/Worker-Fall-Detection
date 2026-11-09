@@ -9,7 +9,9 @@ import socket
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from yolo_pose import DEFAULT_IMAGE_SIZE, parse_image_size
+from sqlalchemy.engine import URL, make_url
+
+from detectors.yolo_pose import DEFAULT_IMAGE_SIZE, parse_image_size
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -66,7 +68,7 @@ class Settings:
     )
     model_path: Path = field(
         default_factory=lambda: _env_path(
-            "FALL_MODEL_PATH", REPO_ROOT / "models" / "yolo11n-pose.pt"
+            "FALL_MODEL_PATH", REPO_ROOT / "models" / "pose_pipeline.json"
         )
     )
     # YOLO inference size: None runs at the camera's native resolution (best

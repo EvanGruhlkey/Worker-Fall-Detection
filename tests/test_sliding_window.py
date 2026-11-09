@@ -7,7 +7,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from sliding_window import TrackWindows, normalize_window  # noqa: E402
+from utils.sliding_window import TrackWindows, normalize_window  # noqa: E402
 
 SAMPLE_JSON = REPO_ROOT / "data" / "output" / "001.json"
 
@@ -268,7 +268,8 @@ def test_replay_of_real_pose_output():
     windows = TrackWindows()
     checked = 0
 
-    for frame in data["frames"]:
+    for index, frame_people in enumerate(data.people):
+        frame = {"frame_index": index, "people": frame_people}
         people = {p["track_id"]: p for p in frame["people"]}
         for track_id in windows.update(frame["frame_index"], frame["people"]):
             window = windows.window(track_id)

@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 from sqlmodel import Session, select
 
-from yolo_pose import load_pose_model, process_frame
+from detectors.yolo_pose import load_pose_model, process_frame
 
 from .db import Job, JobKind, JobStatus, get_engine, utc_now
 from .pipeline import CameraWorker, run_video_job
@@ -29,12 +29,7 @@ class JobManager:
         self._cameras = {}
 
     def warm_up(self):
-        """Run one throwaway inference in the background.
-
-        PyTorch lazily imports a large part of itself on the first inference
-        (10+ seconds on some machines), which would otherwise stall the first
-        video or camera started after the server boots.
-        """
+        """Warm up model loading and inference in the background."""
 
         def run():
             try:

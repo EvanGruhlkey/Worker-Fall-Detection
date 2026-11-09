@@ -20,7 +20,7 @@ import numpy as np
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from yolo_pose import load_pose_model, parse_image_size, resolve_image_size  # noqa: E402
+from detectors.yolo_pose import load_pose_model, parse_image_size, resolve_image_size  # noqa: E402
 
 
 def bench_video(model, path, sizes, stride):

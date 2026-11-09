@@ -68,6 +68,7 @@ def create_app(settings=None):
         return {
             "status": "ok",
             "model": settings.model_path.name,
+            "classifier": settings.classifier_path.name if settings.classifier_path else None,
             "station": settings.station_name,
             "shared_storage": bool(settings.storage_bucket),
         }

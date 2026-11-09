@@ -16,7 +16,7 @@ from pathlib import Path
 import cv2
 from sqlmodel import Session
 
-from yolo_pose import KEYPOINT_FORMAT, load_pose_model, process_frame
+from detectors.yolo_pose import KEYPOINT_FORMAT, load_pose_model, process_frame
 
 from .db import FallEvent, Job, JobStatus, get_engine, update_row, utc_now
 from .fall_detector import FallDetector
@@ -211,16 +211,23 @@ def run_video_job(job_id, settings):
         height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = video.get(cv2.CAP_PROP_FPS) or 30.0
         total = int(video.get(cv2.CAP_PROP_FRAME_COUNT)) or None
-        update_row(Job, job_id, fps=fps, total_frames=total)
-
         processor = FrameProcessor(job_id, settings)
+        target_fps = getattr(processor.model, 'target_fps', fps)
+        sample_stride = max(1, round(fps / target_fps))
+        fps /= sample_stride
+        total = (total + sample_stride - 1) // sample_stride if total else None
+        update_row(Job, job_id, fps=fps, total_frames=total)
         frames = []
         frame_index = 0
+        source_index = -1
         with VideoWriter(output_video, width, height, fps) as writer:
             while True:
                 ok, frame = video.read()
                 if not ok:
                     break
+                source_index += 1
+                if source_index % sample_stride:
+                    continue
                 annotated, people, _ = processor.process(frame, frame_index, frame_index / fps)
                 writer.write(annotated)
                 frames.append({"frame_index": frame_index, "people": people})
@@ -318,20 +325,38 @@ class CameraWorker(threading.Thread):
                 camera.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
 
             self._processor = FrameProcessor(self.job_id, self.settings)
+            replay = '://' not in self.source and not self.source.isdigit() and Path(self.source).is_file()
+            source_fps = camera.get(cv2.CAP_PROP_FPS) or 30.0
+            replay_fps = min(source_fps, getattr(self._processor.model, 'target_fps', source_fps))
+            source_cursor = 0
             start = previous = time.monotonic()
             frame_index = 0
             while not self._stop_event.is_set():
+                timestamp = time.monotonic() - start
+                if replay:
+                    tick = max(frame_index, int(timestamp * replay_fps))
+                    if self._stop_event.wait(max(0.0, tick / replay_fps - timestamp)):
+                        break
+                    source_frame = round(tick * source_fps / replay_fps)
+                    while source_cursor < source_frame:
+                        if not camera.grab():
+                            break
+                        source_cursor += 1
+                    timestamp = source_frame / source_fps
                 ok, frame = camera.read()
                 if not ok:
+                    if replay:
+                        break
                     raise RuntimeError(f"Lost connection to camera {self.source}")
+                source_cursor += 1
                 now = time.monotonic()
                 if frame_index % HEALTH_EVERY == 0:
                     self.health = assess_frame(frame)
-                self._processor.process(frame, frame_index, now - start)
+                self._processor.process(frame, frame_index, timestamp if replay else now - start)
 
                 elapsed = now - previous
                 previous = now
-                if elapsed > 0:
+                if elapsed > 0 and frame_index > 0:
                     instant = 1.0 / elapsed
                     self.fps = instant if self.fps == 0 else 0.9 * self.fps + 0.1 * instant
 

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from sliding_window import TrackWindows
+from utils.sliding_window import TrackWindows
 from temporal.features import extract_features, feature_names, window_signals
 from temporal.model import FallGRU, load_checkpoint, save_checkpoint
 from temporal.visualize import TrackSignals
@@ -54,9 +54,8 @@ def test_pose_json_keeps_only_body_points(tmp_path, keypoint_format, count):
     path = tmp_path / "pose.json"
     path.write_text(json.dumps({"metadata":metadata, "frames":[{"frame_index":i,"people":[person]} for i in range(35)]}))
     data = load_pose_json(path)
-    assert data["metadata"]["keypoint_format"] == "COCO-body-12"
-    assert data["frames"][0]["people"][0]["keypoints"] == body_person()["keypoints"]
-    samples = samples_from_pose_json(path)
+    assert data.people[0][0]["keypoints"] == body_person()["keypoints"]
+    samples, _ = samples_from_pose_json(path)
     assert samples and samples[0].features.shape == (30,91)
     assert len(next(_json_frames(path)[2])[1][0]["keypoints"]) == 12
 

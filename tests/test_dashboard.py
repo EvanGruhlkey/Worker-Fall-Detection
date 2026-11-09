@@ -181,6 +181,13 @@ def test_uptime_ratio_merges_overlaps():
     assert uptime_ratio([], t, t) is None
 
 
+def test_uptime_ratio_ignores_incomplete_intervals():
+    t = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    h = timedelta(hours=1)
+
+    assert uptime_ratio([(None, t + h), (t, None), (t, t + h)], t, t + 4 * h) == 0.25
+
+
 def test_review_accepts_dashboard_labels(client):
     job = add_job()
     event = add_event(job.id)
