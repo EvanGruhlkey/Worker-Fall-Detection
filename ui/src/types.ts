@@ -1,6 +1,6 @@
 export type IconName =
   | "alert" | "cam" | "pulse" | "shield" | "fall" | "warn" | "ok" | "eye"
-  | "pin" | "clock" | "gear" | "chevron" | "download" | "wifi";
+  | "pin" | "clock" | "gear" | "chevron" | "download" | "upload" | "wifi" | "close";
 
 export type Tone = "red" | "green" | "default";
 
@@ -14,6 +14,9 @@ export interface Stat {
 
 export type EventStatus = "Unacknowledged" | "Needs review" | "Resolved" | "False alarm";
 
+/** Which events the log shows: today's, or every one ever recorded. */
+export type EventScope = "today" | "all";
+
 export interface FallEvent {
   id: number;
   time: string;
@@ -22,6 +25,35 @@ export interface FallEvent {
   color: string;
   confidence: number | null; // percent, null when not applicable
   status: EventStatus;
+  camera?: string | null;
+  location?: string | null;
+  // Extra details from the backend, used by the review panel.
+  detected_at?: string; // ISO 8601, UTC
+  source?: "camera" | "video";
+  job_id?: number;
+  coords?: string | null;
+  video_time?: number; // seconds into the video / camera session
+  track_id?: number | null;
+  reason?: string;
+  reviewer?: string | null;
+  notes?: string | null;
+  reviewed_at?: string | null;
+  snapshot_url?: string | null;
+  clip_url?: string | null;
+}
+
+export type UploadStatus = "queued" | "running" | "completed" | "stopped" | "failed";
+
+/** An uploaded video being (or already) checked for falls. */
+export interface Upload {
+  id: number;
+  name: string;
+  status: UploadStatus;
+  progress: number | null; // 0 to 1
+  fall_count: number;
+  error: string | null;
+  created_at: string;
+  output_video_url: string | null;
 }
 
 export interface CameraInfo {
@@ -30,4 +62,19 @@ export interface CameraInfo {
   label: string;
   fps: number;
   online: boolean;
+  stream_url?: string | null; // MJPEG feed with pose overlay, while online
+}
+
+export interface Location {
+  name: string;
+  coords: string;
+}
+
+/** GET /api/dashboard */
+export interface Dashboard {
+  location: Location;
+  stats: Stat[];
+  camera: CameraInfo;
+  events: FallEvent[];
+  uploads: Upload[];
 }

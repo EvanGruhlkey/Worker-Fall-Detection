@@ -1,0 +1,41 @@
+/* Loaded by App.tsx. Settings panel layout and the light theme. */
+
+/* Settings panel (all text centered) */
+.review.settings-panel { width: min(380px, 100%); text-align: center; }
+.settings-panel .review-head { justify-content: center; position: relative; }
+.settings-panel .review-head h2 { justify-content: center; }
+.settings-panel .icon-btn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); }
+.settings-panel .setting-row { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 0; border-top: 1px solid var(--line); }
+.settings-panel .setting-row strong { display: block; font-size: 13px; margin-bottom: 3px; }
+.settings-panel .setting-row small { display: block; }
+.settings-panel .actions { justify-content: center; }
+.settings-panel .review-actions { justify-content: center; }
+
+/* Light theme. Dark stays the default (:root in styles.css). */
+:root[data-theme="light"] {
+  --bg: #eef1f6; --panel: #ffffff; --panel-2: #f5f7fa; --line: #d9dfe8;
+  --text: #151a22; --muted: #556070; --dim: #7a8494;
+  --red: #d6264a; --green: #0f9d63; --amber: #a97a00; --blue: #3558c8;
+  color-scheme: light;
+}
+/* Rules in styles.css that use fixed dark colors */
+:root[data-theme="light"] .count { background: #e6eaf1; }
+:root[data-theme="light"] .btn,
+:root[data-theme="light"] .segmented,
+:root[data-theme="light"] .segmented button + button,
+:root[data-theme="light"] .notes textarea { border-color: #c9d1de; }
+:root[data-theme="light"] .btn:hover,
+:root[data-theme="light"] .segmented button:hover { background: #e9edf4; }
+:root[data-theme="light"] .segmented button.active { background: #dde4f0; }
+:root[data-theme="light"] tr.clickable:hover,
+:root[data-theme="light"] tr.clickable:focus-visible { background: #f0f3f8; }
+:root[data-theme="light"] .pill.unack { color: #c21f45; background: #fde8ed; border-color: #f5c2cf; }
+:root[data-theme="light"] .pill.need { color: #b4561a; background: #fdeee1; border-color: #f4cfae; }
+:root[data-theme="light"] .pill.resolved { color: #0b7a4c; background: #e0f5ec; border-color: #b4e3cf; }
+:root[data-theme="light"] .pill.false { color: #3558c8; background: #e6ecfa; border-color: #c4d1f0; }
+:root[data-theme="light"] .btn.danger { color: #c21f45; background: #fde8ed; border-color: #f5c2cf; }
+:root[data-theme="light"] .btn.danger:hover:not(:disabled) { background: #fbd5de; }
+/* Camera feed area follows the theme */
+:root[data-theme="light"] .video { background: radial-gradient(circle at 50% 40%, #e6ebf3, #d3dae6); }
+:root[data-theme="light"] .badge { background: rgba(255, 255, 255, .85); color: var(--text); }
+:root[data-theme="light"] .backdrop { background: rgba(20, 28, 44, .45); }

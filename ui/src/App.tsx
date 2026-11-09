@@ -1,32 +1,67 @@
+import { useState } from "react";
+import { useDashboard, useReportLocation } from "./api";
 import CameraFeed from "./components/CameraFeed";
 import EventLog from "./components/EventLog";
+import EventReview from "./components/EventReview";
 import { TitleBar, TopBar } from "./components/Header";
+import SettingsPanel from "./components/SettingsPanel";
 import StatCard from "./components/StatCard";
-import { CAMERA, EVENTS, STATS } from "./data/mock";
+import VideoUpload from "./components/VideoUpload";
+import type { EventScope, FallEvent } from "./types";
+import "./settings.css";
+import { useSettings } from "./useSettings";
 
 export default function App() {
+  useReportLocation();
+  const { settings, update, reset } = useSettings();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [scope, setScope] = useState<EventScope>("today");
+  const { data, refresh } = useDashboard(scope);
+  const { location, stats, camera, events, uploads } = data;
+
+  // Keep the latest copy of the selected event (status, clip URL) as data refreshes.
+  const [selected, setSelected] = useState<FallEvent | null>(null);
+  const reviewing = selected && (events.find((e) => e.id === selected.id) ?? selected);
+
   return (
     <div className="window">
       <TitleBar />
-      <TopBar />
+      <TopBar location={location} onSettings={() => setSettingsOpen(true)} />
       <main className="content">
         <h1>Dashboard</h1>
         <p className="sub">Real-time worker safety monitoring</p>
 
         <section className="stats">
-          {STATS.map((s) => <StatCard key={s.label} {...s} />)}
+          {stats.map((s) => <StatCard key={s.label} {...s} />)}
         </section>
 
         <section className="grid">
           <div className="feed-col">
             <h2>Camera feed <span className="count">1</span></h2>
             <div style={{ marginTop: 12 }}>
-              <CameraFeed camera={CAMERA} />
+              <CameraFeed camera={camera} location={location} />
             </div>
+            <VideoUpload uploads={uploads} onUploaded={refresh} />
           </div>
-          <EventLog events={EVENTS} />
+          <EventLog events={events} scope={scope} onScopeChange={setScope} onSelect={setSelected} />
         </section>
       </main>
+      {reviewing && (
+        <EventReview
+          key={reviewing.id}
+          event={reviewing}
+          onClose={() => setSelected(null)}
+          onChanged={refresh}
+        />
+      )}
+      {settingsOpen && (
+        <SettingsPanel
+          settings={settings}
+          onChange={update}
+          onReset={reset}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
     </div>
   );
 }
