@@ -2,9 +2,54 @@
 
 #### Computer vision safety software to detect worker falls
 
-### YOLO Pose detecting construction workers
 
-![View annotated video](data/output/001.gif)
+
+![Full pipeline output](docs/images/pipeline/00-full-pipeline.gif)
+
+## The pipeline
+
+### 1. Video input
+
+OpenCV reads the file or camera one frame at a time.
+
+![Stage 1: video input](docs/images/pipeline/01-video-input.gif)
+
+### 2. Frame sampling
+
+The camera runs at 24 fps. The sampler keeps every 2nd frame (12 fps) and skips the rest. Shown at half speed. 
+
+![Stage 2: frame sampling](docs/images/pipeline/02-frame-sampling.gif)
+
+### 3. YOLO detection
+
+YOLO draws a box and a confidence score around every person in each frame. 
+
+![Stage 3: YOLO detection](docs/images/pipeline/03-yolo-detection.gif)
+
+### 4. ByteTrack
+
+ByteTrack matches boxes across frames so each person keeps an ID. The line behind each box is the person's path. 
+
+![Stage 4: ByteTrack](docs/images/pipeline/04-bytetrack.gif)
+
+### 5. RTMPose
+
+RTMPose finds 12 joints on each tracked person: shoulders, elbows, wrists, hips, knees, ankles. 
+
+![Stage 5: RTMPose](docs/images/pipeline/05-rtmpose.gif)
+
+### 6. Temporal window
+
+For each person, the last 30 frames of joints (2.5 s) are kept, centered and scaled to body height. The panel shows the window for the highlighted person: faint is oldest, bright is newest. 
+
+![Stage 6: temporal window](docs/images/pipeline/06-temporal-window.gif)
+
+### 7. Fall decision
+
+A GRU classifier trained on the labeled rig clips scores each person's window on every frame. A threshold gate raises the alert once the probability stays above 0.5 for 5 frames in a row. The graph shows the highlighted person's probability. 
+
+![Stage 7: fall decision](docs/images/pipeline/07-fall-decision.gif)
+
 
 ### Currently Working
 
@@ -149,7 +194,7 @@ Expected: `109 passed`. To check that the dashboard compiles, run `npm run build
 
 ### Incomplete
 
-The temporal classifier exists but has only been trained on synthetic skeletons, so the dashboard still uses the simple rule in `src/backend/fall_detector.py` by default; it needs labeled fall footage (OmniFall and site clips) before it can replace the rule. The X-CLIP verifier is not started. The dashboard's settings button is not connected yet. Alerts appear only on the dashboard (no sound, SMS or email). <br><br>
+XClip and continue training temporal model
 
 Team Members: Johnathan Miller, Evan Gruhlkey, Malcom Troy, Allen Basil, Benjamin Aleman
 
