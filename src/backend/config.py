@@ -11,6 +11,8 @@ from pathlib import Path
 
 from sqlalchemy.engine import URL, make_url
 
+from detectors.yolo_pose import DEFAULT_IMAGE_SIZE, parse_image_size
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -69,8 +71,13 @@ class Settings:
             "FALL_MODEL_PATH", REPO_ROOT / "models" / "pose_pipeline.json"
         )
     )
-    image_size: int = field(
-        default_factory=lambda: int(os.environ.get("FALL_IMAGE_SIZE", "640"))
+    # YOLO inference size: None runs at the camera's native resolution (best
+    # for people far from the camera); an int such as 640 scales the long side
+    # down to it (faster). FALL_IMAGE_SIZE=native or a number.
+    image_size: int | None = field(
+        default_factory=lambda: parse_image_size(
+            os.environ.get("FALL_IMAGE_SIZE", DEFAULT_IMAGE_SIZE)
+        )
     )
     # Seconds of footage kept before and after a fall for the review clip.
     clip_pre_seconds: float = field(

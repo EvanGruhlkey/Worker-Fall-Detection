@@ -47,6 +47,10 @@ from temporal.visualize import (  # noqa: E402
     draw_track_status,
     plot_track_timeline,
 )
+from detectors.yolo_pose import (  # noqa: E402
+    DEFAULT_IMAGE_SIZE,
+    parse_image_size,
+)
 PANEL_WIDTH, PANEL_HEIGHT = 640, 720
 # Sampling rate when no classifier says otherwise; matches the rig pose files.
 DEFAULT_TARGET_FPS = 12.0
@@ -307,7 +311,11 @@ def parse_args(argv=None):
     parser.add_argument("--threshold", type=float, help="Gate threshold (default: from the checkpoint, else 0.8)")
     parser.add_argument("--debounce", type=int, default=5, help="Frames above the threshold before an event")
     parser.add_argument("--cooldown", type=float, default=30.0, help="Seconds between events for one person")
-    parser.add_argument("--image-size", type=int, default=640)
+    parser.add_argument(
+        "--image-size",
+        default=DEFAULT_IMAGE_SIZE,
+        help="YOLO inference size: 'native' (default) or an integer such as 640",
+    )
     parser.add_argument("--output-dir", default=str(REPO_ROOT / "data" / "output"))
     parser.add_argument("--no-video", action="store_true", help="Skip the annotated video (plots and JSON only)")
     parser.add_argument("--panel-seconds", type=float, default=6.0, help="Seconds of history in the scrolling panel")
@@ -340,6 +348,10 @@ def parse_args(argv=None):
         parser.error('--annotated-video requires --pose-json')
     if args.target_fps is not None and args.target_fps <= 0:
         parser.error("--target-fps must be greater than zero")
+    try:
+        args.image_size = parse_image_size(args.image_size)
+    except ValueError as error:
+        parser.error(f"--image-size: {error}")
     if args.threshold is not None and not 0 <= args.threshold <= 1:
         parser.error("--threshold must be between 0 and 1")
     return args

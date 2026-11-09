@@ -1,9 +1,9 @@
 """Stage 2: drop frames so the classifier sees 10 to 15 frames per second.
 
 A fall takes half a second to a second, so 10 to 15 fps captures it, and the
-window of 30 frames then spans about two seconds as the guide assumes. The
-resize to 640 px is already done by YOLO (``imgsz``), so only the frame rate
-is handled here.
+window of 30 frames then spans about two seconds as the guide assumes. Any
+resize is done by YOLO (``imgsz``; by default the frame's native size), so
+only the frame rate is handled here.
 
 ``FrameSampler`` is for files with a known, steady frame rate; it keeps every
 ``stride``-th frame. ``TimeSampler`` is for live sources, where frames arrive

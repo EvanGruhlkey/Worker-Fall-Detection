@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import math
 import sys
 import time
 from pathlib import Path
@@ -12,8 +13,58 @@ import cv2
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+# YOLO's largest feature-map stride; inference sizes must be multiples of it.
+MODEL_STRIDE = 32
+# Inference size used when none is given: the frame's own resolution. YOLO's
+# usual default of 640 shrinks a 1280 px frame to half size, which makes
+# distant people too small to find; "native" keeps every pixel.
+DEFAULT_IMAGE_SIZE = "native"
 
-DEFAULT_IMAGE_SIZE = 640
+
+def parse_image_size(value):
+    """Turn a CLI/env value into an inference size: ``None`` (native) or an int.
+
+    Accepts ``"native"`` (any case), ``None``, ``0``, or a positive integer in
+    any form. Anything else raises ``ValueError``.
+    """
+    if value is None:
+        return None
+    if isinstance(value, str):
+        text = value.strip().lower()
+        if text in ("", "native", "none", "0"):
+            return None
+        if not text.isdigit():
+            raise ValueError(
+                f"image size must be 'native' or a positive integer, got {value!r}"
+            )
+        value = int(text)
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"image size must be 'native' or a positive integer, got {value!r}")
+    if value == 0:
+        return None
+    if value < 0:
+        raise ValueError(f"image size must be 'native' or a positive integer, got {value!r}")
+    return value
+
+
+def resolve_image_size(image_size, frame):
+    """Return the ``imgsz`` to give YOLO for ``frame``.
+
+    ``None`` (native) becomes the frame's own height and width, each rounded
+    up to a multiple of the model stride, so YOLO letterboxes with a few pixels
+    of padding instead of downscaling. An int is passed through unchanged:
+    YOLO scales the long side to it and keeps the aspect ratio.
+    """
+    image_size = parse_image_size(image_size)
+    if image_size is None:
+        height, width = frame.shape[:2]
+        return [
+            math.ceil(height / MODEL_STRIDE) * MODEL_STRIDE,
+            math.ceil(width / MODEL_STRIDE) * MODEL_STRIDE,
+        ]
+    return int(image_size)
+
+
 KEYPOINT_FORMAT = "COCO-body-12"
 COCO_KEYPOINT_COUNT = 17
 FACE_KEYPOINT_COUNT = 5
@@ -42,7 +93,7 @@ def process_yolo_pose_frame(model, frame, image_size=DEFAULT_IMAGE_SIZE):
         frame,
         persist=True,
         tracker="bytetrack.yaml",
-        imgsz=image_size,
+        imgsz=resolve_image_size(image_size, frame),
         verbose=False,
     )[0]
     boxes = result.boxes.xyxy.cpu().tolist()
@@ -120,6 +171,7 @@ def load_pose_model(model_path):
 
 def process_frame(model, frame, image_size=DEFAULT_IMAGE_SIZE):
     """Run one frame through the selected backend and return body keypoints."""
+    image_size = parse_image_size(image_size)
     pipeline_processor = getattr(model, "process_frame", None)
     if callable(pipeline_processor):
         return pipeline_processor(frame, image_size)
@@ -201,6 +253,7 @@ def process_video(
     image_size=DEFAULT_IMAGE_SIZE,
 ):
     """Process a video and save annotated frames plus per-frame pose data."""
+    image_size = parse_image_size(image_size)
     input_video = Path(input_video)
     output_video = Path(output_video)
     output_json = Path(output_json)
@@ -253,6 +306,7 @@ def process_video(
         "metadata": {
             "source": str(input_video),
             "model": str(model_path),
+            "image_size": "native" if image_size is None else image_size,
             "width": width,
             "height": height,
             "fps": fps,
@@ -284,9 +338,11 @@ def parse_args(argv=None):
     )
     parser.add_argument(
         "--image-size",
-        type=int,
         default=DEFAULT_IMAGE_SIZE,
-        help=f"Inference image size (default: {DEFAULT_IMAGE_SIZE})",
+        help=(
+            "YOLO inference size: 'native' keeps the frame's own resolution "
+            "(default), or an integer such as 640 scales the long side to it"
+        ),
     )
     parser.add_argument("--width", type=int, help="Requested live camera width")
     parser.add_argument("--height", type=int, help="Requested live camera height")
@@ -297,8 +353,10 @@ def parse_args(argv=None):
         args.camera = 0
     if args.camera is not None and args.camera < 0:
         parser.error("--camera must be zero or greater")
-    if args.image_size <= 0:
-        parser.error("--image-size must be greater than zero")
+    try:
+        args.image_size = parse_image_size(args.image_size)
+    except ValueError as error:
+        parser.error(f"--image-size: {error}")
     if args.width is not None and args.width <= 0:
         parser.error("--width must be greater than zero")
     if args.height is not None and args.height <= 0:
