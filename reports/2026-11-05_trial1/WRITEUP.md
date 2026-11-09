@@ -27,7 +27,7 @@ Working from joint positions rather than raw pixels has two advantages. The mode
 | Rig clips (AI-generated oil rig footage) | 31 | 21 | 10 | 6.6 min | Training and testing |
 | CAUCAFall (public research dataset) | 100 | 50 | 50 | 16.6 min | Training only (batch 2) |
 
-**Rig clips.** 36 clips of oil rig workers were generated with AI video tools; 5 were dropped because the AI-generated motion was physically unrealistic. The 21 fall clips cover slips (7), trips (2), loss of balance (3), ladder falls (2), a stair misstep, a fall from a low platform, a sudden collapse and 4 drill floor falls. Scenes include wet grating, oily patches, night, rain and mist, often with several coworkers in view. The 10 normal-work clips show routine maintenance, including workers kneeling, crouching and lying on their backs under pipework, which are exactly the poses most likely to look like a fall.
+**Rig clips.** 36 clips of oil rig workers were generated with AI video tools; 5 were dropped because the AI-generated motion was physically unrealistic. The 21 fall clips cover slips (7), trips (2), loss of balance (3), ladder falls (2), a stair misstep, and more.vThe 10 normal work clips show routine maintenance, including workers kneeling, crouching and lying on their backs under pipework, which are exactly the poses most likely to look like a fall.
 
 **CAUCAFall** (Universidad del Cauca, CC BY 4.0) adds 10 real people filmed by a single camera high in a room corner, in daylight and in night-vision mode. Each person performs five falls (forward, backward, left, right, and falling from a chair) and five everyday movements (walking, hopping, kneeling, sitting down and picking up an object).
 
