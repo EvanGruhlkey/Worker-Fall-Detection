@@ -35,7 +35,12 @@ QUALITIES = {"keep", "review", "drop"}
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--csv", default=str(ROOT / "data" / "labels" / "clips.csv"))
+    parser.add_argument(
+        "--csv", nargs="+",
+        default=[str(ROOT / "data" / "labels" / "clips.csv")]
+        + [str(p) for p in sorted((ROOT / "data" / "labels").glob("external_*.csv"))],
+        help="Label sheets (default: clips.csv plus every data/labels/external_*.csv)",
+    )
     parser.add_argument("--output", default=str(ROOT / "data" / "labels" / "manifest.json"))
     parser.add_argument("--pose-dir", default=str(ROOT / "data" / "output"))
     parser.add_argument(
@@ -77,7 +82,7 @@ def read_clips(path):
 
             clip = clips.setdefault(clip_id, {
                 "has_fall": has_fall, "quality": quality, "group": row.get("group") or clip_id,
-                "folder": row.get("folder", ""),
+                "folder": row.get("folder", ""), "source": row.get("source") or "rig",
                 "duration": _number(row.get("duration_s") or "0", "duration_s", where, errors),
                 "falls": [], "track_ids": set(), "lines": [],
             })
@@ -116,9 +121,14 @@ def read_clips(path):
 
 def main(argv=None):
     args = parse_args(argv)
-    clips, errors = read_clips(args.csv)
+    clips, errors = {}, []
+    for sheet in args.csv:
+        sheet_clips, sheet_errors = read_clips(sheet)
+        errors += [f"{Path(sheet).name} {e}" for e in sheet_errors]
+        errors += [f"{Path(sheet).name}: clip_id {c} is also in another sheet" for c in sheet_clips if c in clips]
+        clips.update(sheet_clips)
     if errors:
-        print(f"{len(errors)} problem(s) in {args.csv}:", file=sys.stderr)
+        print(f"{len(errors)} problem(s) in the label sheets:", file=sys.stderr)
         for error in errors:
             print(f"  {error}", file=sys.stderr)
         return 1
@@ -145,7 +155,8 @@ def main(argv=None):
         warnings += check_pose_file(clip_id, clip, poses)
         rates[clip_id] = poses.resample(args.target_fps).fps
 
-        entry = {"name": clip_id, "group": clip["group"], "pose_json": _relative(pose_json, output.parent)}
+        entry = {"name": clip_id, "group": clip["group"], "source": clip["source"],
+                 "pose_json": _relative(pose_json, output.parent)}
         if clip["has_fall"] == "1":
             entry["falls_seconds"] = sorted(clip["falls"])
             if clip["track_ids"]:
@@ -156,7 +167,7 @@ def main(argv=None):
                                 "labeled as falling during the fall interval")
         videos.append(entry)
 
-    manifest = {"target_fps": args.target_fps, "source": str(Path(args.csv).name), "videos": videos}
+    manifest = {"target_fps": args.target_fps, "sheets": [Path(s).name for s in args.csv], "videos": videos}
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
@@ -174,6 +185,11 @@ def main(argv=None):
             warnings.append(f"{len(ids)} clip(s) end up at {rate:g} fps: {', '.join(sorted(ids))}")
         warnings.append("clips end up at different frame rates; training will refuse this manifest "
                         "until they are re-extracted at one rate or --target-fps is lowered")
+    by_source = defaultdict(lambda: [0, 0])
+    for v in videos:
+        by_source[v["source"]][0 if "falls_seconds" in v else 1] += 1
+    if len(by_source) > 1:
+        print("  " + "; ".join(f"{src}: {f} with falls, {n} without" for src, (f, n) in sorted(by_source.items())))
     for reason, ids in skipped.items():
         print(f"  skipped {len(ids)} ({reason}): {', '.join(ids)}")
     for warning in warnings:

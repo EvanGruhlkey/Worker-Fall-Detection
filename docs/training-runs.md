@@ -72,11 +72,11 @@ run stops.
 ```bash
 export PYTHONUNBUFFERED=1
 C="--seeds 0 1 --plots summary --threads 4"
-uv run scripts/train_cv.py --name baseline $C > /dev/null &
-uv run scripts/train_cv.py --name margin --ignore-partial $C > /dev/null &
-uv run scripts/train_cv.py --name margin-aug3 --ignore-partial --augment 3 $C > /dev/null &
-uv run scripts/train_cv.py --name margin-synth200 --ignore-partial --synthetic 200 $C > /dev/null &
-uv run scripts/train_cv.py --name margin-tcn --ignore-partial --arch tcn $C > /dev/null &
+uv run scripts/train_cv.py --name baseline --external off $C > /dev/null &
+uv run scripts/train_cv.py --name margin --external off --ignore-partial $C > /dev/null &
+uv run scripts/train_cv.py --name margin-aug3 --external off --ignore-partial --augment 3 $C > /dev/null &
+uv run scripts/train_cv.py --name margin-synth200 --external off --ignore-partial --synthetic 200 $C > /dev/null &
+uv run scripts/train_cv.py --name margin-tcn --external off --ignore-partial --arch tcn $C > /dev/null &
 sleep 15; tail -f runs/logs/*.log
 ```
 
@@ -127,6 +127,6 @@ chosen from these reports.
 |---|---|
 | `uv` not found | `pip install uv`, then reopen the terminal |
 | PowerShell says scripts are disabled | use the exact command in step 5 (it includes `-ExecutionPolicy Bypass`) |
-| A window closed early or a run stopped | rerun just that one, e.g. `uv run scripts/train_cv.py --name margin --ignore-partial --seeds 0 1 --plots summary --threads 4` |
+| A window closed early or a run stopped | rerun just that one, e.g. `uv run scripts/train_cv.py --name margin --external off --ignore-partial --seeds 0 1 --plots summary --threads 4` |
 | The laptop is very slow | lower `--threads` (Mac/Linux: edit `C=`; Windows: `-Threads 2` on the script) |
 | An error mentioning `manifest.json` or a pose file | run `git pull` again; the pose files and manifest are in the branch |

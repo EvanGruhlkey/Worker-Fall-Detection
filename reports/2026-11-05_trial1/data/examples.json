@@ -1,0 +1,795 @@
+{
+ "threshold": 0.98,
+ "rows": [
+  {
+   "title": "Normal work 1",
+   "clip": "1xiFn4bLdT-6Alz7z0XDz_alligator",
+   "category": "normal_work",
+   "fold": 2,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.9958522319793701,
+   "video": "videos/normal_work/1xiFn4bLdT-6Alz7z0XDz_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/1xiFn4bLdT-6Alz7z0XDz_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/1xiFn4bLdT-6Alz7z0XDz_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Normal work 2",
+   "clip": "29jB-BibMmaRAZBqZtNnU_alligator",
+   "category": "normal_work",
+   "fold": 5,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 1,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.999832272529602,
+   "video": "videos/normal_work/29jB-BibMmaRAZBqZtNnU_alligator.mp4",
+   "stills": [
+    "stills/29jB-BibMmaRAZBqZtNnU_alligator_14.92s.jpg"
+   ],
+   "source_video": "data/input/normal_rig_work/29jB-BibMmaRAZBqZtNnU_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/29jB-BibMmaRAZBqZtNnU_alligator.mp4",
+   "alerts": [
+    {
+     "time": 14.92,
+     "track": 4,
+     "p": 0.996,
+     "faller": false
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "title": "Normal work 3",
+   "clip": "4CJH5B2NtzP8VwFzxMwO5_alligator",
+   "category": "normal_work",
+   "fold": 4,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.88982754945755,
+   "video": "videos/normal_work/4CJH5B2NtzP8VwFzxMwO5_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/4CJH5B2NtzP8VwFzxMwO5_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/4CJH5B2NtzP8VwFzxMwO5_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Normal work 4",
+   "clip": "EIlywKhfkRHTAlBqul_mf_alligator",
+   "category": "normal_work",
+   "fold": 3,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.9011411666870117,
+   "video": "videos/normal_work/EIlywKhfkRHTAlBqul_mf_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/EIlywKhfkRHTAlBqul_mf_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/EIlywKhfkRHTAlBqul_mf_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Drill floor fall D",
+   "clip": "ILLOvByCSJmu2U4QL4R7q_output",
+   "category": "not_visible",
+   "fold": 1,
+   "fall": "3.00-3.50",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "worker not detected during the fall",
+   "fall_windows": 0,
+   "peak_faller": 0.05750606954097748,
+   "peak_others": null,
+   "video": "videos/not_visible/ILLOvByCSJmu2U4QL4R7q_output.mp4",
+   "stills": [
+    "stills/ILLOvByCSJmu2U4QL4R7q_output_03.50s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/ILLOvByCSJmu2U4QL4R7q_output.mp4",
+   "pose_video": "data/output/rig_falls/ILLOvByCSJmu2U4QL4R7q_output.mp4",
+   "alerts": [],
+   "notes": "only worker; descent looks controlled (crawl-like), check realism"
+  },
+  {
+   "title": "Normal work 7",
+   "clip": "LXCUWr1Hjb3MEZVgdYPIh_alligator",
+   "category": "normal_work",
+   "fold": 5,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.0006379875703714788,
+   "video": "videos/normal_work/LXCUWr1Hjb3MEZVgdYPIh_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/LXCUWr1Hjb3MEZVgdYPIh_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/LXCUWr1Hjb3MEZVgdYPIh_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Normal work 8",
+   "clip": "MIPR_SGTQICev4mFBDU2c_alligator",
+   "category": "normal_work",
+   "fold": 4,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.9865721464157104,
+   "video": "videos/normal_work/MIPR_SGTQICev4mFBDU2c_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/MIPR_SGTQICev4mFBDU2c_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/MIPR_SGTQICev4mFBDU2c_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Normal work 9",
+   "clip": "UyNpEpYTGgJkfrlSRc7Kd_alligator",
+   "category": "normal_work",
+   "fold": 1,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.9572972059249878,
+   "video": "videos/normal_work/UyNpEpYTGgJkfrlSRc7Kd_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/UyNpEpYTGgJkfrlSRc7Kd_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/UyNpEpYTGgJkfrlSRc7Kd_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Drill floor fall B",
+   "clip": "YdQeOIiCjBFNpPjdTE641_output",
+   "category": "caught",
+   "fold": 1,
+   "fall": "6.75-7.33",
+   "delay": 0.5,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 28,
+   "peak_faller": 0.9999610185623169,
+   "peak_others": 0.0042915199883282185,
+   "video": "videos/caught/YdQeOIiCjBFNpPjdTE641_output.mp4",
+   "stills": [
+    "stills/YdQeOIiCjBFNpPjdTE641_output_07.83s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/YdQeOIiCjBFNpPjdTE641_output.mp4",
+   "pose_video": "data/output/rig_falls/YdQeOIiCjBFNpPjdTE641_output.mp4",
+   "alerts": [
+    {
+     "time": 7.83,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "only worker; wobbling from ~6.0, uncontrolled from 6.75"
+  },
+  {
+   "title": "Drill floor fall A",
+   "clip": "_4RXOScjeGcGW1uLah2Cb_output",
+   "category": "caught",
+   "fold": 1,
+   "fall": "8.83-9.50",
+   "delay": 0.25,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 8,
+   "peak_faller": 0.9992316961288452,
+   "peak_others": 0.7130432724952698,
+   "video": "videos/caught/_4RXOScjeGcGW1uLah2Cb_output.mp4",
+   "stills": [
+    "stills/_4RXOScjeGcGW1uLah2Cb_output_09.75s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/_4RXOScjeGcGW1uLah2Cb_output.mp4",
+   "pose_video": "data/output/rig_falls/_4RXOScjeGcGW1uLah2Cb_output.mp4",
+   "alerts": [
+    {
+     "time": 9.75,
+     "track": 1,
+     "p": 0.999,
+     "faller": true
+    }
+   ],
+   "notes": "only worker; squats at valve 8.0-8.8 (not a fall) then falls backward"
+  },
+  {
+   "title": "Backward fall near equipment",
+   "clip": "backward_fall_near_equipment",
+   "category": "caught",
+   "fold": 5,
+   "fall": "9.75-10.75",
+   "delay": -0.3333333333333339,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 30,
+   "peak_faller": 0.9999927282333374,
+   "peak_others": 0.9508755803108215,
+   "video": "videos/caught/backward_fall_near_equipment.mp4",
+   "stills": [
+    "stills/backward_fall_near_equipment_10.42s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/backward_fall_near_equipment.mp4",
+   "pose_video": "data/output/rig_falls/backward_fall_near_equipment.mp4",
+   "alerts": [
+    {
+     "time": 10.42,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker at grey cabinet, center-right"
+  },
+  {
+   "title": "Backward slip while stepping back",
+   "clip": "backward_slip_while_stepping_back",
+   "category": "missed",
+   "fold": 2,
+   "fall": "10.00-10.67",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "worker partly lost by the detector",
+   "fall_windows": 3,
+   "peak_faller": 0.9756455421447754,
+   "peak_others": 0.8671761751174927,
+   "video": "videos/missed/backward_slip_while_stepping_back.mp4",
+   "stills": [
+    "stills/backward_slip_while_stepping_back_10.67s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/backward_slip_while_stepping_back.mp4",
+   "pose_video": "data/output/rig_falls/backward_slip_while_stepping_back.mp4",
+   "alerts": [],
+   "notes": "faller: red coverall, left group"
+  },
+  {
+   "title": "Normal work 5",
+   "clip": "f40KfQHxg3C36Lj1rYwqk_alligator",
+   "category": "normal_work",
+   "fold": 2,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.08542905002832413,
+   "video": "videos/normal_work/f40KfQHxg3C36Lj1rYwqk_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/f40KfQHxg3C36Lj1rYwqk_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/f40KfQHxg3C36Lj1rYwqk_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Fall from ladder",
+   "clip": "fall_from_ladder",
+   "category": "caught",
+   "fold": 3,
+   "fall": "7.50-8.08",
+   "delay": 0.4166666666666661,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 27,
+   "peak_faller": 0.9998358488082886,
+   "peak_others": 0.6972573399543762,
+   "video": "videos/caught/fall_from_ladder.mp4",
+   "stills": [
+    "stills/fall_from_ladder_08.50s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/fall_from_ladder.mp4",
+   "pose_video": "data/output/rig_falls/fall_from_ladder.mp4",
+   "alerts": [
+    {
+     "time": 8.5,
+     "track": 23,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker on ladder, left"
+  },
+  {
+   "title": "Fall while working on pipe",
+   "clip": "fall_while_working_on_pipe",
+   "category": "caught",
+   "fold": 1,
+   "fall": "7.75-8.67",
+   "delay": 0.08333333333333393,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 27,
+   "peak_faller": 0.999964714050293,
+   "peak_others": 0.5327434539794922,
+   "video": "videos/caught/fall_while_working_on_pipe.mp4",
+   "stills": [
+    "stills/fall_while_working_on_pipe_08.75s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/fall_while_working_on_pipe.mp4",
+   "pose_video": "data/output/rig_falls/fall_while_working_on_pipe.mp4",
+   "alerts": [
+    {
+     "time": 8.75,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker at red pipe, center; slow descent"
+  },
+  {
+   "title": "Forward fall while carrying a tool",
+   "clip": "forward_fall_while_carrying_a_tool",
+   "category": "caught",
+   "fold": 3,
+   "fall": "8.58-9.25",
+   "delay": 0.16666666666666607,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 30,
+   "peak_faller": 0.9990054965019226,
+   "peak_others": 0.01459476724267006,
+   "video": "videos/caught/forward_fall_while_carrying_a_tool.mp4",
+   "stills": [
+    "stills/forward_fall_while_carrying_a_tool_09.42s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/forward_fall_while_carrying_a_tool.mp4",
+   "pose_video": "data/output/rig_falls/forward_fall_while_carrying_a_tool.mp4",
+   "alerts": [
+    {
+     "time": 9.42,
+     "track": 3,
+     "p": 0.998,
+     "faller": true
+    }
+   ],
+   "notes": "faller: lone worker center; looks like a controlled lowering, check realism"
+  },
+  {
+   "title": "Forward trip while walking",
+   "clip": "forward_trip_while_walking",
+   "category": "caught",
+   "fold": 3,
+   "fall": "5.25-5.92",
+   "delay": 0.33333333333333304,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 28,
+   "peak_faller": 0.9998154044151306,
+   "peak_others": 0.0030913064256310463,
+   "video": "videos/caught/forward_trip_while_walking.mp4",
+   "stills": [
+    "stills/forward_trip_while_walking_06.25s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/forward_trip_while_walking.mp4",
+   "pose_video": "data/output/rig_falls/forward_trip_while_walking.mp4",
+   "alerts": [
+    {
+     "time": 6.25,
+     "track": 21,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: walking worker center-left"
+  },
+  {
+   "title": "Normal work 6",
+   "clip": "jrigd_ZgdOhh4j67tzGVU_alligator",
+   "category": "normal_work",
+   "fold": 3,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 1,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.9984555244445801,
+   "video": "videos/normal_work/jrigd_ZgdOhh4j67tzGVU_alligator.mp4",
+   "stills": [
+    "stills/jrigd_ZgdOhh4j67tzGVU_alligator_02.75s.jpg"
+   ],
+   "source_video": "data/input/normal_rig_work/jrigd_ZgdOhh4j67tzGVU_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/jrigd_ZgdOhh4j67tzGVU_alligator.mp4",
+   "alerts": [
+    {
+     "time": 2.75,
+     "track": 17,
+     "p": 0.996,
+     "faller": false
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "title": "Slip on wet grating",
+   "clip": "miller_group_fall_01_slip_wet_grating",
+   "category": "missed",
+   "fold": 2,
+   "fall": "6.08-6.42",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "model scored the fall too low",
+   "fall_windows": 30,
+   "peak_faller": 0.9910014271736145,
+   "peak_others": 0.0006674747564829886,
+   "video": "videos/missed/miller_group_fall_01_slip_wet_grating.mp4",
+   "stills": [
+    "stills/miller_group_fall_01_slip_wet_grating_06.42s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_01_slip_wet_grating.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_01_slip_wet_grating.mp4",
+   "alerts": [],
+   "notes": "faller: leftmost of the 3-worker group"
+  },
+  {
+   "title": "Trip over hose",
+   "clip": "miller_group_fall_02_trip_over_hose",
+   "category": "caught",
+   "fold": 1,
+   "fall": "4.17-4.75",
+   "delay": 0.41666666666666696,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 26,
+   "peak_faller": 0.9999500513076782,
+   "peak_others": 0.013156674802303314,
+   "video": "videos/caught/miller_group_fall_02_trip_over_hose.mp4",
+   "stills": [
+    "stills/miller_group_fall_02_trip_over_hose_05.17s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_02_trip_over_hose.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_02_trip_over_hose.mp4",
+   "alerts": [
+    {
+     "time": 5.17,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker on the right, near the hose"
+  },
+  {
+   "title": "Slip on oily patch, drizzle",
+   "clip": "miller_group_fall_03_slip_oily_patch_drizzle",
+   "category": "missed",
+   "fold": 4,
+   "fall": "3.42-4.25",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "worker partly lost by the detector",
+   "fall_windows": 8,
+   "peak_faller": 0.054251931607723236,
+   "peak_others": 0.01804368942975998,
+   "video": "videos/missed/miller_group_fall_03_slip_oily_patch_drizzle.mp4",
+   "stills": [
+    "stills/miller_group_fall_03_slip_oily_patch_drizzle_04.25s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_03_slip_oily_patch_drizzle.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_03_slip_oily_patch_drizzle.mp4",
+   "alerts": [],
+   "notes": "faller: worker right of the wellhead"
+  },
+  {
+   "title": "Ladder fall at pipe rack",
+   "clip": "miller_group_fall_04_ladder_fall_pipe_rack",
+   "category": "caught",
+   "fold": 2,
+   "fall": "7.00-7.42",
+   "delay": 0.916666666666667,
+   "false_alerts": 1,
+   "reason": "",
+   "fall_windows": 26,
+   "peak_faller": 0.9997710585594177,
+   "peak_others": 0.9995978474617004,
+   "video": "videos/caught/miller_group_fall_04_ladder_fall_pipe_rack.mp4",
+   "stills": [
+    "stills/miller_group_fall_04_ladder_fall_pipe_rack_03.08s.jpg",
+    "stills/miller_group_fall_04_ladder_fall_pipe_rack_08.33s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_04_ladder_fall_pipe_rack.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_04_ladder_fall_pipe_rack.mp4",
+   "alerts": [
+    {
+     "time": 3.08,
+     "track": 4,
+     "p": 0.992,
+     "faller": false
+    },
+    {
+     "time": 8.33,
+     "track": 11,
+     "p": 0.998,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker on ladder at the pipe rack"
+  },
+  {
+   "title": "Stair misstep at night",
+   "clip": "miller_group_fall_05_stair_misstep_night",
+   "category": "missed",
+   "fold": 2,
+   "fall": "5.75-6.50",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "model scored the fall too low",
+   "fall_windows": 28,
+   "peak_faller": 0.991255521774292,
+   "peak_others": 0.000692483619786799,
+   "video": "videos/missed/miller_group_fall_05_stair_misstep_night.mp4",
+   "stills": [
+    "stills/miller_group_fall_05_stair_misstep_night_06.50s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_05_stair_misstep_night.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_05_stair_misstep_night.mp4",
+   "alerts": [],
+   "notes": "faller: worker coming down the stairs"
+  },
+  {
+   "title": "Fall from low platform",
+   "clip": "miller_group_fall_08_fall_from_low_platform",
+   "category": "not_visible",
+   "fold": 4,
+   "fall": "4.67-5.25",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "worker not detected during the fall",
+   "fall_windows": 0,
+   "peak_faller": 0.8331296443939209,
+   "peak_others": 0.00018270006694365293,
+   "video": "videos/not_visible/miller_group_fall_08_fall_from_low_platform.mp4",
+   "stills": [
+    "stills/miller_group_fall_08_fall_from_low_platform_05.25s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_08_fall_from_low_platform.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_08_fall_from_low_platform.mp4",
+   "alerts": [],
+   "notes": "faller: worker on the platform"
+  },
+  {
+   "title": "Slip carrying toolbox, night rain",
+   "clip": "miller_group_fall_10_slip_carrying_toolbox_night_rain",
+   "category": "missed",
+   "fold": 5,
+   "fall": "4.17-5.08",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "model scored the fall too low",
+   "fall_windows": 29,
+   "peak_faller": 0.05441679805517197,
+   "peak_others": null,
+   "video": "videos/missed/miller_group_fall_10_slip_carrying_toolbox_night_rain.mp4",
+   "stills": [
+    "stills/miller_group_fall_10_slip_carrying_toolbox_night_rain_05.08s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_10_slip_carrying_toolbox_night_rain.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_10_slip_carrying_toolbox_night_rain.mp4",
+   "alerts": [],
+   "notes": "faller: worker carrying red toolbox; motion blur"
+  },
+  {
+   "title": "Drill floor fall C",
+   "clip": "oO8L7gEH7O6hbAxYdXVHD_output",
+   "category": "caught",
+   "fold": 1,
+   "fall": "2.08-2.50",
+   "delay": 0.5833333333333335,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 24,
+   "peak_faller": 0.9999399185180664,
+   "peak_others": 2.413306174275931e-05,
+   "video": "videos/caught/oO8L7gEH7O6hbAxYdXVHD_output.mp4",
+   "stills": [
+    "stills/oO8L7gEH7O6hbAxYdXVHD_output_03.08s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/oO8L7gEH7O6hbAxYdXVHD_output.mp4",
+   "pose_video": "data/output/rig_falls/oO8L7gEH7O6hbAxYdXVHD_output.mp4",
+   "alerts": [
+    {
+     "time": 3.08,
+     "track": 4,
+     "p": 0.999,
+     "faller": true
+    }
+   ],
+   "notes": "only worker"
+  },
+  {
+   "title": "Slip behind another worker",
+   "clip": "slip_behind_person",
+   "category": "not_visible",
+   "fold": 1,
+   "fall": "7.25-7.75",
+   "delay": null,
+   "false_alerts": 1,
+   "reason": "worker not detected during the fall",
+   "fall_windows": 0,
+   "peak_faller": 0.004286434967070818,
+   "peak_others": 0.9988712668418884,
+   "video": "videos/not_visible/slip_behind_person.mp4",
+   "stills": [
+    "stills/slip_behind_person_07.75s.jpg",
+    "stills/slip_behind_person_08.08s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/slip_behind_person.mp4",
+   "pose_video": "data/output/rig_falls/slip_behind_person.mp4",
+   "alerts": [
+    {
+     "time": 8.08,
+     "track": 60,
+     "p": 0.999,
+     "faller": false
+    }
+   ],
+   "notes": "faller: navy coverall + white helmet behind the group, top-center; small in frame"
+  },
+  {
+   "title": "Slip between coworkers",
+   "clip": "slip_between_coworkers",
+   "category": "missed",
+   "fold": 3,
+   "fall": "6.83-7.67",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "model scored the fall too low",
+   "fall_windows": 27,
+   "peak_faller": 0.9794440269470215,
+   "peak_others": 0.8790029287338257,
+   "video": "videos/missed/slip_between_coworkers.mp4",
+   "stills": [
+    "stills/slip_between_coworkers_07.67s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/slip_between_coworkers.mp4",
+   "pose_video": "data/output/rig_falls/slip_between_coworkers.mp4",
+   "alerts": [],
+   "notes": "faller: navy worker left of orange group; looks like kneeling down, check realism"
+  },
+  {
+   "title": "Slip in the open",
+   "clip": "slip_in_the_open",
+   "category": "caught",
+   "fold": 4,
+   "fall": "6.33-6.67",
+   "delay": 0.33333333333333304,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 26,
+   "peak_faller": 0.999758780002594,
+   "peak_others": 0.026531442999839783,
+   "video": "videos/caught/slip_in_the_open.mp4",
+   "stills": [
+    "stills/slip_in_the_open_07.00s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/slip_in_the_open.mp4",
+   "pose_video": "data/output/rig_falls/slip_in_the_open.mp4",
+   "alerts": [
+    {
+     "time": 7.0,
+     "track": 1,
+     "p": 0.998,
+     "faller": true
+    }
+   ],
+   "notes": "faller: orange worker mid-deck; small in frame"
+  },
+  {
+   "title": "Sudden collapse",
+   "clip": "sudden_collapse",
+   "category": "caught",
+   "fold": 5,
+   "fall": "6.25-6.67",
+   "delay": -0.08333333333333393,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 28,
+   "peak_faller": 0.9999761581420898,
+   "peak_others": 0.06884049624204636,
+   "video": "videos/caught/sudden_collapse.mp4",
+   "stills": [
+    "stills/sudden_collapse_06.58s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/sudden_collapse.mp4",
+   "pose_video": "data/output/rig_falls/sudden_collapse.mp4",
+   "alerts": [
+    {
+     "time": 6.58,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: walking worker center; bent forward from ~5.5 before the collapse"
+  },
+  {
+   "title": "Normal work 10",
+   "clip": "yQ3kWNc-Qe3EgqRaNso6l_alligator",
+   "category": "normal_work",
+   "fold": 1,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.028361590579152107,
+   "video": "videos/normal_work/yQ3kWNc-Qe3EgqRaNso6l_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/yQ3kWNc-Qe3EgqRaNso6l_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/yQ3kWNc-Qe3EgqRaNso6l_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  }
+ ],
+ "seed0": {
+  "folds": [
+   [
+    "drillfloor_720p",
+    "fall_while_working_on_pipe",
+    "slip_behind_person",
+    "miller_group_fall_02_trip_over_hose",
+    "yQ3kWNc-Qe3EgqRaNso6l_alligator",
+    "UyNpEpYTGgJkfrlSRc7Kd_alligator"
+   ],
+   [
+    "miller_group_fall_04_ladder_fall_pipe_rack",
+    "miller_group_fall_01_slip_wet_grating",
+    "miller_group_fall_05_stair_misstep_night",
+    "backward_slip_while_stepping_back",
+    "1xiFn4bLdT-6Alz7z0XDz_alligator",
+    "f40KfQHxg3C36Lj1rYwqk_alligator"
+   ],
+   [
+    "fall_from_ladder",
+    "forward_fall_while_carrying_a_tool",
+    "forward_trip_while_walking",
+    "slip_between_coworkers",
+    "jrigd_ZgdOhh4j67tzGVU_alligator",
+    "EIlywKhfkRHTAlBqul_mf_alligator"
+   ],
+   [
+    "miller_group_fall_08_fall_from_low_platform",
+    "slip_in_the_open",
+    "miller_group_fall_03_slip_oily_patch_drizzle",
+    "MIPR_SGTQICev4mFBDU2c_alligator",
+    "4CJH5B2NtzP8VwFzxMwO5_alligator"
+   ],
+   [
+    "backward_fall_near_equipment",
+    "miller_group_fall_10_slip_carrying_toolbox_night_rain",
+    "sudden_collapse",
+    "LXCUWr1Hjb3MEZVgdYPIh_alligator",
+    "29jB-BibMmaRAZBqZtNnU_alligator"
+   ]
+  ]
+ }
+}

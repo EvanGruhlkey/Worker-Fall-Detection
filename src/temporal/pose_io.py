@@ -32,19 +32,39 @@ class PoseFrames:
         return len(self.people)
 
     def resample(self, target_fps):
-        """Keep every n-th frame to get as close to ``target_fps`` as possible.
+        """Bring the frames to ``target_fps``.
 
-        Frames are never invented: asking for more than ``fps`` keeps them all.
+        - A rate that is a whole multiple of the target (24 -> 12) keeps every
+          n-th frame, so real frames are used unchanged.
+        - Any other higher rate (20 -> 12) is interpolated: each person's box
+          and keypoints are computed at exact 1/target-second steps from the
+          two frames around that time. Picking the nearest frame instead would
+          jitter the spacing between frames, and velocities with it.
+        - Frames are never invented beyond the source rate: asking for more
+          than ``fps`` keeps every frame as it is.
         """
         if target_fps <= 0:
             raise ValueError("target_fps must be greater than zero")
-        stride = max(1, round(self.fps / target_fps))
-        return PoseFrames(
-            fps=self.fps / stride,
-            source_fps=self.source_fps,
-            times=self.times[::stride],
-            people=self.people[::stride],
-        )
+        ratio = self.fps / target_fps
+        if ratio <= 1.0 + 1e-6 or abs(ratio - round(ratio)) < 0.02:
+            stride = max(1, round(ratio))
+            return PoseFrames(
+                fps=self.fps / stride,
+                source_fps=self.source_fps,
+                times=self.times[::stride],
+                people=self.people[::stride],
+            )
+        start, end = self.times[0], self.times[-1]
+        count = int((end - start) * target_fps + 1e-6) + 1
+        times, people = [], []
+        for step in range(count):
+            t = start + step / target_fps
+            position = (t - start) * self.fps
+            before = min(int(position), len(self.people) - 1)
+            after = min(before + 1, len(self.people) - 1)
+            people.append(_blend(self.people[before], self.people[after], position - before))
+            times.append(t)
+        return PoseFrames(fps=float(target_fps), source_fps=self.source_fps, times=times, people=people)
 
     def interval_indices(self, start_seconds, end_seconds):
         """Inclusive frame indices covering a time interval.
@@ -63,6 +83,37 @@ class PoseFrames:
         middle = (start_seconds + end_seconds) / 2
         nearest = min(range(len(self.times)), key=lambda i: abs(self.times[i] - middle))
         return nearest, nearest
+
+
+def _blend(frame_a, frame_b, weight):
+    """People at a time ``weight`` (0-1) of the way from frame_a to frame_b.
+
+    A track in both frames is interpolated (keypoint confidence takes the
+    lower of the two, so a joint unseen in either stays unseen); a track in
+    only one frame is taken from the nearer frame if it has it, else dropped.
+    """
+    by_id_b = {p.get("track_id"): p for p in frame_b if p.get("track_id") is not None}
+    by_id_a = {p.get("track_id"): p for p in frame_a if p.get("track_id") is not None}
+    nearer = frame_a if weight < 0.5 else frame_b
+    out = []
+    for person in nearer:
+        track_id = person.get("track_id")
+        a, b = by_id_a.get(track_id), by_id_b.get(track_id)
+        if track_id is None or a is None or b is None:
+            out.append(person)
+            continue
+        mix = lambda x, y: x + (y - x) * weight  # noqa: E731
+        out.append({
+            "track_id": track_id,
+            "bbox": [mix(x, y) for x, y in zip(a["bbox"], b["bbox"])],
+            "confidence": min(a.get("confidence", 1.0), b.get("confidence", 1.0)),
+            "keypoints": [
+                {"x": mix(ka["x"], kb["x"]), "y": mix(ka["y"], kb["y"]),
+                 "confidence": min(ka["confidence"], kb["confidence"])}
+                for ka, kb in zip(a["keypoints"], b["keypoints"])
+            ],
+        })
+    return out
 
 
 def load_pose_json(path):

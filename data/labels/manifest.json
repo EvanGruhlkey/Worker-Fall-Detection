@@ -1,30 +1,38 @@
 {
   "target_fps": 12.0,
-  "source": "clips.csv",
+  "sheets": [
+    "clips.csv",
+    "external_caucafall.csv"
+  ],
   "videos": [
     {
       "name": "1xiFn4bLdT-6Alz7z0XDz_alligator",
       "group": "1xiFn4bLdT-6Alz7z0XDz_alligator",
+      "source": "rig",
       "pose_json": "../output/normal_rig_work/1xiFn4bLdT-6Alz7z0XDz_alligator.json"
     },
     {
       "name": "29jB-BibMmaRAZBqZtNnU_alligator",
       "group": "29jB-BibMmaRAZBqZtNnU_alligator",
+      "source": "rig",
       "pose_json": "../output/normal_rig_work/29jB-BibMmaRAZBqZtNnU_alligator.json"
     },
     {
       "name": "4CJH5B2NtzP8VwFzxMwO5_alligator",
       "group": "4CJH5B2NtzP8VwFzxMwO5_alligator",
+      "source": "rig",
       "pose_json": "../output/normal_rig_work/4CJH5B2NtzP8VwFzxMwO5_alligator.json"
     },
     {
       "name": "EIlywKhfkRHTAlBqul_mf_alligator",
       "group": "EIlywKhfkRHTAlBqul_mf_alligator",
+      "source": "rig",
       "pose_json": "../output/normal_rig_work/EIlywKhfkRHTAlBqul_mf_alligator.json"
     },
     {
       "name": "ILLOvByCSJmu2U4QL4R7q_output",
       "group": "drillfloor_720p",
+      "source": "rig",
       "pose_json": "../output/rig_falls/ILLOvByCSJmu2U4QL4R7q_output.json",
       "falls_seconds": [
         [
@@ -39,21 +47,25 @@
     {
       "name": "LXCUWr1Hjb3MEZVgdYPIh_alligator",
       "group": "LXCUWr1Hjb3MEZVgdYPIh_alligator",
+      "source": "rig",
       "pose_json": "../output/normal_rig_work/LXCUWr1Hjb3MEZVgdYPIh_alligator.json"
     },
     {
       "name": "MIPR_SGTQICev4mFBDU2c_alligator",
       "group": "MIPR_SGTQICev4mFBDU2c_alligator",
+      "source": "rig",
       "pose_json": "../output/normal_rig_work/MIPR_SGTQICev4mFBDU2c_alligator.json"
     },
     {
       "name": "UyNpEpYTGgJkfrlSRc7Kd_alligator",
       "group": "UyNpEpYTGgJkfrlSRc7Kd_alligator",
+      "source": "rig",
       "pose_json": "../output/normal_rig_work/UyNpEpYTGgJkfrlSRc7Kd_alligator.json"
     },
     {
       "name": "YdQeOIiCjBFNpPjdTE641_output",
       "group": "drillfloor_720p",
+      "source": "rig",
       "pose_json": "../output/rig_falls/YdQeOIiCjBFNpPjdTE641_output.json",
       "falls_seconds": [
         [
@@ -68,6 +80,7 @@
     {
       "name": "_4RXOScjeGcGW1uLah2Cb_output",
       "group": "drillfloor_720p",
+      "source": "rig",
       "pose_json": "../output/rig_falls/_4RXOScjeGcGW1uLah2Cb_output.json",
       "falls_seconds": [
         [
@@ -82,6 +95,7 @@
     {
       "name": "backward_fall_near_equipment",
       "group": "backward_fall_near_equipment",
+      "source": "rig",
       "pose_json": "../output/rig_falls/backward_fall_near_equipment.json",
       "falls_seconds": [
         [
@@ -96,6 +110,7 @@
     {
       "name": "backward_slip_while_stepping_back",
       "group": "backward_slip_while_stepping_back",
+      "source": "rig",
       "pose_json": "../output/rig_falls/backward_slip_while_stepping_back.json",
       "falls_seconds": [
         [
@@ -108,13 +123,1116 @@
       ]
     },
     {
+      "name": "cauca_s01_fall_backwards",
+      "group": "cauca_s01",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s01_fall_backwards.json",
+      "falls_seconds": [
+        [
+          2.4,
+          3.0
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s01_fall_forward",
+      "group": "cauca_s01",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s01_fall_forward.json",
+      "falls_seconds": [
+        [
+          6.15,
+          6.75
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s01_fall_left",
+      "group": "cauca_s01",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s01_fall_left.json",
+      "falls_seconds": [
+        [
+          1.45,
+          2.1
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s01_fall_right",
+      "group": "cauca_s01",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s01_fall_right.json",
+      "falls_seconds": [
+        [
+          1.9,
+          2.6
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s01_fall_sitting",
+      "group": "cauca_s01",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s01_fall_sitting.json",
+      "falls_seconds": [
+        [
+          3.95,
+          4.7
+        ]
+      ],
+      "track_ids": [
+        2
+      ]
+    },
+    {
+      "name": "cauca_s01_hop",
+      "group": "cauca_s01",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s01_hop.json"
+    },
+    {
+      "name": "cauca_s01_kneel",
+      "group": "cauca_s01",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s01_kneel.json"
+    },
+    {
+      "name": "cauca_s01_pick_up_object",
+      "group": "cauca_s01",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s01_pick_up_object.json"
+    },
+    {
+      "name": "cauca_s01_sit_down",
+      "group": "cauca_s01",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s01_sit_down.json"
+    },
+    {
+      "name": "cauca_s01_walk",
+      "group": "cauca_s01",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s01_walk.json"
+    },
+    {
+      "name": "cauca_s02_fall_backwards",
+      "group": "cauca_s02",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s02_fall_backwards.json",
+      "falls_seconds": [
+        [
+          2.65,
+          3.35
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s02_fall_forward",
+      "group": "cauca_s02",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s02_fall_forward.json",
+      "falls_seconds": [
+        [
+          0.7,
+          1.4
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s02_fall_left",
+      "group": "cauca_s02",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s02_fall_left.json",
+      "falls_seconds": [
+        [
+          1.2,
+          1.75
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s02_fall_right",
+      "group": "cauca_s02",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s02_fall_right.json",
+      "falls_seconds": [
+        [
+          1.15,
+          1.75
+        ]
+      ],
+      "track_ids": [
+        1,
+        3
+      ]
+    },
+    {
+      "name": "cauca_s02_fall_sitting",
+      "group": "cauca_s02",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s02_fall_sitting.json",
+      "falls_seconds": [
+        [
+          3.15,
+          3.95
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s02_hop",
+      "group": "cauca_s02",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s02_hop.json"
+    },
+    {
+      "name": "cauca_s02_kneel",
+      "group": "cauca_s02",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s02_kneel.json"
+    },
+    {
+      "name": "cauca_s02_pick_up_object",
+      "group": "cauca_s02",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s02_pick_up_object.json"
+    },
+    {
+      "name": "cauca_s02_sit_down",
+      "group": "cauca_s02",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s02_sit_down.json"
+    },
+    {
+      "name": "cauca_s02_walk",
+      "group": "cauca_s02",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s02_walk.json"
+    },
+    {
+      "name": "cauca_s03_fall_backwards",
+      "group": "cauca_s03",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s03_fall_backwards.json",
+      "falls_seconds": [
+        [
+          2.75,
+          3.35
+        ]
+      ],
+      "track_ids": [
+        1,
+        6,
+        8
+      ]
+    },
+    {
+      "name": "cauca_s03_fall_forward",
+      "group": "cauca_s03",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s03_fall_forward.json",
+      "falls_seconds": [
+        [
+          3.5,
+          4.4
+        ]
+      ],
+      "track_ids": [
+        1,
+        7,
+        12
+      ]
+    },
+    {
+      "name": "cauca_s03_fall_left",
+      "group": "cauca_s03",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s03_fall_left.json",
+      "falls_seconds": [
+        [
+          4.7,
+          5.3
+        ]
+      ],
+      "track_ids": [
+        1,
+        6,
+        7
+      ]
+    },
+    {
+      "name": "cauca_s03_fall_right",
+      "group": "cauca_s03",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s03_fall_right.json",
+      "falls_seconds": [
+        [
+          2.15,
+          2.85
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s03_fall_sitting",
+      "group": "cauca_s03",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s03_fall_sitting.json",
+      "falls_seconds": [
+        [
+          2.25,
+          3.05
+        ]
+      ],
+      "track_ids": [
+        1,
+        2
+      ]
+    },
+    {
+      "name": "cauca_s03_hop",
+      "group": "cauca_s03",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s03_hop.json"
+    },
+    {
+      "name": "cauca_s03_kneel",
+      "group": "cauca_s03",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s03_kneel.json"
+    },
+    {
+      "name": "cauca_s03_pick_up_object",
+      "group": "cauca_s03",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s03_pick_up_object.json"
+    },
+    {
+      "name": "cauca_s03_sit_down",
+      "group": "cauca_s03",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s03_sit_down.json"
+    },
+    {
+      "name": "cauca_s03_walk",
+      "group": "cauca_s03",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s03_walk.json"
+    },
+    {
+      "name": "cauca_s04_fall_backwards",
+      "group": "cauca_s04",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s04_fall_backwards.json",
+      "falls_seconds": [
+        [
+          3.0,
+          3.7
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s04_fall_forward",
+      "group": "cauca_s04",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s04_fall_forward.json",
+      "falls_seconds": [
+        [
+          0.65,
+          1.25
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s04_fall_left",
+      "group": "cauca_s04",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s04_fall_left.json",
+      "falls_seconds": [
+        [
+          2.35,
+          3.05
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s04_fall_right",
+      "group": "cauca_s04",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s04_fall_right.json",
+      "falls_seconds": [
+        [
+          1.85,
+          2.35
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s04_fall_sitting",
+      "group": "cauca_s04",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s04_fall_sitting.json",
+      "falls_seconds": [
+        [
+          2.65,
+          3.35
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s04_hop",
+      "group": "cauca_s04",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s04_hop.json"
+    },
+    {
+      "name": "cauca_s04_kneel",
+      "group": "cauca_s04",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s04_kneel.json"
+    },
+    {
+      "name": "cauca_s04_pick_up_object",
+      "group": "cauca_s04",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s04_pick_up_object.json"
+    },
+    {
+      "name": "cauca_s04_sit_down",
+      "group": "cauca_s04",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s04_sit_down.json"
+    },
+    {
+      "name": "cauca_s04_walk",
+      "group": "cauca_s04",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s04_walk.json"
+    },
+    {
+      "name": "cauca_s05_fall_backwards",
+      "group": "cauca_s05",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s05_fall_backwards.json",
+      "falls_seconds": [
+        [
+          1.5,
+          2.4
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s05_fall_forward",
+      "group": "cauca_s05",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s05_fall_forward.json",
+      "falls_seconds": [
+        [
+          2.2,
+          2.9
+        ]
+      ],
+      "track_ids": [
+        1,
+        7
+      ]
+    },
+    {
+      "name": "cauca_s05_fall_left",
+      "group": "cauca_s05",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s05_fall_left.json",
+      "falls_seconds": [
+        [
+          2.5,
+          3.8
+        ]
+      ],
+      "track_ids": [
+        1,
+        4
+      ]
+    },
+    {
+      "name": "cauca_s05_fall_right",
+      "group": "cauca_s05",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s05_fall_right.json",
+      "falls_seconds": [
+        [
+          3.05,
+          3.7
+        ]
+      ],
+      "track_ids": [
+        1,
+        3,
+        10
+      ]
+    },
+    {
+      "name": "cauca_s05_fall_sitting",
+      "group": "cauca_s05",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s05_fall_sitting.json",
+      "falls_seconds": [
+        [
+          2.55,
+          3.55
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s05_hop",
+      "group": "cauca_s05",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s05_hop.json"
+    },
+    {
+      "name": "cauca_s05_kneel",
+      "group": "cauca_s05",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s05_kneel.json"
+    },
+    {
+      "name": "cauca_s05_pick_up_object",
+      "group": "cauca_s05",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s05_pick_up_object.json"
+    },
+    {
+      "name": "cauca_s05_sit_down",
+      "group": "cauca_s05",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s05_sit_down.json"
+    },
+    {
+      "name": "cauca_s05_walk",
+      "group": "cauca_s05",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s05_walk.json"
+    },
+    {
+      "name": "cauca_s06_fall_backwards",
+      "group": "cauca_s06",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s06_fall_backwards.json",
+      "falls_seconds": [
+        [
+          4.05,
+          4.65
+        ]
+      ],
+      "track_ids": [
+        1,
+        2,
+        4,
+        10
+      ]
+    },
+    {
+      "name": "cauca_s06_fall_forward",
+      "group": "cauca_s06",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s06_fall_forward.json",
+      "falls_seconds": [
+        [
+          3.35,
+          4.05
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s06_fall_left",
+      "group": "cauca_s06",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s06_fall_left.json",
+      "falls_seconds": [
+        [
+          1.75,
+          2.65
+        ]
+      ],
+      "track_ids": [
+        1,
+        3,
+        5
+      ]
+    },
+    {
+      "name": "cauca_s06_fall_right",
+      "group": "cauca_s06",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s06_fall_right.json",
+      "falls_seconds": [
+        [
+          3.25,
+          3.85
+        ]
+      ],
+      "track_ids": [
+        1,
+        3,
+        6,
+        11
+      ]
+    },
+    {
+      "name": "cauca_s06_fall_sitting",
+      "group": "cauca_s06",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s06_fall_sitting.json",
+      "falls_seconds": [
+        [
+          4.25,
+          5.15
+        ]
+      ],
+      "track_ids": [
+        1,
+        5,
+        9
+      ]
+    },
+    {
+      "name": "cauca_s06_hop",
+      "group": "cauca_s06",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s06_hop.json"
+    },
+    {
+      "name": "cauca_s06_kneel",
+      "group": "cauca_s06",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s06_kneel.json"
+    },
+    {
+      "name": "cauca_s06_pick_up_object",
+      "group": "cauca_s06",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s06_pick_up_object.json"
+    },
+    {
+      "name": "cauca_s06_sit_down",
+      "group": "cauca_s06",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s06_sit_down.json"
+    },
+    {
+      "name": "cauca_s06_walk",
+      "group": "cauca_s06",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s06_walk.json"
+    },
+    {
+      "name": "cauca_s07_fall_backwards",
+      "group": "cauca_s07",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s07_fall_backwards.json",
+      "falls_seconds": [
+        [
+          3.55,
+          4.4
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s07_fall_forward",
+      "group": "cauca_s07",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s07_fall_forward.json",
+      "falls_seconds": [
+        [
+          1.35,
+          2.45
+        ]
+      ],
+      "track_ids": [
+        1,
+        2
+      ]
+    },
+    {
+      "name": "cauca_s07_fall_left",
+      "group": "cauca_s07",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s07_fall_left.json",
+      "falls_seconds": [
+        [
+          2.85,
+          3.65
+        ]
+      ],
+      "track_ids": [
+        1,
+        6
+      ]
+    },
+    {
+      "name": "cauca_s07_fall_right",
+      "group": "cauca_s07",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s07_fall_right.json",
+      "falls_seconds": [
+        [
+          1.5,
+          2.4
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s07_fall_sitting",
+      "group": "cauca_s07",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s07_fall_sitting.json",
+      "falls_seconds": [
+        [
+          2.35,
+          3.05
+        ]
+      ],
+      "track_ids": [
+        1,
+        3
+      ]
+    },
+    {
+      "name": "cauca_s07_hop",
+      "group": "cauca_s07",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s07_hop.json"
+    },
+    {
+      "name": "cauca_s07_kneel",
+      "group": "cauca_s07",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s07_kneel.json"
+    },
+    {
+      "name": "cauca_s07_pick_up_object",
+      "group": "cauca_s07",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s07_pick_up_object.json"
+    },
+    {
+      "name": "cauca_s07_sit_down",
+      "group": "cauca_s07",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s07_sit_down.json"
+    },
+    {
+      "name": "cauca_s07_walk",
+      "group": "cauca_s07",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s07_walk.json"
+    },
+    {
+      "name": "cauca_s08_fall_backwards",
+      "group": "cauca_s08",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s08_fall_backwards.json",
+      "falls_seconds": [
+        [
+          2.4,
+          3.1
+        ]
+      ],
+      "track_ids": [
+        1,
+        3,
+        6
+      ]
+    },
+    {
+      "name": "cauca_s08_fall_forward",
+      "group": "cauca_s08",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s08_fall_forward.json",
+      "falls_seconds": [
+        [
+          1.1,
+          1.7
+        ]
+      ],
+      "track_ids": [
+        1,
+        6
+      ]
+    },
+    {
+      "name": "cauca_s08_fall_left",
+      "group": "cauca_s08",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s08_fall_left.json",
+      "falls_seconds": [
+        [
+          2.05,
+          2.65
+        ]
+      ],
+      "track_ids": [
+        1,
+        2,
+        5,
+        12
+      ]
+    },
+    {
+      "name": "cauca_s08_fall_right",
+      "group": "cauca_s08",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s08_fall_right.json",
+      "falls_seconds": [
+        [
+          2.05,
+          2.95
+        ]
+      ],
+      "track_ids": [
+        1,
+        3,
+        6,
+        7
+      ]
+    },
+    {
+      "name": "cauca_s08_fall_sitting",
+      "group": "cauca_s08",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s08_fall_sitting.json",
+      "falls_seconds": [
+        [
+          3.2,
+          4.0
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s08_hop",
+      "group": "cauca_s08",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s08_hop.json"
+    },
+    {
+      "name": "cauca_s08_kneel",
+      "group": "cauca_s08",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s08_kneel.json"
+    },
+    {
+      "name": "cauca_s08_pick_up_object",
+      "group": "cauca_s08",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s08_pick_up_object.json"
+    },
+    {
+      "name": "cauca_s08_sit_down",
+      "group": "cauca_s08",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s08_sit_down.json"
+    },
+    {
+      "name": "cauca_s08_walk",
+      "group": "cauca_s08",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s08_walk.json"
+    },
+    {
+      "name": "cauca_s09_fall_backwards",
+      "group": "cauca_s09",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s09_fall_backwards.json",
+      "falls_seconds": [
+        [
+          2.05,
+          3.15
+        ]
+      ],
+      "track_ids": [
+        1,
+        8,
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "name": "cauca_s09_fall_forward",
+      "group": "cauca_s09",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s09_fall_forward.json",
+      "falls_seconds": [
+        [
+          1.85,
+          2.9
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s09_fall_left",
+      "group": "cauca_s09",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s09_fall_left.json",
+      "falls_seconds": [
+        [
+          1.85,
+          2.95
+        ]
+      ],
+      "track_ids": [
+        1,
+        4
+      ]
+    },
+    {
+      "name": "cauca_s09_fall_right",
+      "group": "cauca_s09",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s09_fall_right.json",
+      "falls_seconds": [
+        [
+          2.05,
+          2.95
+        ]
+      ],
+      "track_ids": [
+        1,
+        3
+      ]
+    },
+    {
+      "name": "cauca_s09_fall_sitting",
+      "group": "cauca_s09",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s09_fall_sitting.json",
+      "falls_seconds": [
+        [
+          4.15,
+          4.75
+        ]
+      ],
+      "track_ids": [
+        1,
+        2,
+        5
+      ]
+    },
+    {
+      "name": "cauca_s09_hop",
+      "group": "cauca_s09",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s09_hop.json"
+    },
+    {
+      "name": "cauca_s09_kneel",
+      "group": "cauca_s09",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s09_kneel.json"
+    },
+    {
+      "name": "cauca_s09_pick_up_object",
+      "group": "cauca_s09",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s09_pick_up_object.json"
+    },
+    {
+      "name": "cauca_s09_sit_down",
+      "group": "cauca_s09",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s09_sit_down.json"
+    },
+    {
+      "name": "cauca_s09_walk",
+      "group": "cauca_s09",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s09_walk.json"
+    },
+    {
+      "name": "cauca_s10_fall_backwards",
+      "group": "cauca_s10",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s10_fall_backwards.json",
+      "falls_seconds": [
+        [
+          2.6,
+          3.8
+        ]
+      ],
+      "track_ids": [
+        1,
+        4,
+        8
+      ]
+    },
+    {
+      "name": "cauca_s10_fall_forward",
+      "group": "cauca_s10",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s10_fall_forward.json",
+      "falls_seconds": [
+        [
+          1.45,
+          2.75
+        ]
+      ],
+      "track_ids": [
+        1,
+        8,
+        12
+      ]
+    },
+    {
+      "name": "cauca_s10_fall_left",
+      "group": "cauca_s10",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s10_fall_left.json",
+      "falls_seconds": [
+        [
+          1.5,
+          2.8
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "cauca_s10_fall_right",
+      "group": "cauca_s10",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s10_fall_right.json",
+      "falls_seconds": [
+        [
+          2.85,
+          4.0
+        ]
+      ],
+      "track_ids": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "name": "cauca_s10_fall_sitting",
+      "group": "cauca_s10",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s10_fall_sitting.json",
+      "falls_seconds": [
+        [
+          3.0,
+          3.8
+        ]
+      ],
+      "track_ids": [
+        1,
+        4,
+        6,
+        11
+      ]
+    },
+    {
+      "name": "cauca_s10_hop",
+      "group": "cauca_s10",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s10_hop.json"
+    },
+    {
+      "name": "cauca_s10_kneel",
+      "group": "cauca_s10",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s10_kneel.json"
+    },
+    {
+      "name": "cauca_s10_pick_up_object",
+      "group": "cauca_s10",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s10_pick_up_object.json"
+    },
+    {
+      "name": "cauca_s10_sit_down",
+      "group": "cauca_s10",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s10_sit_down.json"
+    },
+    {
+      "name": "cauca_s10_walk",
+      "group": "cauca_s10",
+      "source": "caucafall",
+      "pose_json": "../output/caucafall/cauca_s10_walk.json"
+    },
+    {
       "name": "f40KfQHxg3C36Lj1rYwqk_alligator",
       "group": "f40KfQHxg3C36Lj1rYwqk_alligator",
+      "source": "rig",
       "pose_json": "../output/normal_rig_work/f40KfQHxg3C36Lj1rYwqk_alligator.json"
     },
     {
       "name": "fall_from_ladder",
       "group": "fall_from_ladder",
+      "source": "rig",
       "pose_json": "../output/rig_falls/fall_from_ladder.json",
       "falls_seconds": [
         [
@@ -129,6 +1247,7 @@
     {
       "name": "fall_while_working_on_pipe",
       "group": "fall_while_working_on_pipe",
+      "source": "rig",
       "pose_json": "../output/rig_falls/fall_while_working_on_pipe.json",
       "falls_seconds": [
         [
@@ -143,6 +1262,7 @@
     {
       "name": "forward_fall_while_carrying_a_tool",
       "group": "forward_fall_while_carrying_a_tool",
+      "source": "rig",
       "pose_json": "../output/rig_falls/forward_fall_while_carrying_a_tool.json",
       "falls_seconds": [
         [
@@ -157,6 +1277,7 @@
     {
       "name": "forward_trip_while_walking",
       "group": "forward_trip_while_walking",
+      "source": "rig",
       "pose_json": "../output/rig_falls/forward_trip_while_walking.json",
       "falls_seconds": [
         [
@@ -171,11 +1292,13 @@
     {
       "name": "jrigd_ZgdOhh4j67tzGVU_alligator",
       "group": "jrigd_ZgdOhh4j67tzGVU_alligator",
+      "source": "rig",
       "pose_json": "../output/normal_rig_work/jrigd_ZgdOhh4j67tzGVU_alligator.json"
     },
     {
       "name": "miller_group_fall_01_slip_wet_grating",
       "group": "miller_group_fall_01_slip_wet_grating",
+      "source": "rig",
       "pose_json": "../output/rig_falls/miller_group_fall_01_slip_wet_grating.json",
       "falls_seconds": [
         [
@@ -190,6 +1313,7 @@
     {
       "name": "miller_group_fall_02_trip_over_hose",
       "group": "miller_group_fall_02_trip_over_hose",
+      "source": "rig",
       "pose_json": "../output/rig_falls/miller_group_fall_02_trip_over_hose.json",
       "falls_seconds": [
         [
@@ -204,6 +1328,7 @@
     {
       "name": "miller_group_fall_03_slip_oily_patch_drizzle",
       "group": "miller_group_fall_03_slip_oily_patch_drizzle",
+      "source": "rig",
       "pose_json": "../output/rig_falls/miller_group_fall_03_slip_oily_patch_drizzle.json",
       "falls_seconds": [
         [
@@ -218,6 +1343,7 @@
     {
       "name": "miller_group_fall_04_ladder_fall_pipe_rack",
       "group": "miller_group_fall_04_ladder_fall_pipe_rack",
+      "source": "rig",
       "pose_json": "../output/rig_falls/miller_group_fall_04_ladder_fall_pipe_rack.json",
       "falls_seconds": [
         [
@@ -232,6 +1358,7 @@
     {
       "name": "miller_group_fall_05_stair_misstep_night",
       "group": "miller_group_fall_05_stair_misstep_night",
+      "source": "rig",
       "pose_json": "../output/rig_falls/miller_group_fall_05_stair_misstep_night.json",
       "falls_seconds": [
         [
@@ -246,6 +1373,7 @@
     {
       "name": "miller_group_fall_08_fall_from_low_platform",
       "group": "miller_group_fall_08_fall_from_low_platform",
+      "source": "rig",
       "pose_json": "../output/rig_falls/miller_group_fall_08_fall_from_low_platform.json",
       "falls_seconds": [
         [
@@ -260,6 +1388,7 @@
     {
       "name": "miller_group_fall_10_slip_carrying_toolbox_night_rain",
       "group": "miller_group_fall_10_slip_carrying_toolbox_night_rain",
+      "source": "rig",
       "pose_json": "../output/rig_falls/miller_group_fall_10_slip_carrying_toolbox_night_rain.json",
       "falls_seconds": [
         [
@@ -274,6 +1403,7 @@
     {
       "name": "oO8L7gEH7O6hbAxYdXVHD_output",
       "group": "drillfloor_720p",
+      "source": "rig",
       "pose_json": "../output/rig_falls/oO8L7gEH7O6hbAxYdXVHD_output.json",
       "falls_seconds": [
         [
@@ -288,6 +1418,7 @@
     {
       "name": "slip_behind_person",
       "group": "slip_behind_person",
+      "source": "rig",
       "pose_json": "../output/rig_falls/slip_behind_person.json",
       "falls_seconds": [
         [
@@ -302,6 +1433,7 @@
     {
       "name": "slip_between_coworkers",
       "group": "slip_between_coworkers",
+      "source": "rig",
       "pose_json": "../output/rig_falls/slip_between_coworkers.json",
       "falls_seconds": [
         [
@@ -316,6 +1448,7 @@
     {
       "name": "slip_in_the_open",
       "group": "slip_in_the_open",
+      "source": "rig",
       "pose_json": "../output/rig_falls/slip_in_the_open.json",
       "falls_seconds": [
         [
@@ -330,6 +1463,7 @@
     {
       "name": "sudden_collapse",
       "group": "sudden_collapse",
+      "source": "rig",
       "pose_json": "../output/rig_falls/sudden_collapse.json",
       "falls_seconds": [
         [
@@ -344,6 +1478,7 @@
     {
       "name": "yQ3kWNc-Qe3EgqRaNso6l_alligator",
       "group": "yQ3kWNc-Qe3EgqRaNso6l_alligator",
+      "source": "rig",
       "pose_json": "../output/normal_rig_work/yQ3kWNc-Qe3EgqRaNso6l_alligator.json"
     }
   ]

@@ -26,6 +26,7 @@ import numpy as np  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
 
 from .crossval import average_precision, config_dict, fold_summaries, pooled_windows  # noqa: E402
+from .evaluate import summarize  # noqa: E402
 from .model import save_checkpoint  # noqa: E402
 
 SURFACE = "#fcfcfb"
@@ -83,6 +84,8 @@ def build_metrics(result, data_note):
         "fps": result.fps,
         "clips": len(result.clips),
         "fall_clips": sum(c.has_fall for c in result.clips),
+        "sources": _source_counts(result.clips),
+        "extra_training_clips": _source_counts(result.extra_train),
         "groups": len({c.group for c in result.clips}),
         "config": config_dict(result.config),
         "folds": [sorted(f) for f in result.folds],
@@ -163,6 +166,9 @@ def render_markdown(result, metrics, per_clip, images, extra_notes):
         f"- Augmented copies per training clip: {c.augment}; synthetic clips added: {c.synthetic}",
         f"- Gate: debounce {c.debounce} frames ({c.debounce / result.fps:.2f} s), cooldown {c.cooldown:g} s",
         f"- Seeds: {', '.join(str(s) for s in c.seeds)}",
+        f"- Tested clips by source: {_source_text(metrics['sources'])}",
+        f"- External clips added to every training set (never tested): "
+        f"{_source_text(metrics['extra_training_clips']) or 'none'}",
     ]
     if result.final_model is not None:
         lines += [f"- Final model: trained on all clips for {result.final_epochs} epochs, saved as `model.pt` "
@@ -179,6 +185,18 @@ def render_markdown(result, metrics, per_clip, images, extra_notes):
             f"{p['window']['precision']:.2f} | {p['window']['recall']:.2f} |"
         )
 
+    sources = sorted({clip.source for clip in result.clips})
+    if len(sources) > 1:
+        lines += ["", "## By source (at the chosen threshold)", "",
+                  "The headline and threshold use the rig clips only.", "",
+                  "| Source | Falls caught | False alerts | Non-fall minutes |", "|---|---:|---:|---:|"]
+        for source in sources:
+            names = {c.name for c in result.clips if c.source == source}
+            per_seed = [summarize([o for o in result.outcomes[s] if o["clip"] in names]) for s in c.seeds]
+            caught = np.mean([p["caught"] for p in per_seed])
+            false = np.mean([p["false_alerts"] for p in per_seed])
+            lines.append(f"| {source} | {caught:g}/{per_seed[0]['falls']} | {false:g} | "
+                         f"{per_seed[0]['non_fall_minutes']:.1f} |")
     lines += ["", "## Folds", "",
               "| Seed | Fold | Test clips | Train windows (falls) | Test windows (falls) | Best epoch | Avg precision | F1 @0.5 |",
               "|---:|---:|---:|---:|---:|---:|---:|---:|"]
@@ -358,6 +376,19 @@ def alerts_at(result, scores):
 
 
 # Helpers
+
+
+def _source_counts(clips):
+    counts = {}
+    for clip in clips:
+        entry = counts.setdefault(clip.source, {"clips": 0, "falls": 0})
+        entry["clips"] += 1
+        entry["falls"] += int(clip.has_fall)
+    return counts
+
+
+def _source_text(counts):
+    return ", ".join(f"{s} {v['clips']} ({v['falls']} falls)" for s, v in sorted(counts.items()))
 
 
 def _short(name, limit=34):

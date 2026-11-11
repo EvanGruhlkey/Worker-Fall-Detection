@@ -1,0 +1,89 @@
+Charts done (3s)
+Re-running Rig + CAUCAFall cross-validation (seed 0) on 131 clips...
+  seed 0 fold 1/5: building windows (19 train, 3 val, 9 test clips)...
+  seed 0 fold 1/5: training on 12268 windows (875 falls)
+  seed 0 fold 1/5: epoch   5/40  train loss 0.0117  val loss 1.4396  val P 0.881 R 0.673 F1 0.763  (82s)
+  seed 0 fold 1/5: epoch  10/40  train loss 0.0009  val loss 0.3721  val P 0.833 R 0.909 F1 0.870  (164s)
+  seed 0 fold 1/5: epoch  15/40  train loss 0.0001  val loss 0.5450  val P 0.877 R 0.909 F1 0.893  (249s)
+  seed 0 fold 1/5: epoch  20/40  train loss 0.0001  val loss 0.6071  val P 0.891 R 0.891 F1 0.891  (333s)
+  seed 0 fold 1/5: epoch  25/40  train loss 0.0000  val loss 0.6519  val P 0.907 R 0.891 F1 0.899  (416s)
+  seed 0 fold 1/5: epoch  30/40  train loss 0.0000  val loss 0.6836  val P 0.907 R 0.891 F1 0.899  (498s)
+  seed 0 fold 1/5: epoch  35/40  train loss 0.0000  val loss 0.7050  val P 0.907 R 0.891 F1 0.899  (539s)
+  seed 0 fold 1/5: epoch  40/40  train loss 0.0000  val loss 0.7093  val P 0.907 R 0.891 F1 0.899  (553s)
+  seed 0 fold 1/5: 12268 train windows (875 falls), best epoch 7, 9 test clips, 630s
+  seed 0 fold 2/5: building windows (22 train, 3 val, 6 test clips)...
+  seed 0 fold 2/5: training on 12430 windows (922 falls)
+  seed 0 fold 2/5: epoch   5/40  train loss 0.0153  val loss 0.7751  val P 0.591 R 0.765 F1 0.667  (13s)
+  seed 0 fold 2/5: epoch  10/40  train loss 0.0004  val loss 0.7870  val P 0.553 R 0.765 F1 0.642  (26s)
+  seed 0 fold 2/5: epoch  15/40  train loss 0.0001  val loss 0.9146  val P 0.743 R 0.765 F1 0.754  (40s)
+  seed 0 fold 2/5: epoch  20/40  train loss 0.0000  val loss 0.9911  val P 0.765 R 0.765 F1 0.765  (53s)
+  seed 0 fold 2/5: epoch  25/40  train loss 0.0000  val loss 1.0463  val P 0.765 R 0.765 F1 0.765  (67s)
+  seed 0 fold 2/5: epoch  30/40  train loss 0.0000  val loss 1.0814  val P 0.765 R 0.765 F1 0.765  (82s)
+  seed 0 fold 2/5: epoch  35/40  train loss 0.0000  val loss 1.1012  val P 0.765 R 0.765 F1 0.765  (96s)
+  seed 0 fold 2/5: epoch  40/40  train loss 0.0000  val loss 1.1062  val P 0.765 R 0.765 F1 0.765  (110s)
+  seed 0 fold 2/5: 12430 train windows (922 falls), best epoch 4, 6 test clips, 129s
+  seed 0 fold 3/5: building windows (22 train, 3 val, 6 test clips)...
+  seed 0 fold 3/5: training on 11692 windows (875 falls)
+  seed 0 fold 3/5: epoch   5/40  train loss 0.0090  val loss 5.5185  val P 0.643 R 0.482 F1 0.551  (13s)
+  seed 0 fold 3/5: epoch  10/40  train loss 0.0113  val loss 6.0890  val P 0.871 R 0.482 F1 0.621  (25s)
+  seed 0 fold 3/5: epoch  15/40  train loss 0.0001  val loss 6.7082  val P 0.818 R 0.482 F1 0.607  (36s)
+  seed 0 fold 3/5: epoch  20/40  train loss 0.0001  val loss 6.9886  val P 0.818 R 0.482 F1 0.607  (47s)
+  seed 0 fold 3/5: epoch  25/40  train loss 0.0000  val loss 7.1036  val P 0.844 R 0.482 F1 0.614  (58s)
+  seed 0 fold 3/5: epoch  30/40  train loss 0.0000  val loss 7.1320  val P 0.818 R 0.482 F1 0.607  (70s)
+  seed 0 fold 3/5: epoch  35/40  train loss 0.0000  val loss 7.1453  val P 0.818 R 0.482 F1 0.607  (81s)
+  seed 0 fold 3/5: epoch  40/40  train loss 0.0000  val loss 7.1474  val P 0.818 R 0.482 F1 0.607  (93s)
+  seed 0 fold 3/5: 11692 train windows (875 falls), best epoch 4, 6 test clips, 116s
+  seed 0 fold 4/5: building windows (23 train, 3 val, 5 test clips)...
+  seed 0 fold 4/5: training on 11685 windows (977 falls)
+  seed 0 fold 4/5: epoch   5/40  train loss 0.0252  val loss 2.5651  val P 0.667 R 0.062 F1 0.114  (12s)
+  seed 0 fold 4/5: epoch  10/40  train loss 0.0002  val loss 3.0438  val P 0.000 R 0.000 F1 0.000  (46s)
+  seed 0 fold 4/5: epoch  15/40  train loss 0.0001  val loss 3.2702  val P 0.000 R 0.000 F1 0.000  (79s)
+  seed 0 fold 4/5: epoch  20/40  train loss 0.0000  val loss 3.4014  val P 0.000 R 0.000 F1 0.000  (116s)
+  seed 0 fold 4/5: epoch  25/40  train loss 0.0000  val loss 3.5016  val P 0.000 R 0.000 F1 0.000  (155s)
+  seed 0 fold 4/5: epoch  30/40  train loss 0.0000  val loss 3.5641  val P 0.000 R 0.000 F1 0.000  (192s)
+  seed 0 fold 4/5: epoch  35/40  train loss 0.0000  val loss 3.5833  val P 0.000 R 0.000 F1 0.000  (229s)
+  seed 0 fold 4/5: epoch  40/40  train loss 0.0000  val loss 3.5887  val P 0.000 R 0.000 F1 0.000  (267s)
+  seed 0 fold 4/5: 11685 train windows (977 falls), best epoch 5, 5 test clips, 296s
+  seed 0 fold 5/5: building windows (23 train, 3 val, 5 test clips)...
+  seed 0 fold 5/5: training on 11985 windows (902 falls)
+  seed 0 fold 5/5: epoch   5/40  train loss 0.0092  val loss 1.2226  val P 0.481 R 0.722 F1 0.578  (33s)
+  seed 0 fold 5/5: epoch  10/40  train loss 0.0009  val loss 3.9085  val P 0.243 R 0.333 F1 0.281  (45s)
+  seed 0 fold 5/5: epoch  15/40  train loss 0.0001  val loss 3.2378  val P 0.333 R 0.518 F1 0.406  (58s)
+  seed 0 fold 5/5: epoch  20/40  train loss 0.0000  val loss 3.2103  val P 0.360 R 0.593 F1 0.448  (72s)
+  seed 0 fold 5/5: epoch  25/40  train loss 0.0000  val loss 3.3659  val P 0.355 R 0.611 F1 0.449  (84s)
+  seed 0 fold 5/5: epoch  30/40  train loss 0.0000  val loss 3.4743  val P 0.355 R 0.611 F1 0.449  (97s)
+  seed 0 fold 5/5: epoch  35/40  train loss 0.0000  val loss 3.5223  val P 0.355 R 0.611 F1 0.449  (109s)
+  seed 0 fold 5/5: epoch  40/40  train loss 0.0000  val loss 3.5314  val P 0.355 R 0.611 F1 0.449  (121s)
+  seed 0 fold 5/5: 11985 train windows (902 falls), best epoch 7, 5 test clips, 155s
+  rendered normal_work 1xiFn4bLdT-6Alz7z0XDz_alligator
+  rendered normal_work 29jB-BibMmaRAZBqZtNnU_alligator
+  rendered normal_work 4CJH5B2NtzP8VwFzxMwO5_alligator
+  rendered normal_work EIlywKhfkRHTAlBqul_mf_alligator
+  rendered not_visible ILLOvByCSJmu2U4QL4R7q_output
+  rendered normal_work LXCUWr1Hjb3MEZVgdYPIh_alligator
+  rendered normal_work MIPR_SGTQICev4mFBDU2c_alligator
+  rendered normal_work UyNpEpYTGgJkfrlSRc7Kd_alligator
+  rendered caught      YdQeOIiCjBFNpPjdTE641_output
+  rendered caught      _4RXOScjeGcGW1uLah2Cb_output
+  rendered caught      backward_fall_near_equipment
+  rendered missed      backward_slip_while_stepping_back
+  rendered normal_work f40KfQHxg3C36Lj1rYwqk_alligator
+  rendered caught      fall_from_ladder
+  rendered caught      fall_while_working_on_pipe
+  rendered caught      forward_fall_while_carrying_a_tool
+  rendered caught      forward_trip_while_walking
+  rendered normal_work jrigd_ZgdOhh4j67tzGVU_alligator
+  rendered missed      miller_group_fall_01_slip_wet_grating
+  rendered caught      miller_group_fall_02_trip_over_hose
+  rendered missed      miller_group_fall_03_slip_oily_patch_drizzle
+  rendered caught      miller_group_fall_04_ladder_fall_pipe_rack
+  rendered missed      miller_group_fall_05_stair_misstep_night
+  rendered not_visible miller_group_fall_08_fall_from_low_platform
+  rendered missed      miller_group_fall_10_slip_carrying_toolbox_night_rain
+  rendered caught      oO8L7gEH7O6hbAxYdXVHD_output
+  rendered not_visible slip_behind_person
+  rendered missed      slip_between_coworkers
+  rendered caught      slip_in_the_open
+  rendered caught      sudden_collapse
+  rendered normal_work yQ3kWNc-Qe3EgqRaNso6l_alligator
+Done in 1436s -> C:\Oxy Github\Worker-Fall-Detection\reports\2026-11-05_trial1

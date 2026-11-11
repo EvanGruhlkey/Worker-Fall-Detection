@@ -53,6 +53,10 @@ def parse_args(argv=None):
     parser.add_argument("--debounce", type=int, default=5, help="Gate: frames above the threshold before an alert")
     parser.add_argument("--catch-after", type=float, default=1.5,
                         help="Seconds after impact an alert still counts as catching the fall")
+    parser.add_argument(
+        "--external", choices=("train", "cv", "off"), default="train",
+        help="External-dataset clips: add to training only (default), put in the folds too, or leave out",
+    )
     parser.add_argument("--final", action="store_true", help="Also train on all clips and save the model")
     parser.add_argument("--plots", choices=("all", "summary", "none"), default="all")
     parser.add_argument("--copy-model-to", help="With --final, also copy model.pt here (e.g. models/fall_rig.pt)")
@@ -94,6 +98,7 @@ def main(argv=None):
         learning_rate=args.lr, batch_size=args.batch_size, window_size=args.window_size, stride=args.stride,
         ignore_partial=args.ignore_partial, augment=args.augment, synthetic=args.synthetic, folds=args.folds,
         seeds=tuple(args.seeds), debounce=args.debounce, catch_after=args.catch_after, final=args.final,
+        external=args.external,
     )
     started = time.perf_counter()
     clips, fps = load_clips(args.manifest)
@@ -136,6 +141,11 @@ def write_index():
             changes.append(f"aug x{c['augment']}")
         if c["synthetic"]:
             changes.append(f"synth {c['synthetic']}")
+        extra = m.get("extra_training_clips") or {}
+        if extra:
+            changes.append("+" + "+".join(sorted(extra)) + " (train)")
+        if c.get("external") == "cv" and len(m.get("sources") or {}) > 1:
+            changes.append("external in folds")
         if len(c["seeds"]) > 1:
             changes.append(f"{len(c['seeds'])} seeds")
         ap = m["window_average_precision"]
