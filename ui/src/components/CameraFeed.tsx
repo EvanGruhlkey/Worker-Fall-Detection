@@ -27,7 +27,6 @@ export default function CameraFeed({ camera, location }: { camera: CameraInfo; l
         </div>
         {camera.online && <span className="online"><Icon name="wifi" />Online</span>}
       </div>
-      <CameraControls camera={camera} onChanged={onChanged} />
     </article>
   );
 }
