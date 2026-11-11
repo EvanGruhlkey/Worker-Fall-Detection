@@ -26,7 +26,7 @@ export function TitleBar() {
   );
 }
 
-export function TopBar({ location }: { location: Location }) {
+export function TopBar({ location, onSettings }: { location: Location; onSettings: () => void }) {
   const clock = useClock();
   return (
     <header className="topbar">
@@ -37,7 +37,9 @@ export function TopBar({ location }: { location: Location }) {
       </div>
       <div className="right">
         <div className="clock"><Icon name="clock" />{clock}</div>
-        <button className="settings"><Icon name="gear" size={16} />Settings</button>
+        <button className="settings" onClick={onSettings} aria-haspopup="dialog">
+          <Icon name="gear" size={16} />Settings
+        </button>
       </div>
     </header>
   );

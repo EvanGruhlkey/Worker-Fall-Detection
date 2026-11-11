@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CameraOption, Dashboard, EventScope, EventStatus, Stat, Upload } from "./types";
+import type { Dashboard, EventScope, EventStatus, Stat, Upload } from "./types";
 
 const POLL_MS = 2500;
 const LOCATION_REFRESH_MS = 10 * 60 * 1000;
@@ -124,42 +124,13 @@ async function errorMessage(response: Response): Promise<string> {
   return `Request failed (HTTP ${response.status})`;
 }
 
-/** Upload a video as a real-time simulated camera feed. */
+/** Upload a recorded video; the backend queues it for fall detection. */
 export async function uploadVideo(file: File): Promise<Upload> {
   const form = new FormData();
   form.append("file", file);
-  form.append("live", "true");
   const response = await fetch("/api/videos", { method: "POST", body: form });
   if (!response.ok) throw new Error(await errorMessage(response));
   return response.json();
-}
-
-/** Ask the backend which local camera indices OpenCV can access. */
-export async function listCameraOptions(): Promise<CameraOption[]> {
-  const response = await fetch("/api/cameras/options");
-  if (!response.ok) throw new Error(await errorMessage(response));
-  return response.json();
-}
-
-/** Start a local camera index or custom network stream. */
-export async function startCamera(source: string): Promise<void> {
-  const response = await fetch("/api/cameras", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ source }),
-  });
-  if (!response.ok) throw new Error(await errorMessage(response));
-}
-
-/** Stop a running camera session. */
-export async function stopCamera(jobId: number): Promise<void> {
-  const response = await fetch(`/api/cameras/${jobId}/stop`, { method: "POST" });
-  if (!response.ok) throw new Error(await errorMessage(response));
-}
-
-export async function simulateVideo(id: number): Promise<void> {
-  const response = await fetch(`/api/jobs/${id}/simulate`, { method: "POST" });
-  if (!response.ok) throw new Error(await errorMessage(response));
 }
 
 /** Set an event's review status (and optional notes). */

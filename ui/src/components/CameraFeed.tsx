@@ -1,9 +1,8 @@
 import type { CameraInfo, Location } from "../types";
-import CameraControls from "./CameraControls";
 import Icon from "./Icon";
 
 /** Live feed from the backend, with pose skeletons, track IDs and fall alerts drawn on. */
-export default function CameraFeed({ camera, location, onChanged }: { camera: CameraInfo; location: Location; onChanged: () => void }) {
+export default function CameraFeed({ camera, location }: { camera: CameraInfo; location: Location }) {
   const live = camera.online && camera.stream_url;
   return (
     <article className="camera">
@@ -14,11 +13,11 @@ export default function CameraFeed({ camera, location, onChanged }: { camera: Ca
         ) : (
           <div className="placeholder">
             <Icon name="cam" size={40} className="big" />
-            <span>{camera.label === "Video simulation" ? "Video finished · click Play live to replay" : "Camera offline"}</span>
+            <span>Camera offline</span>
           </div>
         )}
-        <span className="badge live-badge"><i className="dot" />{camera.label === "Video simulation" ? "VIDEO TEST" : "LOCAL CAM"}</span>
-        <span className="badge fps">{live ? `LIVE · ${camera.fps} FPS` : camera.label === "Video simulation" ? "ENDED" : "OFFLINE"}</span>
+        <span className="badge live-badge"><i className="dot" />LOCAL CAM</span>
+        <span className="badge fps">{live ? `LIVE · ${camera.fps} FPS` : "OFFLINE"}</span>
         <span className="badge loc-badge"><Icon name="pin" />{location.name}</span>
       </div>
       <div className="cam-info">

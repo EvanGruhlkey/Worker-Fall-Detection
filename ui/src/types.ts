@@ -62,14 +62,7 @@ export interface CameraInfo {
   label: string;
   fps: number;
   online: boolean;
-  job_id?: number | null;
-  source?: string | null; // local camera index; credentials in stream URLs stay server-side
   stream_url?: string | null; // MJPEG feed with pose overlay, while online
-}
-
-export interface CameraOption {
-  source: string;
-  label: string;
 }
 
 export interface Location {

@@ -4,12 +4,17 @@ import CameraFeed from "./components/CameraFeed";
 import EventLog from "./components/EventLog";
 import EventReview from "./components/EventReview";
 import { TitleBar, TopBar } from "./components/Header";
+import SettingsPanel from "./components/SettingsPanel";
 import StatCard from "./components/StatCard";
 import VideoUpload from "./components/VideoUpload";
 import type { EventScope, FallEvent } from "./types";
+import "./settings.css";
+import { useSettings } from "./useSettings";
 
 export default function App() {
   useReportLocation();
+  const { settings, update, reset } = useSettings();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [scope, setScope] = useState<EventScope>("today");
   const { data, refresh } = useDashboard(scope);
   const { location, stats, camera, events, uploads } = data;
@@ -21,7 +26,7 @@ export default function App() {
   return (
     <div className="window">
       <TitleBar />
-      <TopBar location={location} />
+      <TopBar location={location} onSettings={() => setSettingsOpen(true)} />
       <main className="content">
         <h1>Dashboard</h1>
         <p className="sub">Real-time worker safety monitoring</p>
@@ -34,7 +39,7 @@ export default function App() {
           <div className="feed-col">
             <h2>Camera feed <span className="count">1</span></h2>
             <div style={{ marginTop: 12 }}>
-              <CameraFeed camera={camera} location={location} onChanged={refresh} />
+              <CameraFeed camera={camera} location={location} />
             </div>
             <VideoUpload uploads={uploads} onUploaded={refresh} />
           </div>
@@ -47,6 +52,14 @@ export default function App() {
           event={reviewing}
           onClose={() => setSelected(null)}
           onChanged={refresh}
+        />
+      )}
+      {settingsOpen && (
+        <SettingsPanel
+          settings={settings}
+          onChange={update}
+          onReset={reset}
+          onClose={() => setSettingsOpen(false)}
         />
       )}
     </div>
