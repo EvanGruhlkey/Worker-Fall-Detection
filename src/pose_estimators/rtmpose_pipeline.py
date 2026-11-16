@@ -27,7 +27,7 @@ class RTMPosePipeline:
             if Path(config[key]).suffix.lower() != ".onnx":
                 raise ValueError(f"{key} must be an ONNX model (.onnx)")
 
-        device_id = config.get("device_id", 0)
+        device_id = config.get("device_id")  # None = the high-performance GPU (see pose_runtime)
         self.detector = YoloPersonDetector(
             (config_path.parent / config["detector"]).resolve(), device_id
         )

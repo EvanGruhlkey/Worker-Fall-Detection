@@ -5,7 +5,10 @@
 
 One row per fall event: a clip with two falls gets two rows with the same
 clip_id. Clips without a fall have one row with empty fall times. Rows marked
-quality=drop are left out. Pose JSON is looked for at
+quality=drop are left out; quality=test_only keeps a clip for testing but out
+of every training set (e.g. slow, controlled "falls" that teach the model the
+wrong thing). An optional batch column (e.g. trial1, trial2) is passed through
+so reports can compare the same clips across trials. Pose JSON is looked for at
 data/output/<folder>/<clip_id>.json (the RTMPose batch layout), then
 data/output/<clip_id>.json (yolo_pose.py); clips without one are reported and
 skipped. Each pose file is also checked: that it covers the whole clip, that
@@ -30,7 +33,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from temporal.pose_io import load_pose_json  # noqa: E402
 
-QUALITIES = {"keep", "review", "drop"}
+QUALITIES = {"keep", "review", "drop", "test_only"}
 
 
 def parse_args(argv=None):
@@ -83,6 +86,7 @@ def read_clips(path):
             clip = clips.setdefault(clip_id, {
                 "has_fall": has_fall, "quality": quality, "group": row.get("group") or clip_id,
                 "folder": row.get("folder", ""), "source": row.get("source") or "rig",
+                "batch": row.get("batch", ""), "file": row.get("file", ""),
                 "duration": _number(row.get("duration_s") or "0", "duration_s", where, errors),
                 "falls": [], "track_ids": set(), "lines": [],
             })
@@ -143,7 +147,7 @@ def main(argv=None):
         if clip["quality"] == "review" and args.keep_only:
             skipped["quality=review"].append(clip_id)
             continue
-        pose_json = find_pose_json(pose_dir, clip["folder"], clip_id)
+        pose_json = find_pose_json(pose_dir, clip["folder"], clip_id, clip["file"])
         if pose_json is None:
             skipped["no pose JSON yet"].append(clip_id)
             continue
@@ -157,6 +161,10 @@ def main(argv=None):
 
         entry = {"name": clip_id, "group": clip["group"], "source": clip["source"],
                  "pose_json": _relative(pose_json, output.parent)}
+        if clip["quality"] == "test_only":
+            entry["train"] = False
+        if clip["batch"]:
+            entry["batch"] = clip["batch"]
         if clip["has_fall"] == "1":
             entry["falls_seconds"] = sorted(clip["falls"])
             if clip["track_ids"]:
@@ -190,6 +198,9 @@ def main(argv=None):
         by_source[v["source"]][0 if "falls_seconds" in v else 1] += 1
     if len(by_source) > 1:
         print("  " + "; ".join(f"{src}: {f} with falls, {n} without" for src, (f, n) in sorted(by_source.items())))
+    test_only = [v["name"] for v in videos if v.get("train") is False]
+    if test_only:
+        print(f"  {len(test_only)} clip(s) kept for testing only, never trained on (quality=test_only)")
     for reason, ids in skipped.items():
         print(f"  skipped {len(ids)} ({reason}): {', '.join(ids)}")
     for warning in warnings:
@@ -197,10 +208,15 @@ def main(argv=None):
     return 0
 
 
-def find_pose_json(pose_dir, folder, clip_id):
-    """data/output/<folder>/<clip>.json (RTMPose batch layout), else data/output/<clip>.json."""
-    candidates = [pose_dir / folder / f"{clip_id}.json"] if folder else []
-    candidates.append(pose_dir / f"{clip_id}.json")
+def find_pose_json(pose_dir, folder, clip_id, file=""):
+    """data/output/<folder>/<clip>.json (RTMPose batch layout), else data/output/<clip>.json.
+
+    When clip_id differs from the video's file name (e.g. gym_IMG_0070 for
+    IMG_0070.MOV), the pose file named after the video is found too.
+    """
+    names = [clip_id] + ([Path(file).stem] if file and Path(file).stem != clip_id else [])
+    candidates = [pose_dir / folder / f"{name}.json" for name in names] if folder else []
+    candidates += [pose_dir / f"{name}.json" for name in names]
     return next((path for path in candidates if path.exists()), None)
 
 

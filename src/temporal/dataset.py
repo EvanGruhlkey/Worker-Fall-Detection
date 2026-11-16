@@ -47,6 +47,7 @@ class WindowSample:
     end_frame: int
     track_id: int
     group: str = ""  # videos of the same scene share a group; splits keep it whole
+    weight: float = 1.0  # share of the training loss (hard normal windows count more)
 
     @property
     def split_key(self):
@@ -174,6 +175,8 @@ class Clip:
     fall_intervals: list  # (first, last) frame indices, inclusive
     track_ids: list | None  # the person who falls; None = everyone
     source: str = "rig"  # which label sheet / dataset the clip comes from
+    train: bool = True  # False: tested, never trained on (quality=test_only)
+    batch: str = ""  # which labeling batch the clip came in (e.g. trial1), for reports
 
     @property
     def has_fall(self):
@@ -216,6 +219,8 @@ def load_clips(path):
                 fall_intervals=[poses.interval_indices(a, b) for a, b in seconds],
                 track_ids=video.get("track_ids"),
                 source=video.get("source") or "rig",
+                train=video.get("train", True),
+                batch=video.get("batch", ""),
             )
         )
     if not clips:

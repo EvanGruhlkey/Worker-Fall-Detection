@@ -31,8 +31,12 @@ dependencies = [
 # This is a collection of scripts, not an installable package.
 package = false
 # Install one ONNX Runtime package; these packages share a Python module.
-default-groups = ["dev", "runtime"]
-conflicts = [[{ group = "runtime" }, { group = "cuda" }]]
+default-groups = ["dev", "runtime", "cpu"]
+conflicts = [
+    [{ group = "runtime" }, { group = "cuda" }],
+    # PyTorch: the CPU build (default) or the NVIDIA build (groups cpu / gpu below).
+    [{ group = "cpu" }, { group = "gpu" }],
+]
 # Make the lockfile include a torch/torchvision version that has wheels for
 # Intel Macs (torch 2.2.2 / torchvision 0.17.2). Other platforms (Apple
 # Silicon, Linux, Windows) still resolve to the newest release.
@@ -46,12 +50,31 @@ name = "rtmlib"
 version = "0.0.16"
 requires-dist = ["numpy", "opencv-contrib-python", "opencv-python", "tqdm"]
 
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu130", group = "gpu", marker = "sys_platform != 'darwin'" }]
+torchvision = [{ index = "pytorch-cu130", group = "gpu", marker = "sys_platform != 'darwin'" }]
+
 [dependency-groups]
 runtime = [
     "onnxruntime-directml>=1.24.4; sys_platform == 'win32'",
     "onnxruntime>=1.23.2; sys_platform != 'win32'",
 ]
 cuda = ["onnxruntime-gpu>=1.23.2; sys_platform != 'darwin'"]
+# PyTorch is only used for training and for pose extraction (scripts/), not by
+# the live pipeline (ONNX). "cpu" is the default; on an NVIDIA laptop, extraction
+# runs several times faster with the CUDA build:
+#   uv run --no-group cpu --group gpu scripts/extract_poses_rtmpose.py ...
+# (needs an NVIDIA driver that supports CUDA 13, version 580 or newer).
+cpu = ["torch", "torchvision"]
+gpu = [
+    "torch==2.14.1; sys_platform != 'darwin'",
+    "torchvision==0.29.1; sys_platform != 'darwin'",
+]
 dev = [
     "httpx2>=2.14.0",
     "pytest>=9.1.1",

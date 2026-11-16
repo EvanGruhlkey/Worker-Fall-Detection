@@ -11,7 +11,7 @@ class YoloPersonDetector:
 
     input_size = 640
 
-    def __init__(self, model_path, device_id=0):
+    def __init__(self, model_path, device_id=None):
         self.session = load_session(model_path, device_id)
         self.input_name = self.session.get_inputs()[0].name
 

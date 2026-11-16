@@ -118,6 +118,45 @@ def window_signals(window, fps):
     return compute_signals(xy, confidence, window.boxes, mask, fps)[-1]
 
 
+DROP_SPAN_SECONDS = 0.75
+
+
+def window_drop(window, fps, span_seconds=DROP_SPAN_SECONDS):
+    """Fastest drop of the body in a window: how far the body centre fell, in
+    body lengths, within any ``span_seconds``.
+
+    The fast-drop check uses it to tell a fall from getting down on purpose: a
+    worker who kneels or lies down to work lowers their body over a second or
+    more, a fall drops it in well under one. The body centre is the middle of
+    the shoulders and hips, smoothed over 3 frames so one jittery pose is not a
+    drop. Body length is the largest box side in the window (box height when
+    standing, box width when lying), so a person lying still is not scaled up.
+    """
+    mask = np.asarray(window.mask, dtype=bool)
+    real = np.flatnonzero(mask)
+    if len(real) < 2:
+        return 0.0
+    confidence = window.keypoints[..., 2].astype(np.float32)
+    xy = fill_missing_joints(window.keypoints[..., :2], confidence, mask, window.boxes)
+    visible = confidence >= MIN_KEYPOINT_CONFIDENCE
+    hip = _visible_midpoint(xy, visible, (LEFT_HIP, RIGHT_HIP))
+    shoulder = _visible_midpoint(xy, visible, (LEFT_SHOULDER, RIGHT_SHOULDER))
+    centre = ((hip[:, 1] + shoulder[:, 1]) / 2)[real]
+    if len(centre) >= 3:
+        padded = np.concatenate([centre[:1], centre, centre[-1:]])
+        centre = np.median(np.stack([padded[:-2], padded[1:-1], padded[2:]]), axis=0)
+    boxes = window.boxes[real]
+    size = float(np.max(np.maximum(boxes[:, 2] - boxes[:, 0], boxes[:, 3] - boxes[:, 1])))
+    if size <= 1e-6:
+        return 0.0
+    span = max(1, int(round(span_seconds * fps)))
+    best = 0.0
+    for end in range(1, len(centre)):
+        earlier = centre[max(0, end - span):end]
+        best = max(best, float(centre[end] - earlier.min()))  # image y grows downward
+    return best / size
+
+
 def fill_missing_joints(xy, confidence, mask, boxes):
     """Replace low-confidence joint positions with the last good one.
 

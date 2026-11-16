@@ -8,7 +8,7 @@ from pose_estimators.pose_runtime import load_session
 class RTMPoseEstimator:
     """Estimate COCO keypoints for each tracked person box."""
 
-    def __init__(self, model_path, device_id=0):
+    def __init__(self, model_path, device_id=None):
         self.model = RTMPose.__new__(RTMPose)
         self.model.session = load_session(model_path, device_id)
         input_shape = self.model.session.get_inputs()[0].shape

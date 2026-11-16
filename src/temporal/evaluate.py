@@ -26,7 +26,7 @@ import numpy as np
 
 from utils.sliding_window import TrackWindows
 
-from .detector import handoff_lost_tracks, score_tracks
+from .detector import drop_checked, handoff_lost_tracks, score_tracks, track_drops
 from .gate import ThresholdGate
 
 
@@ -37,6 +37,7 @@ class ClipScores:
     renames: list = field(default_factory=list)  # per frame: [(old, new)]
     alive: list = field(default_factory=list)  # per frame: track IDs still held
     faller: list = field(default_factory=list)  # per frame: set of the faller's IDs
+    drops: list = field(default_factory=list)  # per frame: {track_id: fastest body drop in its window}
 
     def faller_curve(self):
         """Highest faller probability per frame (NaN where none was scored)."""
@@ -78,20 +79,26 @@ def score_clip(model, clip, window_size, max_gap=5):
             faller.update(updated)
         scored = score_tracks(model, windows, updated, clip.fps)
         scores.probabilities.append({t: p for t, (p, _) in scored.items()})
+        scores.drops.append(track_drops(windows, scored, clip.fps))
         scores.renames.append(renames)
         scores.alive.append(set(windows.track_ids()))
         scores.faller.append(set(faller))
     return scores
 
 
-def alerts_for(scores, threshold, debounce=5, cooldown_seconds=30.0):
-    """The alerts the gate raises over a scored clip at ``threshold``."""
+def alerts_for(scores, threshold, debounce=5, cooldown_seconds=30.0, min_drop=0.0):
+    """The alerts the gate raises over a scored clip at ``threshold``.
+
+    With ``min_drop`` the fast-drop check runs first, as in live detection.
+    """
     gate = ThresholdGate(threshold, debounce, cooldown_seconds)
     alerts, known = [], set()
     times = scores.clip.times
     for index, probs in enumerate(scores.probabilities):
         for old_id, new_id in scores.renames[index]:
             gate.rename(old_id, new_id)
+        if min_drop > 0:
+            probs = drop_checked(probs, scores.drops[index], min_drop)
         for track_id, probability in probs.items():
             known.add(track_id)
             if gate.update(track_id, probability, times[index]):

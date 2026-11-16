@@ -190,7 +190,7 @@ Set these in `.env` in the project root (copy `.env.example`), or as environment
 | Env variable | Default |
 |---|---|
 | `FALL_DATA_DIR` | `data/` (uploads in `input/`, outputs in `output/`, event media in `events/`) |
-| `FALL_MODEL_PATH` | `models/yolo11n-pose.pt` |
+| `FALL_MODEL_PATH` | `models/pose_pipeline.json` (YOLO26m + RTMPose, needs a GPU live). `models/pose_pipeline_cpu.json` uses YOLO26n for laptops without a GPU; `models/yolo11n-pose.pt` selects the older YOLO-Pose pipeline |
 | `FALL_IMAGE_SIZE` | `native`: YOLO runs at the camera's own resolution. A number (e.g. `640`) scales the long side down to it; faster, but people far from the camera are missed |
 | `FALL_CLIP_PRE_SECONDS` / `FALL_CLIP_POST_SECONDS` | `5` / `5` |
 | `FALL_CORS_ORIGINS` | `*` |

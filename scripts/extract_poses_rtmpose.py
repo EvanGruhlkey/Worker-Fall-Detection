@@ -1,4 +1,4 @@
-"""YOLO26n + ByteTrack + RTMPose-t pose extraction, writing the rig pose JSON format.
+"""YOLO26 + ByteTrack + RTMPose-t pose extraction, writing the rig pose JSON format.
 
 A re-implementation of the team's batch pipeline (whose code is not in the
 repo), matched to what its output files record and checked against them: YOLO26n person detection at
@@ -13,6 +13,21 @@ keypoint confidences correlate 0.98-0.99. Only borderline detections
     uv run scripts/extract_poses_rtmpose.py data/external/caucafall/videos --out data/output/caucafall
     # sampled like the rig batch (24 fps -> 12)
     uv run scripts/extract_poses_rtmpose.py data/input/rig_falls --out OUT --fps 12
+    # phone videos filmed upright that decode sideways: turn them upright first
+    uv run scripts/extract_poses_rtmpose.py clip.mov --out OUT --rotate cw
+    # fix the timing of JSONs extracted before true_timing() existed (no re-extraction)
+    uv run scripts/extract_poses_rtmpose.py data/input/man_made_fall_videos --out data/output/man_made_fall_videos --retime-only
+
+Frame times come from the video's own frame timestamps (true_timing), not
+OpenCV's frame-rate guess: phone videos trimmed on the phone keep one stray
+frame from before the trim, which makes OpenCV report e.g. "20 fps over 30 s"
+for a 10 s, 60 fps clip. That stray first frame is skipped.
+
+The detector is YOLO26m by default (the live dashboard's detector since
+2026-11-15; Trial 1's poses used YOLO26n, --yolo data/external/models/yolo26n.pt).
+On an NVIDIA laptop run it with the GPU build of PyTorch, several times faster:
+
+    uv run --no-group cpu --group gpu scripts/extract_poses_rtmpose.py data/input/rig_falls --out OUT --fps 12
 
 Models are downloaded once to data/external/models/ and their SHA-256 is
 checked. Output per video: <out>/<video stem>.json (same layout as
@@ -120,13 +135,79 @@ def _warp_matrix(center, scale, size):
     return cv2.getAffineTransform(src, dst)
 
 
-def process_video(video, out_path, detector, pose, target_fps, image_size, confidence, iou):
+def true_timing(video):
+    """``(fps, skip)``: the real frame rate from the video's frame timestamps, and
+    how many leading frames to skip because a trim cut follows them.
+
+    Reads every frame's presentation time with ffmpeg (edit lists ignored, so
+    cuts show up as gaps). The rate is 1 / the median gap. A gap over 5x the
+    median within the first 3 frames is a phone trim: the frames before it are
+    skipped. A cut later in the video cannot be fixed by skipping, so it raises.
+    Returns ``(None, 0)`` when ffmpeg is unavailable.
+    """
+    import re
+    import subprocess
+
+    try:
+        import imageio_ffmpeg
+
+        ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    except (ImportError, RuntimeError):
+        return None, 0
+    out = subprocess.run([ffmpeg, "-hide_banner", "-ignore_editlist", "1", "-i", str(video), "-map", "0:v:0",
+                          "-vf", "showinfo", "-f", "null", "-"], capture_output=True, text=True).stderr
+    times = np.array([float(t) for t in re.findall(r"pts_time:([0-9.]+)", out)])
+    if len(times) < 3:
+        return None, 0
+    gaps = np.diff(times)
+    median = float(np.median(gaps))
+    cuts = np.flatnonzero(gaps > 5 * median)
+    if len(cuts) and cuts.max() >= 3:
+        raise RuntimeError(f"{video.name}: frame times jump by {gaps[cuts.max()]:.1f} s at frame {cuts.max() + 1}; "
+                           "the video was cut in the middle, trim it into separate clips first")
+    skip = int(cuts.max()) + 1 if len(cuts) else 0
+    return round(1.0 / median, 3), skip
+
+
+def retime(video, out_path):
+    """Correct an existing every-frame JSON with ``true_timing`` (rate and stray first frames)."""
+    data = json.loads(out_path.read_text(encoding="utf-8"))
+    meta = data["metadata"]
+    if abs(meta["fps"] - meta["source_fps"]) > 1e-6:
+        raise RuntimeError(f"{out_path.name}: only every-frame extractions can be retimed")
+    fps, skip = true_timing(video)
+    if fps is None:
+        raise RuntimeError("ffmpeg (imageio-ffmpeg) is needed to read frame times")
+    frames = [f for f in data["frames"] if f["source_frame"] >= skip]
+    for index, frame in enumerate(frames):
+        frame["sample_index"] = index
+        frame["timestamp"] = frame["source_frame"] / fps
+    old = meta["source_fps"]
+    meta.update({"source_fps": fps, "fps": fps, "frame_count": len(frames), "skipped_leading_frames": skip,
+                 "retimed_from_fps": old})
+    meta["configuration"]["fps"] = fps
+    data["frames"] = frames
+    out_path.write_text(json.dumps(data), encoding="utf-8")
+    return old, fps, skip
+
+
+ROTATIONS = {"none": None, "cw": cv2.ROTATE_90_CLOCKWISE, "ccw": cv2.ROTATE_90_COUNTERCLOCKWISE,
+             "180": cv2.ROTATE_180}
+
+
+def process_video(video, out_path, detector, pose, target_fps, image_size, confidence, iou, rotate="none",
+                  detector_name="YOLO26m"):
     capture = cv2.VideoCapture(str(video))
     if not capture.isOpened():
         raise RuntimeError(f"cannot open {video}")
     source_fps = capture.get(cv2.CAP_PROP_FPS) or 30.0
+    fps, skip = true_timing(video)
+    if fps is not None:
+        source_fps = fps
     total = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
     width, height = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)), int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    if rotate in ("cw", "ccw"):
+        width, height = height, width
     step = 1 if not target_fps else max(1, round(source_fps / target_fps))
     if target_fps and abs(source_fps / step - target_fps) > 0.02 * target_fps:
         raise RuntimeError(f"{video.name}: {source_fps:g} fps cannot be sampled evenly to {target_fps:g}; "
@@ -135,9 +216,13 @@ def process_video(video, out_path, detector, pose, target_fps, image_size, confi
     frames, index, started = [], 0, time.perf_counter()
     while True:
         ok, image = capture.read()
+        if ok and ROTATIONS[rotate] is not None:
+            # Poses must be measured with "down" pointing down: hip heights, drops
+            # and torso angles all assume it.
+            image = cv2.rotate(image, ROTATIONS[rotate])
         if not ok:
             break
-        if index % step == 0:
+        if index >= skip and (index - skip) % step == 0:
             result = detector.track(image, persist=True, tracker="bytetrack.yaml", imgsz=image_size,
                                     conf=confidence, iou=iou, classes=[0], verbose=False)[0]
             people = []
@@ -163,10 +248,11 @@ def process_video(video, out_path, detector, pose, target_fps, image_size, confi
         "metadata": {
             "source": str(video), "source_sha256": sha256(video), "source_fps": source_fps,
             "source_frames": total, "fps": source_fps / step, "width": width, "height": height,
+            "skipped_leading_frames": skip,
             "frame_count": len(frames),
             "configuration": {
-                "pipeline": "YOLO26n + ByteTrack + RTMPose-t", "implementation": "scripts/extract_poses_rtmpose.py",
-                "person_class": 0, "image_size": image_size, "confidence": confidence, "nms_iou": iou,
+                "pipeline": f"{detector_name} + ByteTrack + RTMPose-t", "implementation": "scripts/extract_poses_rtmpose.py",
+                "person_class": 0, "image_size": image_size, "confidence": confidence, "nms_iou": iou, "rotate": rotate,
                 "fps": source_fps / step, "rtmpose_sha256": RTMPOSE_SHA256, "fall_alerts": False,
             },
             "processing_seconds": elapsed,
@@ -187,8 +273,13 @@ def main(argv=None):
     parser.add_argument("--image-size", type=int, default=640)
     parser.add_argument("--conf", type=float, default=0.1)
     parser.add_argument("--iou", type=float, default=0.7)
-    parser.add_argument("--yolo", default=str(MODELS / "yolo26n.pt"), help="YOLO26n weights (downloaded if missing)")
+    parser.add_argument("--rotate", choices=sorted(ROTATIONS), default="none",
+                        help="Rotate every frame first (cw / ccw / 180), for phone videos that decode sideways")
+    parser.add_argument("--yolo", default=str(MODELS / "yolo26m.pt"),
+                        help="YOLO weights (yolo26m.pt by default; downloaded if missing)")
     parser.add_argument("--force", action="store_true", help="Redo videos that already have a JSON")
+    parser.add_argument("--retime-only", action="store_true",
+                        help="Only correct frame times of existing JSONs from the video's own timestamps")
     args = parser.parse_args(argv)
 
     from ultralytics import YOLO
@@ -197,21 +288,34 @@ def main(argv=None):
     for item in map(Path, args.inputs):
         videos += sorted(p for p in item.iterdir() if p.suffix.lower() in VIDEO_SUFFIXES) if item.is_dir() else [item]
     out = Path(args.out)
+    if args.retime_only:
+        for video in videos:
+            target = out / f"{video.stem}.json"
+            if not target.exists():
+                print(f"  {video.name}: no JSON yet, skipped")
+                continue
+            old, fps, skip = retime(video, target)
+            print(f"  {video.name}: {old:g} -> {fps:g} fps" + (f", skipped {skip} stray leading frame(s)" if skip else ""))
+        return 0
     todo = [v for v in videos if args.force or not (out / f"{v.stem}.json").exists()]
     print(f"{len(videos)} videos, {len(todo)} to process -> {out}")
     if not todo:
         return 0
     MODELS.mkdir(parents=True, exist_ok=True)
     yolo_path = Path(args.yolo)
-    detector = YOLO(str(yolo_path) if yolo_path.exists() else "yolo26n.pt")
-    if not yolo_path.exists() and Path("yolo26n.pt").exists():
-        Path("yolo26n.pt").replace(yolo_path)
+    detector = YOLO(str(yolo_path) if yolo_path.exists() else yolo_path.name)
+    if not yolo_path.exists() and Path(yolo_path.name).exists():
+        Path(yolo_path.name).replace(yolo_path)
+    detector_name = "YOLO" + yolo_path.stem[4:] if yolo_path.stem.lower().startswith("yolo") else yolo_path.stem
+    import torch
+    print(f"Detector {yolo_path.name} on {'GPU ' + torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU'}")
     pose = RTMPose(rtmpose_model())
     failures = []
     for number, video in enumerate(todo, 1):
         try:
             count, elapsed = process_video(video, out / f"{video.stem}.json", detector, pose,
-                                           args.fps, args.image_size, args.conf, args.iou)
+                                           args.fps, args.image_size, args.conf, args.iou, args.rotate,
+                                           detector_name)
             print(f"  [{number}/{len(todo)}] {video.name}: {count} frames, {elapsed:.0f}s", flush=True)
         except Exception as error:  # noqa: BLE001 - report and continue with the next video
             failures.append(f"{video.name}: {error}")

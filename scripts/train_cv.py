@@ -47,12 +47,29 @@ def parse_args(argv=None):
     parser.add_argument("--ignore-partial", action="store_true",
                         help="Leave out windows holding 0-50%% of a fall instead of labeling them 'no fall'")
     parser.add_argument("--augment", type=int, default=0, help="Augmented copies of each training clip")
+    parser.add_argument("--augment-mode", choices=("full", "mirror"), default="full",
+                        help="full: --augment copies with every change (Trial 1); mirror: one mirrored copy per clip")
+    parser.add_argument("--label-smoothing", type=float, default=0.0,
+                        help="Train on targets eps/2 and 1-eps/2 instead of 0 and 1 (e.g. 0.1), so scores spread out")
+    parser.add_argument("--hard-negative-weight", type=float, default=1.0,
+                        help="Loss weight of normal windows of a person kneeling, crouching or lying (e.g. 3)")
     parser.add_argument("--synthetic", type=int, default=0, help="Synthetic clips added to each training set")
+    parser.add_argument("--max-gap", type=int, default=5,
+                        help="Frames a lost track may stay unseen and continue / be handed over (5 = 0.4 s; 12 = 1 s)")
+    parser.add_argument("--drop-source", nargs="+", default=[],
+                        help="Leave these data sources out entirely (e.g. gym), to test whether they help")
+    parser.add_argument("--include-test-only", action="store_true",
+                        help="Also train on quality=test_only clips (e.g. the slow CAUCAFall falls)")
+    parser.add_argument("--merge-duplicates", action="store_true",
+                        help="Remove a second, smaller box on a body that already has one")
     parser.add_argument("--folds", type=int, default=5)
     parser.add_argument("--seeds", type=int, nargs="+", default=[0])
     parser.add_argument("--debounce", type=int, default=5, help="Gate: frames above the threshold before an alert")
     parser.add_argument("--catch-after", type=float, default=1.5,
                         help="Seconds after impact an alert still counts as catching the fall")
+    parser.add_argument("--min-drop", type=float, default=0.0,
+                        help="Fast-drop check: alerts need a body drop of at least this many body lengths "
+                             "within 0.75 s (0 = off; 0.15 removed false alerts without losing catches on Trial 1)")
     parser.add_argument(
         "--external", choices=("train", "cv", "off"), default="train",
         help="External-dataset clips: add to training only (default), put in the folds too, or leave out",
@@ -98,7 +115,10 @@ def main(argv=None):
         learning_rate=args.lr, batch_size=args.batch_size, window_size=args.window_size, stride=args.stride,
         ignore_partial=args.ignore_partial, augment=args.augment, synthetic=args.synthetic, folds=args.folds,
         seeds=tuple(args.seeds), debounce=args.debounce, catch_after=args.catch_after, final=args.final,
-        external=args.external,
+        external=args.external, min_drop=args.min_drop, augment_mode=args.augment_mode,
+        label_smoothing=args.label_smoothing, hard_negative_weight=args.hard_negative_weight,
+        max_gap=args.max_gap, merge_duplicates=args.merge_duplicates,
+        drop_sources=tuple(args.drop_source), include_test_only=args.include_test_only,
     )
     started = time.perf_counter()
     clips, fps = load_clips(args.manifest)
@@ -124,6 +144,12 @@ def main(argv=None):
     print(f"\nThreshold {metrics['chosen_threshold']:.2f}: caught {chosen['caught']:g}/{chosen['falls']} falls, "
           f"{chosen['false_alerts']:g} false alerts in {chosen['non_fall_minutes']:.1f} min, "
           f"window AP {metrics['window_average_precision'] or 0:.3f}")
+    nested = metrics.get("nested")
+    if nested:
+        print(f"Honest estimate (threshold chosen without the tested fold): caught {nested['caught']:g}/"
+              f"{nested['falls']}, {nested['false_alerts']:g} false alerts")
+    for batch, s in (metrics.get("by_batch") or {}).items():
+        print(f"  {batch} clips: caught {s['caught']:g}/{s['falls']}, {s['false_alerts']:g} false alerts")
     print(f"Report: {run_dir / 'report.md'}  ({time.perf_counter() - started:.0f}s)")
     return 0
 
@@ -137,8 +163,22 @@ def write_index():
         changes = [f"{c['arch']} h{c['hidden']} d{c['dropout']}", f"win {c['window_size']}"]
         if c["ignore_partial"]:
             changes.append("margin")
-        if c["augment"]:
+        if c.get("augment_mode") == "mirror":
+            changes.append("mirror")
+        elif c["augment"]:
             changes.append(f"aug x{c['augment']}")
+        if c.get("max_gap", 5) != 5:
+            changes.append(f"gap {c['max_gap']}")
+        if c.get("drop_sources"):
+            changes.append("no " + "+".join(c["drop_sources"]))
+        if c.get("include_test_only"):
+            changes.append("+test-only in training")
+        if c.get("merge_duplicates"):
+            changes.append("dedupe")
+        if c.get("label_smoothing"):
+            changes.append(f"smooth {c['label_smoothing']:g}")
+        if c.get("hard_negative_weight", 1.0) != 1.0:
+            changes.append(f"low x{c['hard_negative_weight']:g}")
         if c["synthetic"]:
             changes.append(f"synth {c['synthetic']}")
         extra = m.get("extra_training_clips") or {}
@@ -146,12 +186,19 @@ def write_index():
             changes.append("+" + "+".join(sorted(extra)) + " (train)")
         if c.get("external") == "cv" and len(m.get("sources") or {}) > 1:
             changes.append("external in folds")
+        if c.get("min_drop"):
+            changes.append(f"drop>={c['min_drop']:g}")
         if len(c["seeds"]) > 1:
             changes.append(f"{len(c['seeds'])} seeds")
         ap = m["window_average_precision"]
+        nested = m.get("nested")
+        honest = f"{nested['caught']:g}/{nested['falls']}, {nested['false_alerts']:g}" if nested else ""
+        trial1 = (m.get("by_batch") or {}).get("trial1")
+        on_trial1 = f"{trial1['caught']:g}/{trial1['falls']}, {trial1['false_alerts']:g}" if trial1 else ""
         rows.append(
             f"| [{metrics_path.parent.name}]({metrics_path.parent.name}/report.md) | {', '.join(changes)} | "
             f"{m['chosen_threshold']:.2f} | {chosen['caught']:g}/{chosen['falls']} | {chosen['false_alerts']:g} | "
+            f"{honest} | {on_trial1} | "
             f"{'' if ap is None else f'{ap:.3f}'} | {'yes' if m.get('final_model_epochs') else ''} |"
         )
     text = "\n".join([
@@ -159,10 +206,12 @@ def write_index():
         "",
         "Written by `scripts/train_cv.py`. Every number is from grouped cross-validation: each clip is",
         "scored by a model that never saw its scene. Falls caught = alert on the faller within 1.5 s of",
-        "impact; false alerts = any other alert, over all held-out footage.",
+        "impact; false alerts = any other alert, over all held-out footage. Honest = threshold chosen",
+        "without the fold it is tested on (compare runs on this). On Trial 1 clips = the same 21 falls",
+        "Trial 1 was scored on (caught, false alerts). Runs before Trial 2 have neither column.",
         "",
-        "| Run | Settings | Threshold | Falls caught | False alerts | Window AP | Final model |",
-        "|---|---|---:|---:|---:|---:|---|",
+        "| Run | Settings | Threshold | Falls caught | False alerts | Honest (caught, false) | On Trial 1 clips | Window AP | Final model |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---|",
         *rows,
         "",
     ])

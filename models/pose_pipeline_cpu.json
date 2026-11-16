@@ -1,0 +1,5 @@
+{
+  "backend": "rtmpose",
+  "detector": "yolo26n.onnx",
+  "pose": "rtmpose-t.onnx"
+}

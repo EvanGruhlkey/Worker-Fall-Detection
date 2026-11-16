@@ -113,6 +113,47 @@ git push
 Then tell the team it's pushed. The next batch (combining what helped) is
 chosen from these reports.
 
+## Trial 2 runs (batch 3)
+
+Trial 2 adds the night rig clips (`data/input/rig_falls_night`), the team's gym
+falls (`data/input/man_made_fall_videos`, label sheet
+`data/labels/external_gym.csv`, used for training only) and takes the 12 slow
+CAUCAFall falls out of training. Batch 3 runs the new baseline plus one change
+at a time, with 3 seeds:
+
+All Trial 2 poses come from **YOLO26m** (the live dashboard's detector since
+2026-11-15), not Trial 1's YOLO26n, and the faller IDs in the label sheets were
+redone for them. YOLO26m sees the faller in 97% of rig fall frames (YOLO26n: 73%),
+so several clips Trial 1 could not use are back in. Trial 1's YOLO26n poses are
+not in this repo's working copy any more; git history has the rig and CAUCAFall
+ones. To re-extract, see `scripts/extract_poses_rtmpose.py` (GPU:
+`uv run --no-group cpu --group gpu ...`).
+
+```
+powershell -ExecutionPolicy Bypass -File scripts\run_experiments.ps1 -Batch 3 -Parallel 3
+```
+
+`-Parallel 3` keeps three runs going at once and starts the next as one
+finishes (ten at once would fight for the CPU). Leave that first window open.
+
+| Run | What it changes |
+|---|---|
+| t2-base | Trial 1's best setup on the new data |
+| t2-no-gym | without the gym falls (do they help?) |
+| t2-with-slow | slow CAUCAFall falls back in training (does leaving them out help?) |
+| t2-win18 | 1.5 s window instead of 2.5 s |
+| t2-drop015 | fast-drop check: no alert without a fast body drop |
+| t2-smooth01 | label smoothing 0.1 (less overconfident scores) |
+| t2-low-x3 | kneeling / crouching / lying normal windows count 3x in training |
+| t2-gap12 | a lost track may be handed to a new ID up to 1 s later (was 0.4 s) |
+| t2-dedupe | a second, smaller box on the same body is removed |
+| t2-mirror | one mirrored copy of each training clip |
+
+Compare runs on the **Honest** and **On Trial 1 clips** columns of
+`runs/README.md`: Honest picks each fold's threshold without that fold, and
+On Trial 1 clips scores the same 21 falls as Trial 1. Then put the changes
+that helped together in batch 4 of `scripts/run_experiments.ps1`.
+
 ## Rules
 
 - **Only one person runs a batch.** Two people pushing results for the same

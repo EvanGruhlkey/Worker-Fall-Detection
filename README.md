@@ -124,8 +124,12 @@ uv run src/detectors/yolo_pose.py --model models/pose_pipeline.json --camera 1 -
 On first use, your operating system may ask for camera access for Terminal or Python.
 
 The pipeline config selects the ONNX YOLO detector and RTMPose models. Both use
-automatic CUDA, DirectML, or CPU selection. The dashboard uses this config by
-default; set `FALL_MODEL_PATH` in `.env` to use another config.
+automatic CUDA, DirectML, or CPU selection; on a laptop with both built-in graphics
+and a separate GPU, DirectML uses the separate (faster) GPU. The dashboard uses this config by
+default; set `FALL_MODEL_PATH` in `.env` to use another config. The default detector is
+YOLO26m, which needs a GPU to keep up live; on a laptop without one, set
+`FALL_MODEL_PATH=models/pose_pipeline_cpu.json` (the smaller YOLO26n). See
+[models/models.md](models/models.md) for speeds.
 The main pipeline is split across `src/detectors/yolo_detector.py`, `src/trackers/bytetrack_tracker.py`,
 and `src/pose_estimators/rtmpose_estimator.py`, and connected by `src/pose_estimators/rtmpose_pipeline.py`.
 

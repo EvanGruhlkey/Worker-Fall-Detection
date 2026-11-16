@@ -77,6 +77,7 @@ def train_model(
     seed=0,
     device="cpu",
     log=print,
+    label_smoothing=0.0,
     **model_config,
 ):
     """Train a classifier; return (model, history) with the best-epoch weights.
@@ -84,6 +85,11 @@ def train_model(
     With no ``val_samples`` (the final model, trained on everything) there is
     nothing to pick an epoch by, so all ``epochs`` run and the last weights are
     kept; choose ``epochs`` from cross-validation.
+
+    ``label_smoothing`` trains on targets eps/2 and 1 - eps/2 instead of 0 and
+    1, so the model stops pushing every window to exactly 0 or 1 (Trial 1's
+    models were so sure that almost every run picked the top threshold, 0.99).
+    A sample's ``weight`` (default 1) scales its share of the loss.
     """
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -97,15 +103,24 @@ def train_model(
     model = build_model(arch, **model_config).to(device)
     model.set_feature_scaling(mean, std)
 
-    positives = max(float(y_train.sum()), 1.0)
-    negatives = max(float(len(y_train) - y_train.sum()), 1.0)
+    weights = np.array([getattr(s, "weight", 1.0) for s in train_samples], np.float32)
+    # Falls vs normal balance by total weight, so up-weighting hard normal
+    # windows shifts attention among normal windows without tilting the whole
+    # model against falls. With every weight 1 this is the plain count ratio.
+    positives = max(float(weights[y_train >= 0.5].sum()), 1.0)
+    negatives = max(float(weights[y_train < 0.5].sum()), 1.0)
     criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(negatives / positives, device=device))
+    per_window = nn.BCEWithLogitsLoss(
+        pos_weight=torch.tensor(negatives / positives, device=device), reduction="none"
+    )
+    targets = y_train * (1.0 - label_smoothing) + 0.5 * label_smoothing
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max(epochs, 1))
 
     x_train_t = torch.from_numpy(x_train).to(device)
     m_train_t = torch.from_numpy(m_train).to(device)
-    y_train_t = torch.from_numpy(y_train).to(device)
+    y_train_t = torch.from_numpy(targets.astype(np.float32)).to(device)
+    w_train_t = torch.from_numpy(weights).to(device)
 
     history = []
     best_state, best_f1, best_loss, best_epoch = copy.deepcopy(model.state_dict()), -1.0, float("inf"), 0
@@ -118,7 +133,8 @@ def train_model(
         for start in range(0, len(order), batch_size):
             index = order[start:start + batch_size]
             optimizer.zero_grad()
-            loss = criterion(model(x_train_t[index], m_train_t[index]), y_train_t[index])
+            losses = per_window(model(x_train_t[index], m_train_t[index]), y_train_t[index])
+            loss = (losses * w_train_t[index]).sum() / w_train_t[index].sum()
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()

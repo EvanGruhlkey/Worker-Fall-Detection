@@ -34,8 +34,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from backend.media import VideoWriter  # noqa: E402
 from utils.sliding_window import TrackWindows  # noqa: E402
-from temporal.detector import handoff_lost_tracks, score_tracks  # noqa: E402
-from temporal.features import window_signals  # noqa: E402
+from temporal.detector import drop_duplicate_people, handoff_lost_tracks, score_tracks  # noqa: E402
+from temporal.features import window_drop, window_signals  # noqa: E402
 from temporal.gate import ThresholdGate  # noqa: E402
 from temporal.model import load_checkpoint  # noqa: E402
 from temporal.pose_io import load_pose_json  # noqa: E402
@@ -123,13 +123,18 @@ class TemporalRun:
         self.threshold = float(
             self.meta.get("threshold", 0.8) if threshold is None else threshold
         )
-        self.windows = TrackWindows(window_size=window_size)
+        self.min_drop = float(self.meta.get("min_drop", 0.0))
+        self.max_gap = int(self.meta.get("max_gap", 5))
+        self.merge_duplicates = bool(self.meta.get("merge_duplicates", False))
+        self.windows = TrackWindows(window_size=window_size, max_gap=self.max_gap)
         self.gate = ThresholdGate(self.threshold, debounce, cooldown_seconds)
         self.histories = {}
         self.events = []
 
     def step(self, index, time_seconds, people):
         """Process one kept frame. Returns {track_id: (probability, above, fired)}."""
+        if self.merge_duplicates:
+            people = drop_duplicate_people(people)
         for old_id, new_id in handoff_lost_tracks(self.windows, people, index):
             self.gate.rename(old_id, new_id)
             if old_id in self.histories:
@@ -146,7 +151,10 @@ class TemporalRun:
             probability = scored[track_id][0] if track_id in scored else np.nan
             above = fired = False
             if track_id in scored:
-                fired = self.gate.update(track_id, probability, time_seconds)
+                checked = probability
+                if self.min_drop > 0 and window_drop(window, self.fps) < self.min_drop:
+                    checked = 0.0  # fast-drop check: no fast body drop, no alert
+                fired = self.gate.update(track_id, checked, time_seconds)
                 above = self.gate.is_above(track_id)
             history = self.histories.setdefault(track_id, TrackSignals(track_id))
             history.append(time_seconds, index, signals, window.box_features[-1, 0], probability, above)

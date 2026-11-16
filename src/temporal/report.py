@@ -25,7 +25,9 @@ matplotlib.use("Agg")
 import numpy as np  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
 
-from .crossval import average_precision, config_dict, fold_summaries, pooled_windows  # noqa: E402
+from .crossval import (  # noqa: E402
+    average_precision, config_dict, drop_sweep, fold_summaries, pooled_windows, subset_summary,
+)
 from .evaluate import summarize  # noqa: E402
 from .model import save_checkpoint  # noqa: E402
 
@@ -62,7 +64,8 @@ def write_run(run_dir, result, *, plots="all", data_note="", extra_notes=()):
         save_checkpoint(
             run_dir / "model.pt", result.final_model, fps=result.fps,
             window_size=result.config.window_size, threshold=result.threshold,
-            metrics=metrics, notes=f"{result.config.name}: {data_note}",
+            min_drop=result.config.min_drop, max_gap=result.config.max_gap,
+            merge_duplicates=result.config.merge_duplicates, metrics=metrics, notes=f"{result.config.name}: {data_note}",
         )
     (run_dir / "report.md").write_text(
         render_markdown(result, metrics, per_clip, [p for p in images if p], extra_notes), encoding="utf-8"
@@ -92,7 +95,13 @@ def build_metrics(result, data_note):
         "chosen_threshold": result.threshold,
         "at_chosen_threshold": chosen,
         "window_average_precision": average_precision(labels, probs),
+        "nested": result.nested,
+        "by_source": {source: subset_summary(result, {c.name for c in result.clips if c.source == source})
+                      for source in sorted({c.source for c in result.clips})},
+        "by_batch": {batch: subset_summary(result, {c.name for c in result.headline_clips if c.batch == batch})
+                     for batch in sorted({c.batch for c in result.headline_clips if c.batch})},
         "threshold_sweep": result.sweep,
+        "drop_sweep": drop_sweep(result),
         "fold_results": fold_summaries(result),
         "final_model_epochs": result.final_epochs,
     }
@@ -151,6 +160,21 @@ def render_markdown(result, metrics, per_clip, images, extra_notes):
         f"- Late alerts (faller, after the catch window): {chosen['late']:g}",
         f"- Window-level: average precision {_fmt(metrics['window_average_precision'])}, "
         f"precision {chosen['window']['precision']:.2f} / recall {chosen['window']['recall']:.2f} at this threshold",
+    ]
+    nested = metrics.get("nested")
+    if nested:
+        thresholds = sorted({t["threshold"] for t in nested["thresholds"]})
+        lines += [
+            f"- **Honest estimate (threshold chosen without the tested fold): {nested['caught']:g} of "
+            f"{nested['falls']} caught, {nested['false_alerts']:g} false alerts.** Each fold's threshold "
+            f"({', '.join(f'{t:.2f}' for t in thresholds)}) was picked from the other folds only, so these "
+            "are the numbers to compare between runs.",
+        ]
+    if len(c.seeds) > 1:
+        spread = subset_summary_spread(result)
+        lines += [f"- Seed to seed: falls caught {spread['caught']}, false alerts {spread['false']} "
+                  "(the run-to-run noise; differences between runs smaller than this are not real)"]
+    lines += [
         "",
         f"> One false alert in {chosen['non_fall_minutes']:.1f} min is "
         f"{60 / chosen['non_fall_minutes']:.0f}/hour, so this data cannot show the 1/hour target directly; "
@@ -163,8 +187,16 @@ def render_markdown(result, metrics, per_clip, images, extra_notes):
         f"- Model: {c.arch.upper()}, hidden {c.hidden}, dropout {c.dropout}, up to {c.epochs} epochs "
         f"(best by validation), learning rate {c.learning_rate}",
         f"- Ambiguous windows (0-50% of a fall) left out: {'yes' if c.ignore_partial else 'no'}",
-        f"- Augmented copies per training clip: {c.augment}; synthetic clips added: {c.synthetic}",
+        "- Augmentation: " + ("one mirrored copy per training clip" if c.augment_mode == "mirror"
+                              else f"{c.augment} augmented copies per training clip")
+        + f"; synthetic clips added: {c.synthetic}",
+        f"- Label smoothing: {c.label_smoothing:g}; low-posture normal windows weighted "
+        f"x{c.hard_negative_weight:g}",
+        f"- Tracking: a lost track continues for up to {c.max_gap} frames ({c.max_gap / result.fps:.2f} s); "
+        f"duplicate boxes on one body {'removed' if c.merge_duplicates else 'kept'}",
         f"- Gate: debounce {c.debounce} frames ({c.debounce / result.fps:.2f} s), cooldown {c.cooldown:g} s",
+        f"- Fast-drop check: " + (f"alerts need a body drop of at least {c.min_drop:g} body lengths within 0.75 s"
+                                  if c.min_drop > 0 else "off"),
         f"- Seeds: {', '.join(str(s) for s in c.seeds)}",
         f"- Tested clips by source: {_source_text(metrics['sources'])}",
         f"- External clips added to every training set (never tested): "
@@ -185,18 +217,29 @@ def render_markdown(result, metrics, per_clip, images, extra_notes):
             f"{p['window']['precision']:.2f} | {p['window']['recall']:.2f} |"
         )
 
-    sources = sorted({clip.source for clip in result.clips})
-    if len(sources) > 1:
+    lines += ["", "## Fast-drop check (at the chosen threshold)", "",
+              "What requiring a fast body drop before an alert would change. The run's own setting is marked.", "",
+              "| Minimum drop (body lengths in 0.75 s) | Falls caught | False alerts |", "|---:|---:|---:|"]
+    for row in metrics["drop_sweep"]:
+        mark = " **(this run)**" if abs(row["min_drop"] - c.min_drop) < 1e-9 else ""
+        label = "off" if row["min_drop"] == 0 else f"{row['min_drop']:g}"
+        lines.append(f"| {label}{mark} | {row['caught']:g}/{row['falls']} | {row['false_alerts']:g} |")
+
+    if len(metrics["by_source"]) > 1:
         lines += ["", "## By source (at the chosen threshold)", "",
                   "The headline and threshold use the rig clips only.", "",
                   "| Source | Falls caught | False alerts | Non-fall minutes |", "|---|---:|---:|---:|"]
-        for source in sources:
-            names = {c.name for c in result.clips if c.source == source}
-            per_seed = [summarize([o for o in result.outcomes[s] if o["clip"] in names]) for s in c.seeds]
-            caught = np.mean([p["caught"] for p in per_seed])
-            false = np.mean([p["false_alerts"] for p in per_seed])
-            lines.append(f"| {source} | {caught:g}/{per_seed[0]['falls']} | {false:g} | "
-                         f"{per_seed[0]['non_fall_minutes']:.1f} |")
+        for source, s in metrics["by_source"].items():
+            lines.append(f"| {source} | {s['caught']:g}/{s['falls']} | {s['false_alerts']:g} | "
+                         f"{s['non_fall_minutes']:.1f} |")
+    if metrics["by_batch"]:
+        lines += ["", "## By batch (rig clips, at the chosen threshold)", "",
+                  "`trial1` is exactly the clip set Trial 1 was scored on, so it compares directly with Trial 1's "
+                  "numbers. Later batches are the clips added since.", "",
+                  "| Batch | Clips | Falls caught | False alerts | Non-fall minutes |", "|---|---:|---:|---:|---:|"]
+        for batch, s in metrics["by_batch"].items():
+            lines.append(f"| {batch} | {s['clips']} | {s['caught']:g}/{s['falls']} | {s['false_alerts']:g} | "
+                         f"{s['non_fall_minutes']:.1f} |")
     lines += ["", "## Folds", "",
               "| Seed | Fold | Test clips | Train windows (falls) | Test windows (falls) | Best epoch | Avg precision | F1 @0.5 |",
               "|---:|---:|---:|---:|---:|---:|---:|---:|"]
@@ -372,10 +415,18 @@ def alerts_at(result, scores):
     from .evaluate import alerts_for
 
     c = result.config
-    return alerts_for(scores, result.threshold, c.debounce, c.cooldown)
+    return alerts_for(scores, result.threshold, c.debounce, c.cooldown, c.min_drop)
 
 
 # Helpers
+
+
+def subset_summary_spread(result):
+    """Lowest to highest falls caught and false alerts across seeds, at the chosen threshold."""
+    per_seed = [summarize(result.outcomes[s]) for s in result.config.seeds]
+    caught = [p["caught"] for p in per_seed]
+    false = [p["false_alerts"] for p in per_seed]
+    return {"caught": f"{min(caught)} to {max(caught)}", "false": f"{min(false)} to {max(false)}"}
 
 
 def _source_counts(clips):

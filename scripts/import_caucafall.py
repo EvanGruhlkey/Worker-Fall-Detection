@@ -42,7 +42,7 @@ POSES = ROOT / "data" / "output" / "caucafall"
 
 COLUMNS = ["clip_id", "folder", "file", "has_fall", "fall_start_s", "fall_end_s", "faller_track_id",
            "quality", "group", "fall_type", "fall_direction", "camera_view", "people_in_frame",
-           "conditions", "notes", "duration_s", "fps", "frames", "resolution", "source"]
+           "conditions", "notes", "duration_s", "fps", "frames", "resolution", "source", "batch"]
 ACTIVITIES = {
     "Fall backwards": ("fall", "backward"), "Fall forward": ("fall", "forward"),
     "Fall left": ("fall", "sideways"), "Fall right": ("fall", "sideways"),
@@ -152,7 +152,7 @@ def main(argv=None):
                 "group": f"cauca_s{subject:02d}", "fall_type": fall_type, "fall_direction": direction,
                 "camera_view": "high corner", "people_in_frame": "", "conditions": "",
                 "notes": "; ".join(notes), "duration_s": f"{count / fps:.2f}", "fps": f"{fps:g}",
-                "frames": count, "resolution": size, "source": "caucafall",
+                "frames": count, "resolution": size, "source": "caucafall", "batch": "trial1",
                 "_folder": folder,  # not written to the CSV
             })
     kept = keep_reviewed_fields(rows)
@@ -192,7 +192,7 @@ def keep_reviewed_fields(rows):
         old = existing.get(row["clip_id"])
         if old is None:
             continue
-        for field in ("fall_start_s", "fall_end_s", "quality", "notes", "people_in_frame", "conditions"):
+        for field in ("fall_start_s", "fall_end_s", "quality", "notes", "people_in_frame", "conditions", "batch"):
             row[field] = old.get(field, row[field])
         kept += 1
     return kept

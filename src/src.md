@@ -55,7 +55,7 @@ The backend imports the same pose functions. Python imports use the folders, for
 2. DirectML for compatible Windows GPUs, including AMD.
 3. CPU everywhere else.
 
-This is a preference order, not a speed benchmark. Both ONNX models use the same selection rule and allow CPU fallback. The optional `device_id` in the JSON config selects GPU 0 by default. Use `"backend": "rtmpose"` in new configs; the old `"directml_rtmpose"` value also works with automatic selection.
+This is a preference order, not a speed benchmark. Both ONNX models use the same selection rule and allow CPU fallback. Without a `device_id` in the JSON config, DirectML uses the high-performance GPU: on laptops with built-in graphics plus a separate GPU (e.g. Intel Iris Xe + NVIDIA) that is the separate one, about twice as fast as GPU 0, which is usually the built-in one. CUDA uses GPU 0. Add `"device_id": N` to the config to pick a GPU by number. Use `"backend": "rtmpose"` in new configs; the old `"directml_rtmpose"` value also works with automatic selection.
 
 The default `uv sync` installs DirectML on Windows and CPU runtime elsewhere. On a machine with NVIDIA CUDA and cuDNN installed, use the CUDA group when running commands:
 

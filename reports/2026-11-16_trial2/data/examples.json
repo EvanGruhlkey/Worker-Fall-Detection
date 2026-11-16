@@ -1,0 +1,1071 @@
+{
+ "threshold": 0.97,
+ "rows": [
+  {
+   "title": "Normal work 1",
+   "clip": "1xiFn4bLdT-6Alz7z0XDz_alligator",
+   "category": "normal_work",
+   "fold": 5,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 1,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.9983799457550049,
+   "video": "videos/normal_work/1xiFn4bLdT-6Alz7z0XDz_alligator.mp4",
+   "stills": [
+    "stills/1xiFn4bLdT-6Alz7z0XDz_alligator_12.75s.jpg"
+   ],
+   "source_video": "data/input/normal_rig_work/1xiFn4bLdT-6Alz7z0XDz_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/1xiFn4bLdT-6Alz7z0XDz_alligator.mp4",
+   "alerts": [
+    {
+     "time": 12.75,
+     "track": 8,
+     "p": 0.998,
+     "faller": false
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "title": "Normal work 2",
+   "clip": "29jB-BibMmaRAZBqZtNnU_alligator",
+   "category": "normal_work",
+   "fold": 3,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 1,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.9999997615814209,
+   "video": "videos/normal_work/29jB-BibMmaRAZBqZtNnU_alligator.mp4",
+   "stills": [
+    "stills/29jB-BibMmaRAZBqZtNnU_alligator_09.33s.jpg"
+   ],
+   "source_video": "data/input/normal_rig_work/29jB-BibMmaRAZBqZtNnU_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/29jB-BibMmaRAZBqZtNnU_alligator.mp4",
+   "alerts": [
+    {
+     "time": 9.33,
+     "track": 14,
+     "p": 1.0,
+     "faller": false
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "title": "Normal work 3",
+   "clip": "4CJH5B2NtzP8VwFzxMwO5_alligator",
+   "category": "normal_work",
+   "fold": 1,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.02492573857307434,
+   "video": "videos/normal_work/4CJH5B2NtzP8VwFzxMwO5_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/4CJH5B2NtzP8VwFzxMwO5_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/4CJH5B2NtzP8VwFzxMwO5_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Normal work 4",
+   "clip": "EIlywKhfkRHTAlBqul_mf_alligator",
+   "category": "normal_work",
+   "fold": 2,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.8361944556236267,
+   "video": "videos/normal_work/EIlywKhfkRHTAlBqul_mf_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/EIlywKhfkRHTAlBqul_mf_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/EIlywKhfkRHTAlBqul_mf_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Drill floor fall D",
+   "clip": "ILLOvByCSJmu2U4QL4R7q_output",
+   "category": "caught",
+   "fold": 1,
+   "fall": "3.00-3.50",
+   "delay": 0.16666666666666652,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 22,
+   "peak_faller": 0.9999960660934448,
+   "peak_others": null,
+   "video": "videos/caught/ILLOvByCSJmu2U4QL4R7q_output.mp4",
+   "stills": [
+    "stills/ILLOvByCSJmu2U4QL4R7q_output_03.67s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/ILLOvByCSJmu2U4QL4R7q_output.mp4",
+   "pose_video": "data/output/rig_falls/ILLOvByCSJmu2U4QL4R7q_output.mp4",
+   "alerts": [
+    {
+     "time": 3.67,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "only worker; descent looks controlled (crawl-like), check realism; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Normal work 7",
+   "clip": "LXCUWr1Hjb3MEZVgdYPIh_alligator",
+   "category": "normal_work",
+   "fold": 2,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.015061984769999981,
+   "video": "videos/normal_work/LXCUWr1Hjb3MEZVgdYPIh_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/LXCUWr1Hjb3MEZVgdYPIh_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/LXCUWr1Hjb3MEZVgdYPIh_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Normal work 8",
+   "clip": "MIPR_SGTQICev4mFBDU2c_alligator",
+   "category": "normal_work",
+   "fold": 3,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.9254117608070374,
+   "video": "videos/normal_work/MIPR_SGTQICev4mFBDU2c_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/MIPR_SGTQICev4mFBDU2c_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/MIPR_SGTQICev4mFBDU2c_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Normal work 9",
+   "clip": "UyNpEpYTGgJkfrlSRc7Kd_alligator",
+   "category": "normal_work",
+   "fold": 5,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.9469820857048035,
+   "video": "videos/normal_work/UyNpEpYTGgJkfrlSRc7Kd_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/UyNpEpYTGgJkfrlSRc7Kd_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/UyNpEpYTGgJkfrlSRc7Kd_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Drill floor fall B",
+   "clip": "YdQeOIiCjBFNpPjdTE641_output",
+   "category": "caught",
+   "fold": 1,
+   "fall": "6.75-7.33",
+   "delay": 0.41666666666666696,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 29,
+   "peak_faller": 0.9999992847442627,
+   "peak_others": null,
+   "video": "videos/caught/YdQeOIiCjBFNpPjdTE641_output.mp4",
+   "stills": [
+    "stills/YdQeOIiCjBFNpPjdTE641_output_07.75s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/YdQeOIiCjBFNpPjdTE641_output.mp4",
+   "pose_video": "data/output/rig_falls/YdQeOIiCjBFNpPjdTE641_output.mp4",
+   "alerts": [
+    {
+     "time": 7.75,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "only worker; wobbling from ~6.0, uncontrolled from 6.75; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Drill floor fall A",
+   "clip": "_4RXOScjeGcGW1uLah2Cb_output",
+   "category": "caught",
+   "fold": 1,
+   "fall": "8.83-9.50",
+   "delay": 0.3333333333333339,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 29,
+   "peak_faller": 0.9999874830245972,
+   "peak_others": null,
+   "video": "videos/caught/_4RXOScjeGcGW1uLah2Cb_output.mp4",
+   "stills": [
+    "stills/_4RXOScjeGcGW1uLah2Cb_output_09.83s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/_4RXOScjeGcGW1uLah2Cb_output.mp4",
+   "pose_video": "data/output/rig_falls/_4RXOScjeGcGW1uLah2Cb_output.mp4",
+   "alerts": [
+    {
+     "time": 9.83,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "only worker; squats at valve 8.0-8.8 (not a fall) then falls backward; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Backward fall near equipment",
+   "clip": "backward_fall_near_equipment",
+   "category": "caught",
+   "fold": 4,
+   "fall": "9.75-10.75",
+   "delay": -0.3333333333333339,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 30,
+   "peak_faller": 0.9999727010726929,
+   "peak_others": 0.0576770082116127,
+   "video": "videos/caught/backward_fall_near_equipment.mp4",
+   "stills": [
+    "stills/backward_fall_near_equipment_10.42s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/backward_fall_near_equipment.mp4",
+   "pose_video": "data/output/rig_falls/backward_fall_near_equipment.mp4",
+   "alerts": [
+    {
+     "time": 10.42,
+     "track": 3,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker at grey cabinet, center-right; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Backward slip while stepping back",
+   "clip": "backward_slip_while_stepping_back",
+   "category": "caught",
+   "fold": 5,
+   "fall": "10.00-10.67",
+   "delay": 0.41666666666666785,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 26,
+   "peak_faller": 0.9999159574508667,
+   "peak_others": 0.06323941797018051,
+   "video": "videos/caught/backward_slip_while_stepping_back.mp4",
+   "stills": [
+    "stills/backward_slip_while_stepping_back_11.08s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/backward_slip_while_stepping_back.mp4",
+   "pose_video": "data/output/rig_falls/backward_slip_while_stepping_back.mp4",
+   "alerts": [
+    {
+     "time": 11.08,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: red coverall, left group; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Normal work 5",
+   "clip": "f40KfQHxg3C36Lj1rYwqk_alligator",
+   "category": "normal_work",
+   "fold": 4,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.2580811083316803,
+   "video": "videos/normal_work/f40KfQHxg3C36Lj1rYwqk_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/f40KfQHxg3C36Lj1rYwqk_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/f40KfQHxg3C36Lj1rYwqk_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  },
+  {
+   "title": "Fall from ladder",
+   "clip": "fall_from_ladder",
+   "category": "caught",
+   "fold": 1,
+   "fall": "7.50-8.08",
+   "delay": 0.08333333333333215,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 25,
+   "peak_faller": 0.9999979734420776,
+   "peak_others": 0.8694766163825989,
+   "video": "videos/caught/fall_from_ladder.mp4",
+   "stills": [
+    "stills/fall_from_ladder_08.17s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/fall_from_ladder.mp4",
+   "pose_video": "data/output/rig_falls/fall_from_ladder.mp4",
+   "alerts": [
+    {
+     "time": 8.17,
+     "track": 4,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker on ladder, left; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Fall while working on pipe",
+   "clip": "fall_while_working_on_pipe",
+   "category": "caught",
+   "fold": 2,
+   "fall": "7.75-8.67",
+   "delay": -0.33333333333333215,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 29,
+   "peak_faller": 0.9999997615814209,
+   "peak_others": 0.014194841496646404,
+   "video": "videos/caught/fall_while_working_on_pipe.mp4",
+   "stills": [
+    "stills/fall_while_working_on_pipe_08.33s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/fall_while_working_on_pipe.mp4",
+   "pose_video": "data/output/rig_falls/fall_while_working_on_pipe.mp4",
+   "alerts": [
+    {
+     "time": 8.33,
+     "track": 2,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker at red pipe, center; slow descent; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Forward fall while carrying a tool",
+   "clip": "forward_fall_while_carrying_a_tool",
+   "category": "caught",
+   "fold": 5,
+   "fall": "8.58-9.25",
+   "delay": 0.0,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 30,
+   "peak_faller": 0.9996898174285889,
+   "peak_others": 0.9633249640464783,
+   "video": "videos/caught/forward_fall_while_carrying_a_tool.mp4",
+   "stills": [
+    "stills/forward_fall_while_carrying_a_tool_09.25s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/forward_fall_while_carrying_a_tool.mp4",
+   "pose_video": "data/output/rig_falls/forward_fall_while_carrying_a_tool.mp4",
+   "alerts": [
+    {
+     "time": 9.25,
+     "track": 5,
+     "p": 0.999,
+     "faller": true
+    }
+   ],
+   "notes": "faller: lone worker center; looks like a controlled lowering, check realism; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Forward trip while walking",
+   "clip": "forward_trip_while_walking",
+   "category": "caught",
+   "fold": 3,
+   "fall": "5.25-5.92",
+   "delay": -0.08333333333333393,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 30,
+   "peak_faller": 0.9999998807907104,
+   "peak_others": 0.002045390196144581,
+   "video": "videos/caught/forward_trip_while_walking.mp4",
+   "stills": [
+    "stills/forward_trip_while_walking_05.83s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/forward_trip_while_walking.mp4",
+   "pose_video": "data/output/rig_falls/forward_trip_while_walking.mp4",
+   "alerts": [
+    {
+     "time": 5.83,
+     "track": 6,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: walking worker center-left; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Normal work 6",
+   "clip": "jrigd_ZgdOhh4j67tzGVU_alligator",
+   "category": "normal_work",
+   "fold": 1,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 2,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.9999951124191284,
+   "video": "videos/normal_work/jrigd_ZgdOhh4j67tzGVU_alligator.mp4",
+   "stills": [
+    "stills/jrigd_ZgdOhh4j67tzGVU_alligator_04.83s.jpg",
+    "stills/jrigd_ZgdOhh4j67tzGVU_alligator_04.92s.jpg"
+   ],
+   "source_video": "data/input/normal_rig_work/jrigd_ZgdOhh4j67tzGVU_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/jrigd_ZgdOhh4j67tzGVU_alligator.mp4",
+   "alerts": [
+    {
+     "time": 4.83,
+     "track": 4,
+     "p": 1.0,
+     "faller": false
+    },
+    {
+     "time": 4.92,
+     "track": 36,
+     "p": 1.0,
+     "faller": false
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "title": "Slip on wet grating",
+   "clip": "miller_group_fall_01_slip_wet_grating",
+   "category": "caught",
+   "fold": 4,
+   "fall": "6.08-6.42",
+   "delay": 0.583333333333333,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 30,
+   "peak_faller": 0.9997712969779968,
+   "peak_others": 0.0007714479579590261,
+   "video": "videos/caught/miller_group_fall_01_slip_wet_grating.mp4",
+   "stills": [
+    "stills/miller_group_fall_01_slip_wet_grating_07.00s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_01_slip_wet_grating.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_01_slip_wet_grating.mp4",
+   "alerts": [
+    {
+     "time": 7.0,
+     "track": 3,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: leftmost of the 3-worker group; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Trip over hose",
+   "clip": "miller_group_fall_02_trip_over_hose",
+   "category": "caught",
+   "fold": 3,
+   "fall": "4.17-4.75",
+   "delay": 0.16666666666666696,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 29,
+   "peak_faller": 0.9999998807907104,
+   "peak_others": 6.12690791967907e-06,
+   "video": "videos/caught/miller_group_fall_02_trip_over_hose.mp4",
+   "stills": [
+    "stills/miller_group_fall_02_trip_over_hose_04.92s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_02_trip_over_hose.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_02_trip_over_hose.mp4",
+   "alerts": [
+    {
+     "time": 4.92,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker on the right, near the hose; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Slip on oily patch, drizzle",
+   "clip": "miller_group_fall_03_slip_oily_patch_drizzle",
+   "category": "caught",
+   "fold": 4,
+   "fall": "3.42-4.25",
+   "delay": -0.08333333333333304,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 30,
+   "peak_faller": 0.9999761581420898,
+   "peak_others": 0.008656024001538754,
+   "video": "videos/caught/miller_group_fall_03_slip_oily_patch_drizzle.mp4",
+   "stills": [
+    "stills/miller_group_fall_03_slip_oily_patch_drizzle_04.17s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_03_slip_oily_patch_drizzle.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_03_slip_oily_patch_drizzle.mp4",
+   "alerts": [
+    {
+     "time": 4.17,
+     "track": 2,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker right of the wellhead; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Ladder fall at pipe rack",
+   "clip": "miller_group_fall_04_ladder_fall_pipe_rack",
+   "category": "caught",
+   "fold": 3,
+   "fall": "7.00-7.42",
+   "delay": 0.16666666666666607,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 29,
+   "peak_faller": 0.9999998807907104,
+   "peak_others": 5.428859367384575e-05,
+   "video": "videos/caught/miller_group_fall_04_ladder_fall_pipe_rack.mp4",
+   "stills": [
+    "stills/miller_group_fall_04_ladder_fall_pipe_rack_07.58s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_04_ladder_fall_pipe_rack.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_04_ladder_fall_pipe_rack.mp4",
+   "alerts": [
+    {
+     "time": 7.58,
+     "track": 2,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker on ladder at the pipe rack; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Stair misstep at night",
+   "clip": "miller_group_fall_05_stair_misstep_night",
+   "category": "caught",
+   "fold": 4,
+   "fall": "5.75-6.50",
+   "delay": 0.16666666666666696,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 29,
+   "peak_faller": 0.9998452663421631,
+   "peak_others": 0.0015127547085285187,
+   "video": "videos/caught/miller_group_fall_05_stair_misstep_night.mp4",
+   "stills": [
+    "stills/miller_group_fall_05_stair_misstep_night_06.67s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_05_stair_misstep_night.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_05_stair_misstep_night.mp4",
+   "alerts": [
+    {
+     "time": 6.67,
+     "track": 3,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker coming down the stairs; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Fall from low platform",
+   "clip": "miller_group_fall_08_fall_from_low_platform",
+   "category": "caught",
+   "fold": 1,
+   "fall": "4.67-5.25",
+   "delay": -0.08333333333333304,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 29,
+   "peak_faller": 0.9999942779541016,
+   "peak_others": 5.537242395803332e-05,
+   "video": "videos/caught/miller_group_fall_08_fall_from_low_platform.mp4",
+   "stills": [
+    "stills/miller_group_fall_08_fall_from_low_platform_05.17s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_08_fall_from_low_platform.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_08_fall_from_low_platform.mp4",
+   "alerts": [
+    {
+     "time": 5.17,
+     "track": 2,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker on the platform; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Slip carrying toolbox, night rain",
+   "clip": "miller_group_fall_10_slip_carrying_toolbox_night_rain",
+   "category": "caught",
+   "fold": 3,
+   "fall": "4.17-5.08",
+   "delay": -0.16666666666666607,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 29,
+   "peak_faller": 1.0,
+   "peak_others": 6.551543265231885e-06,
+   "video": "videos/caught/miller_group_fall_10_slip_carrying_toolbox_night_rain.mp4",
+   "stills": [
+    "stills/miller_group_fall_10_slip_carrying_toolbox_night_rain_04.92s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/miller_group_fall_10_slip_carrying_toolbox_night_rain.mp4",
+   "pose_video": "data/output/rig_falls/miller_group_fall_10_slip_carrying_toolbox_night_rain.mp4",
+   "alerts": [
+    {
+     "time": 4.92,
+     "track": 2,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: worker carrying red toolbox; motion blur; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Night vision: slip on wet grating",
+   "clip": "miller_night_fall_01_nv_slip_wet_grating",
+   "category": "missed",
+   "fold": 2,
+   "fall": "5.42-6.08",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "worker partly lost by the detector",
+   "fall_windows": 2,
+   "peak_faller": 0.9999613761901855,
+   "peak_others": 4.897462076769443e-06,
+   "video": "videos/missed/miller_night_fall_01_nv_slip_wet_grating.mp4",
+   "stills": [
+    "stills/miller_night_fall_01_nv_slip_wet_grating_06.08s.jpg"
+   ],
+   "source_video": "data/input/rig_falls_night/miller_night_fall_01_nv_slip_wet_grating.mp4",
+   "pose_video": "data/output/rig_falls_night/miller_night_fall_01_nv_slip_wet_grating.mp4",
+   "alerts": [],
+   "notes": "faller: left of three at the manifold; times set by eye; detector loses the faller from 5.5 s; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Night vision: trip over hose",
+   "clip": "miller_night_fall_02_nv_trip_over_hose",
+   "category": "not_visible",
+   "fold": 1,
+   "fall": "4.25-4.83",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "worker not detected during the fall",
+   "fall_windows": 0,
+   "peak_faller": 7.441580237355083e-05,
+   "peak_others": 0.992355465888977,
+   "video": "videos/not_visible/miller_night_fall_02_nv_trip_over_hose.mp4",
+   "stills": [
+    "stills/miller_night_fall_02_nv_trip_over_hose_04.83s.jpg"
+   ],
+   "source_video": "data/input/rig_falls_night/miller_night_fall_02_nv_trip_over_hose.mp4",
+   "pose_video": "data/output/rig_falls_night/miller_night_fall_02_nv_trip_over_hose.mp4",
+   "alerts": [],
+   "notes": "times set by eye; retry with a larger detector; back in with YOLO26m: YOLO26m detects the right-hand worker (ID 2) for the first half of the fall (4.25-4.5 s), lost once down; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Night vision: stumble carrying pipe",
+   "clip": "miller_night_fall_05_nv_stumble_carrying_pipe",
+   "category": "missed",
+   "fold": 4,
+   "fall": "4.92-5.42",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "worker partly lost by the detector",
+   "fall_windows": 9,
+   "peak_faller": 0.9998593330383301,
+   "peak_others": 0.004660415463149548,
+   "video": "videos/missed/miller_night_fall_05_nv_stumble_carrying_pipe.mp4",
+   "stills": [
+    "stills/miller_night_fall_05_nv_stumble_carrying_pipe_05.42s.jpg"
+   ],
+   "source_video": "data/input/rig_falls_night/miller_night_fall_05_nv_stumble_carrying_pipe.mp4",
+   "pose_video": "data/output/rig_falls_night/miller_night_fall_05_nv_stumble_carrying_pipe.mp4",
+   "alerts": [],
+   "notes": "faller: worker carrying the pipe (middle); times set by eye; detector loses everyone from 4.9 s; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Floodlit night: slip on oily patch",
+   "clip": "miller_night_fall_06_oh_slip_oily_patch",
+   "category": "caught",
+   "fold": 1,
+   "fall": "4.00-4.50",
+   "delay": -0.08333333333333304,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 30,
+   "peak_faller": 0.9999995231628418,
+   "peak_others": 7.624906720593572e-05,
+   "video": "videos/caught/miller_night_fall_06_oh_slip_oily_patch.mp4",
+   "stills": [
+    "stills/miller_night_fall_06_oh_slip_oily_patch_04.42s.jpg"
+   ],
+   "source_video": "data/input/rig_falls_night/miller_night_fall_06_oh_slip_oily_patch.mp4",
+   "pose_video": "data/output/rig_falls_night/miller_night_fall_06_oh_slip_oily_patch.mp4",
+   "alerts": [
+    {
+     "time": 4.42,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: orange coveralls, middle; times set by eye; back as ID 1 lying from ~5 s; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Floodlit night: trip over flange",
+   "clip": "miller_night_fall_07_oh_trip_over_flange",
+   "category": "missed",
+   "fold": 2,
+   "fall": "4.08-4.50",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "model scored the fall too low",
+   "fall_windows": 28,
+   "peak_faller": 0.9999934434890747,
+   "peak_others": 0.006794898305088282,
+   "video": "videos/missed/miller_night_fall_07_oh_trip_over_flange.mp4",
+   "stills": [
+    "stills/miller_night_fall_07_oh_trip_over_flange_04.50s.jpg",
+    "stills/miller_night_fall_07_oh_trip_over_flange_06.75s.jpg"
+   ],
+   "source_video": "data/input/rig_falls_night/miller_night_fall_07_oh_trip_over_flange.mp4",
+   "pose_video": "data/output/rig_falls_night/miller_night_fall_07_oh_trip_over_flange.mp4",
+   "alerts": [
+    {
+     "time": 6.75,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: navy coveralls; trips to his knees 4.05-4.5 s (impact = knees), then lowers himself prone ~5.8-6.2 s; times set by eye; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Floodlit night: fall from low platform",
+   "clip": "miller_night_fall_08_oh_fall_from_low_platform",
+   "category": "caught",
+   "fold": 1,
+   "fall": "4.92-5.50",
+   "delay": 0.33333333333333304,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 28,
+   "peak_faller": 0.9999998807907104,
+   "peak_others": 0.0015609471593052149,
+   "video": "videos/caught/miller_night_fall_08_oh_fall_from_low_platform.mp4",
+   "stills": [
+    "stills/miller_night_fall_08_oh_fall_from_low_platform_05.83s.jpg"
+   ],
+   "source_video": "data/input/rig_falls_night/miller_night_fall_08_oh_fall_from_low_platform.mp4",
+   "pose_video": "data/output/rig_falls_night/miller_night_fall_08_oh_fall_from_low_platform.mp4",
+   "alerts": [
+    {
+     "time": 5.83,
+     "track": 4,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: navy worker on the raised platform; times set by eye; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Floodlit night: slip stepping off ladder",
+   "clip": "miller_night_fall_09_oh_slip_stepping_off_ladder",
+   "category": "caught",
+   "fold": 5,
+   "fall": "5.08-5.58",
+   "delay": 0.16666666666666696,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 30,
+   "peak_faller": 0.9999089241027832,
+   "peak_others": 0.6338056325912476,
+   "video": "videos/caught/miller_night_fall_09_oh_slip_stepping_off_ladder.mp4",
+   "stills": [
+    "stills/miller_night_fall_09_oh_slip_stepping_off_ladder_05.75s.jpg"
+   ],
+   "source_video": "data/input/rig_falls_night/miller_night_fall_09_oh_slip_stepping_off_ladder.mp4",
+   "pose_video": "data/output/rig_falls_night/miller_night_fall_09_oh_slip_stepping_off_ladder.mp4",
+   "alerts": [
+    {
+     "time": 5.75,
+     "track": 3,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: orange worker coming down the ladder (left); times set by eye; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Floodlit night: slip carrying toolbox",
+   "clip": "miller_night_fall_10_oh_slip_carrying_toolbox_alone",
+   "category": "caught",
+   "fold": 2,
+   "fall": "4.42-4.83",
+   "delay": 0.666666666666667,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 24,
+   "peak_faller": 0.999998927116394,
+   "peak_others": 5.470230917126173e-06,
+   "video": "videos/caught/miller_night_fall_10_oh_slip_carrying_toolbox_alone.mp4",
+   "stills": [
+    "stills/miller_night_fall_10_oh_slip_carrying_toolbox_alone_05.50s.jpg"
+   ],
+   "source_video": "data/input/rig_falls_night/miller_night_fall_10_oh_slip_carrying_toolbox_alone.mp4",
+   "pose_video": "data/output/rig_falls_night/miller_night_fall_10_oh_slip_carrying_toolbox_alone.mp4",
+   "alerts": [
+    {
+     "time": 5.5,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: navy worker with the red toolbox; tracker gives him ID 5 after the fall; times set by eye; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Drill floor fall C",
+   "clip": "oO8L7gEH7O6hbAxYdXVHD_output",
+   "category": "caught",
+   "fold": 1,
+   "fall": "2.08-2.50",
+   "delay": 0.25,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 28,
+   "peak_faller": 0.9999992847442627,
+   "peak_others": 0.0011313618160784245,
+   "video": "videos/caught/oO8L7gEH7O6hbAxYdXVHD_output.mp4",
+   "stills": [
+    "stills/oO8L7gEH7O6hbAxYdXVHD_output_02.75s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/oO8L7gEH7O6hbAxYdXVHD_output.mp4",
+   "pose_video": "data/output/rig_falls/oO8L7gEH7O6hbAxYdXVHD_output.mp4",
+   "alerts": [
+    {
+     "time": 2.75,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "only worker; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Slip behind another worker",
+   "clip": "slip_behind_person",
+   "category": "caught",
+   "fold": 3,
+   "fall": "7.25-7.75",
+   "delay": 0.3333333333333339,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 27,
+   "peak_faller": 0.9999920129776001,
+   "peak_others": 0.9979914426803589,
+   "video": "videos/caught/slip_behind_person.mp4",
+   "stills": [
+    "stills/slip_behind_person_08.08s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/slip_behind_person.mp4",
+   "pose_video": "data/output/rig_falls/slip_behind_person.mp4",
+   "alerts": [
+    {
+     "time": 8.08,
+     "track": 53,
+     "p": 0.999,
+     "faller": true
+    }
+   ],
+   "notes": "faller: navy coverall + white helmet behind the group, top-center; small in frame; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Slip between coworkers",
+   "clip": "slip_between_coworkers",
+   "category": "caught",
+   "fold": 5,
+   "fall": "6.83-7.67",
+   "delay": -0.3333333333333339,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 29,
+   "peak_faller": 0.9993414282798767,
+   "peak_others": 0.22857825458049774,
+   "video": "videos/caught/slip_between_coworkers.mp4",
+   "stills": [
+    "stills/slip_between_coworkers_07.33s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/slip_between_coworkers.mp4",
+   "pose_video": "data/output/rig_falls/slip_between_coworkers.mp4",
+   "alerts": [
+    {
+     "time": 7.33,
+     "track": 1,
+     "p": 0.996,
+     "faller": true
+    }
+   ],
+   "notes": "faller: navy worker left of orange group; looks like kneeling down, check realism; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Slip in the open",
+   "clip": "slip_in_the_open",
+   "category": "caught",
+   "fold": 2,
+   "fall": "6.33-6.67",
+   "delay": 0.33333333333333304,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 30,
+   "peak_faller": 0.9999972581863403,
+   "peak_others": 0.00890202634036541,
+   "video": "videos/caught/slip_in_the_open.mp4",
+   "stills": [
+    "stills/slip_in_the_open_07.00s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/slip_in_the_open.mp4",
+   "pose_video": "data/output/rig_falls/slip_in_the_open.mp4",
+   "alerts": [
+    {
+     "time": 7.0,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: orange worker mid-deck; small in frame; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Sudden collapse",
+   "clip": "sudden_collapse",
+   "category": "caught",
+   "fold": 5,
+   "fall": "6.25-6.67",
+   "delay": 0.0,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 29,
+   "peak_faller": 0.9998983144760132,
+   "peak_others": 0.8386929631233215,
+   "video": "videos/caught/sudden_collapse.mp4",
+   "stills": [
+    "stills/sudden_collapse_06.67s.jpg"
+   ],
+   "source_video": "data/input/rig_falls/sudden_collapse.mp4",
+   "pose_video": "data/output/rig_falls/sudden_collapse.mp4",
+   "alerts": [
+    {
+     "time": 6.67,
+     "track": 1,
+     "p": 1.0,
+     "faller": true
+    }
+   ],
+   "notes": "faller: walking worker center; bent forward from ~5.5 before the collapse; faller IDs redone for YOLO26m poses (2026-11-15)"
+  },
+  {
+   "title": "Normal work 10",
+   "clip": "yQ3kWNc-Qe3EgqRaNso6l_alligator",
+   "category": "normal_work",
+   "fold": 4,
+   "fall": "",
+   "delay": null,
+   "false_alerts": 0,
+   "reason": "",
+   "fall_windows": 0,
+   "peak_faller": null,
+   "peak_others": 0.09525889158248901,
+   "video": "videos/normal_work/yQ3kWNc-Qe3EgqRaNso6l_alligator.mp4",
+   "stills": [],
+   "source_video": "data/input/normal_rig_work/yQ3kWNc-Qe3EgqRaNso6l_alligator.mp4",
+   "pose_video": "data/output/normal_rig_work/yQ3kWNc-Qe3EgqRaNso6l_alligator.mp4",
+   "alerts": [],
+   "notes": ""
+  }
+ ],
+ "seed0": {
+  "folds": [
+   [
+    "night_08_oh_fall_from_low_platform",
+    "drillfloor_720p",
+    "fall_from_ladder",
+    "miller_group_fall_08_fall_from_low_platform",
+    "night_06_oh_slip_oily_patch",
+    "night_02_nv_trip_over_hose",
+    "4CJH5B2NtzP8VwFzxMwO5_alligator",
+    "jrigd_ZgdOhh4j67tzGVU_alligator"
+   ],
+   [
+    "fall_while_working_on_pipe",
+    "slip_in_the_open",
+    "night_10_oh_slip_carrying_toolbox_alone",
+    "night_07_oh_trip_over_flange",
+    "night_01_nv_slip_wet_grating",
+    "LXCUWr1Hjb3MEZVgdYPIh_alligator",
+    "EIlywKhfkRHTAlBqul_mf_alligator"
+   ],
+   [
+    "miller_group_fall_04_ladder_fall_pipe_rack",
+    "forward_trip_while_walking",
+    "miller_group_fall_02_trip_over_hose",
+    "miller_group_fall_10_slip_carrying_toolbox_night_rain",
+    "slip_behind_person",
+    "MIPR_SGTQICev4mFBDU2c_alligator",
+    "29jB-BibMmaRAZBqZtNnU_alligator"
+   ],
+   [
+    "miller_group_fall_05_stair_misstep_night",
+    "night_05_nv_stumble_carrying_pipe",
+    "backward_fall_near_equipment",
+    "miller_group_fall_01_slip_wet_grating",
+    "miller_group_fall_03_slip_oily_patch_drizzle",
+    "f40KfQHxg3C36Lj1rYwqk_alligator",
+    "yQ3kWNc-Qe3EgqRaNso6l_alligator"
+   ],
+   [
+    "sudden_collapse",
+    "slip_between_coworkers",
+    "night_09_oh_slip_stepping_off_ladder",
+    "forward_fall_while_carrying_a_tool",
+    "backward_slip_while_stepping_back",
+    "UyNpEpYTGgJkfrlSRc7Kd_alligator",
+    "1xiFn4bLdT-6Alz7z0XDz_alligator"
+   ]
+  ]
+ }
+}
