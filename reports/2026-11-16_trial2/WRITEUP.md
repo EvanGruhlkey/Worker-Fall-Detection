@@ -222,7 +222,7 @@ In priority order:
 1. **Add footage of workers getting down on purpose,** crouching, kneeling, lying under equipment, and getting up again, with at least as many minutes as the fall footage. This is still the main source of false alarms, and it would also make the false-alarm rate measurable per hour. The team's own gym recordings show this works: the same setup could record deliberate kneeling and crouching.
 2. **Improve detection in night-vision footage.** Options are adding night-vision images to the detector's training (fine-tuning YOLO26m), or testing the larger YOLO26l on the GPU. Then bring the two left-out night-vision clips back in.
 3. **Add the 12 fps limit to the live dashboard** and switch the trained temporal model on, so the live system makes the same decisions as the tests.
-4. **Train the final model** on all clips with the best Trial 2 setup (mirror + fast drop + dedupe) for the live system.
+4. **Done: the final model.** It was trained on all clips with the best Trial 2 setup (mirror + fast drop + dedupe) for 7 epochs, the median best epoch of the 15 test models, and saved as `models/fall_gru_trial2.pt`. The file carries its own alert threshold (0.99), fast-drop setting and frame rate. The live dashboard loads it with `FALL_CLASSIFIER_PATH=models/fall_gru_trial2.pt` in `.env`.
 5. **Review the 5 rig clips left out since Trial 1** and use them again if YOLO26m tracks them well.
 6. **Tune the fast-drop check and label smoothing together.** Each cut false alarms sharply on its own at some cost in catches. A milder combination may keep all 25 catches with fewer false alarms.
 7. **Generate more AI rig clips** in the conditions with the fewest examples (night vision, rain, workers hidden by equipment), once budget allows.
