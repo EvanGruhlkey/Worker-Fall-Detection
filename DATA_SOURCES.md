@@ -25,3 +25,15 @@ attribution its license requires. Raw downloads live in `data/external/`
 AI-generated clips of oil rig workers in `data/input/rig_falls` and
 `data/input/normal_rig_work`, labeled in `data/labels/clips.csv`. Owned by the
 project team.
+
+## Historical GMDCSA24 recorded-footage pilot
+
+Local source: `data/external/gmdcsa24/raw/ekramalam-GMDCSA24-A-Dataset-for-Human-Fall-Detection-in-Videos-5abac76`.
+
+- Dataset: Ekram Alam, GMDCSA24: A Dataset for Human Fall Detection in Videos, v2.0 (2024), DOI `10.5281/zenodo.12921216`.
+- The downloaded repository includes an MIT license, copyright 2024 Ekram Alam. Preserve its LICENSE and README with any distributed source footage.
+- The earlier pilot used recorded indoor activities and staged falls from subjects 1 through 4. These are not oil-site recordings.
+- Changes: selected original clips are trimmed, letterboxed to 640x360, resampled to 12 fps, muted, and concatenated at normal speed. No generated footage, bounding boxes, skeletons, or synthetic alerts are added. Labels come from source CSVs; alerts come from the actual fall pipeline.
+- Historical derived footage and provenance remain in ignored `data/study/real-footage/`. The current study uses the AI-generated rig clips described above; preparation instructions are in `user_study/README.md`.
+
+User study branding: the Oxy logo is sourced from https://www.oxy.com/siteassets/images/logos/logo.png and stored at `user_study/frontend/public/oxy-logo.png` for local playback.

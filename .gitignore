@@ -22,3 +22,6 @@ backups/
 .env
 .env.localtest
 data/local-test/
+
+# Participant records and study media stay local.
+data/study/
