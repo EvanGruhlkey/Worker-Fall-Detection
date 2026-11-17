@@ -106,7 +106,7 @@ def prepare(directory, classifier):
         command = [ffmpeg, "-y", "-loglevel", "error"]
         for feed in video_set["feeds"]:
             command.extend(["-threads", "1", "-i", str(directory / "media" / feed["pipeline_file"])])
-        command.extend(["-filter_complex", "".join(f"[{i}:v]" for i in range(6)) + "xstack=inputs=6:layout=0_0|640_0|1280_0|0_360|640_360|1280_360[v]", "-map", "[v]", "-t", str(manifest["duration"]), "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24", "-threads", "4", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(output)])
+        command.extend(["-filter_complex", "".join(f"[{i}:v]" for i in range(9)) + "xstack=inputs=9:layout=0_0|640_0|1280_0|0_360|640_360|1280_360|0_720|640_720|1280_720[v]", "-map", "[v]", "-t", str(manifest["duration"]), "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24", "-threads", "4", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(output)])
         subprocess.run(command, check=True)
         video_set["pipeline_wall_file"] = output.name
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")

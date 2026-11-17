@@ -321,3 +321,21 @@ def test_participant_ids_are_assigned_automatically(study):
     assert codes[0] != codes[1]
     exported = client.get("/api/study/export").json()["sessions"]
     assert [s["code"] for s in exported] == codes
+
+def test_nine_camera_manifest_and_participant_view(study):
+    import shutil
+    client, store, admin, manifest = study
+    for vs in manifest["sets"]:
+        source = store.media / vs["feeds"][0]["file"]
+        for index in range(6, 9):
+            name = f'{vs["id"]}{index}.mp4'
+            shutil.copyfile(source, store.media / name)
+            vs["feeds"].append({"id": f"c{index}", "name": f"Camera {index}", "file": name, "duration": 10})
+    assert client.put("/api/study/config", json=manifest).status_code == 200
+    headers, sid = enroll(client, admin)
+    consent_and_start(client, headers)
+    state = client.get("/api/study/session", headers=headers).json()
+    assert len(state["feeds"]) == 9
+    assert client.get(state["feeds"][8]["url"], headers=headers).status_code == 200
+    manifest["sets"][0]["feeds"].pop()
+    assert client.put("/api/study/config", json=manifest).status_code == 422

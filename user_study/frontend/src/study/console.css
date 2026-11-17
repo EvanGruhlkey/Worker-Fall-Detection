@@ -29,8 +29,7 @@ body:has(.study-console) { padding: 0; background: #151719; }
 .console-sidebar h2 { margin-bottom: 12px; font-size: 14px; font-weight: 500; }
 .console-events table { table-layout: fixed; width: 100%; }
 .console-events th { background: #1e2225; color: #a6adaf; padding: 8px 5px; font-size: 11px; }
-.console-events th:first-child { width: 22%; }
-.console-events th:nth-child(2) { width: 27%; }
+.console-events th { width: 50%; }
 .console-events td { padding: 8px 5px; border-color: #33383b; font-size: 12px; }
 .console-events input { background: transparent; color: #eceeed; border: 1px solid transparent; padding: 3px; width: 100%; font: inherit; }
 .console-events input:focus { border-color: #768089; }

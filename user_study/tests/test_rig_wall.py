@@ -4,12 +4,12 @@ from pathlib import Path
 module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "user_study/scripts/prepare_study_rig_wall.py"))
 
 
-def test_six_camera_cycle_runs_two_minutes_with_six_falls():
+def test_nine_camera_cycle_runs_two_minutes_with_six_falls():
     normal = [{"frames": 180, "id": f"normal{i}"} for i in range(10)]
     falls = [{"frames": 180, "id": f"fall{i}", "onset": 7.5} for i in range(11)]
-    timelines = [module["timeline"](normal, falls, camera, 0) for camera in range(6)]
-    assert len(timelines) == 6
-    assert len({schedule[0]["clip"]["id"] for schedule in timelines}) == 6
+    timelines = [module["timeline"](normal, falls, camera, 0) for camera in range(9)]
+    assert len(timelines) == 9
+    assert len({schedule[0]["clip"]["id"] for schedule in timelines}) == 9
     assert sum(part["kind"] == "fall" for schedule in timelines for part in schedule) == 6
     event_times = []
     for schedule in timelines:
@@ -24,7 +24,7 @@ def test_six_camera_cycle_runs_two_minutes_with_six_falls():
     assert len(set(intervals)) > 1
     assert min(intervals) >= 15
     normal_frames = sum(part["frames"] for schedule in timelines for part in schedule if part["kind"] == "normal")
-    assert normal_frames / (6 * 1440) >= .85
+    assert normal_frames / (9 * 1440) >= .85
 
 
 def test_conditions_do_not_repeat_the_same_fall_schedule():
@@ -32,6 +32,6 @@ def test_conditions_do_not_repeat_the_same_fall_schedule():
     falls = [{"frames": 180, "id": f"fall{i}", "onset": 7.5} for i in range(11)]
     schedules = []
     for set_index in (0, 1):
-        times = sorted(part["start_frame"] for camera in range(6) for part in module["timeline"](normal, falls, camera, set_index) if part["kind"] == "fall")
+        times = sorted(part["start_frame"] for camera in range(9) for part in module["timeline"](normal, falls, camera, set_index) if part["kind"] == "fall")
         schedules.append(times)
     assert schedules[0] != schedules[1]

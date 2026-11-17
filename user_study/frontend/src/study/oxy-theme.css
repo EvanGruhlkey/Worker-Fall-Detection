@@ -122,3 +122,12 @@ body:has(.study-page), body:has(.study-console) { background: #f4f7fb; }
 .management-settings dt { font-size: 12px; color: #52677e; }
 .management-settings dd { margin: 0; font-size: 16px; }
 @media(max-width: 540px) { .study-page .management-card { padding: 20px 14px; } .management-tabs button { padding: 12px 24px; } }
+
+.study-page .study-console:not(.study-console-auto) .console-wall.console-wall-nine, .study-page .console-wall.console-wall-nine { aspect-ratio: 16 / 9; width: min(100%, calc((100dvh - 370px) * 1.7778)); }
+.study-page .pipeline-monitor .console-wall.console-wall-nine { width: min(100%, calc((100dvh - 450px) * 1.7778)); }
+.console-wall-nine .console-tiles { grid-template-rows: repeat(3, 1fr); }
+@media(max-width: 540px) { .study-page .console-wall.console-wall-nine { width: 100%; } }
+/* Inset outlines keep the camera grid from shifting on hover. */
+.study-page .console-tiles button:hover { box-shadow: inset 0 0 0 3px #0070b5; }
+.study-page .console-tiles button[aria-pressed="true"] { border-color: #003b71; box-shadow: inset 0 0 0 3px #003b71; }
+.study-page .console-tiles button:focus-visible { outline: 3px solid #0070b5; outline-offset: -5px; }

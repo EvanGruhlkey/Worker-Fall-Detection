@@ -9,7 +9,8 @@ export default function ParticipantForm({ onSession }: { onSession: (session: St
   const [error, setError] = useState("");
   return <section className="study-panel study-intake">
     <h2>Before you begin</h2>
-    <p>Two minutes of manual monitoring, two minutes with automated alerts, then a short survey.</p>
+    <p>This study compares manual monitoring with automated fall alerts. First, watch nine camera feeds and mark possible falls. Then, solve arithmetic problems and review alerts from the system.</p>
+    <p>Each part lasts two minutes, followed by a short survey. Participation is voluntary; you can stop at any time.</p>
     <form onSubmit={event => {
       event.preventDefault(); setBusy(true); setError("");
       void request("/sessions", "POST", { group, age_range: age, experience })

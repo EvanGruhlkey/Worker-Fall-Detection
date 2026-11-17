@@ -43,7 +43,7 @@ class Incident(Model):
 
 class VideoSet(Model):
     id: Literal["A", "B"]
-    feeds: list[Feed] = Field(min_length=6, max_length=6)
+    feeds: list[Feed] = Field(min_length=6, max_length=9)
     wall_file: str | None = None
     pipeline_wall_file: str | None = None
 
@@ -75,6 +75,8 @@ class Manifest(Model):
             raise ValueError("Provide distinct A and B sets")
         files = []
         for video_set in self.sets:
+            if len(video_set.feeds) not in (6, 9):
+                raise ValueError("Use six or nine camera feeds")
             ids = [f.id for f in video_set.feeds]
             if len(set(ids)) != len(ids):
                 raise ValueError("Camera IDs must be unique within a set")

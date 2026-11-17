@@ -208,4 +208,4 @@ The body-only temporal features require a newly trained checkpoint. Leave `FALL_
 
 ## User study
 
-The standalone study app, backend, tests, media preparation scripts, model, and documentation are in [user_study/](user_study/README.md). It runs manual monitoring first, then arithmetic with automated alerts, using six simultaneous camera feeds per condition.
+The standalone study app, backend, tests, media preparation scripts, model, and documentation are in [user_study/](user_study/README.md). It runs manual monitoring first, then arithmetic with automated alerts, using nine simultaneous camera feeds per condition.

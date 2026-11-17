@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { clock, request, type StudySession } from "./api";
+import { clock, type StudySession } from "./api";
 import AutomatedCondition from "./AutomatedCondition";
 import "./console.css";
 
@@ -70,24 +70,20 @@ export default function Condition({ session: s, busy, command, onWithdraw, onFac
     } catch (cause) { player.pause(); setError(cause instanceof Error ? cause.message : "Playback failed."); }
     finally { setStarting(false); }
   }
-  async function saveNote(index: number, text: string) {
-    try { await request(`/session/reports/${index}/notes`, "POST", { text }); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Note was not saved."); }
-  }
 
-  if (!s.wall_url || s.feeds.length !== 6) return <section className="study-panel">
-    <h2>Start a six-camera session</h2><p>This session uses the previous camera layout. Your records are saved.</p>
+  if (!s.wall_url || ![6, 9].includes(s.feeds.length)) return <section className="study-panel">
+    <h2>Start a camera session</h2><p>This session uses the previous camera layout. Your records are saved.</p>
     <button className="btn" onClick={onFacilitator}>Study setup</button>
   </section>;
 
   const cameraView = (
-      <div className="console-wall" role="group" aria-label="6 simultaneous camera feeds">
+      <div className={`console-wall ${s.feeds.length === 9 ? "console-wall-nine" : ""}`} role="group" aria-label={`${s.feeds.length} simultaneous camera feeds`}>
         <video ref={video} src={s.wall_url} muted playsInline preload="auto" onLoadedMetadata={event => { event.currentTarget.currentTime = s.elapsed; }} onCanPlay={() => setReady(true)}
           onWaiting={() => { setReady(false); interrupt("buffering"); }}
           onError={() => { setReady(false); setError("Camera video could not load."); interrupt("media_error"); }}
           onEnded={() => { if (s.elapsed < s.duration - 1) { setError("Video ended early."); interrupt("media_error"); } }}
           onTimeUpdate={e => { if (!starting && Math.abs(e.currentTarget.currentTime - s.elapsed) > 2) interrupt("drift"); }} />
-        <canvas ref={picture} width={1920} height={720} aria-label="Six live camera views" />
+        <canvas ref={picture} width={1920} height={s.feeds.length === 9 ? 1080 : 720} aria-label={`${s.feeds.length} live camera views`} />
         <div className="console-tiles">{s.feeds.map((feed, index) => <button key={feed.id} aria-label={`Select ${feed.name}`} aria-pressed={camera === feed.id} disabled={!manual} onClick={() => setCamera(feed.id)}>
           <span>CAM {String(index + 1).padStart(2, "0")}</span>
         </button>)}</div>
@@ -109,10 +105,8 @@ export default function Condition({ session: s, busy, command, onWithdraw, onFac
         <p>Select a camera, then mark a possible fall.</p>
         <button className="console-mark" disabled={disabled || !camera} onClick={() => void command("/reports", { camera, time: Math.floor(s.elapsed) })}>Mark possible fall</button>
         <section className="console-events"><h2>Events ({s.reports.length})</h2>
-          {s.reports.length === 0 ? <p>No events marked.</p> : <table><thead><tr><th>Camera</th><th>Time</th><th>Note</th></tr></thead><tbody>
-            {s.reports.map((report, index) => <tr key={index}><td>{String(s.feeds.findIndex(feed => feed.id === report.camera) + 1).padStart(2, "0")}</td><td>{clock(report.reported_at)}</td><td>
-              <input aria-label={`Note for event ${index + 1}`} placeholder="Optional" maxLength={500} defaultValue={report.notes} disabled={busy} onBlur={e => { if (e.target.value !== report.notes) void saveNote(index, e.target.value); }} />
-            </td></tr>)}
+          {s.reports.length === 0 ? <p>No events marked.</p> : <table><thead><tr><th>Camera</th><th>Time</th></tr></thead><tbody>
+            {s.reports.map((report, index) => <tr key={index}><td>{String(s.feeds.findIndex(feed => feed.id === report.camera) + 1).padStart(2, "0")}</td><td>{clock(report.reported_at)}</td></tr>)}
           </tbody></table>}
         </section>
       </> : <AutomatedCondition session={s} busy={busy} command={command} audio={alertAudio.current} cameraView={cameraView} />}

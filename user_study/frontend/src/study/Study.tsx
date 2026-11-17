@@ -115,6 +115,8 @@ export default function Study() {
     return () => { document.removeEventListener("visibilitychange", visibility); window.removeEventListener("beforeunload", unload); };
   }, [command]);
 
+  useEffect(() => { window.scrollTo(0, 0); }, [session?.id, session?.condition_number, session?.stage === "survey", session?.stage === "intermission"]);
+
   async function withdraw() {
     pending.current = true; ++version.current; setBusy(true);
     try { await request("/session", "DELETE"); monitoring.current = false; setSession(null); setWithdrawOpen(false); setError(""); }

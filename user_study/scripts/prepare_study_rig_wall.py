@@ -1,6 +1,6 @@
-"""Build two two-minute, six-camera sets from the project's AI rig clips.
+"""Build two two-minute, nine-camera sets from the project's AI rig clips.
 
-Each set has six labeled fall occurrences spread across six feeds. Activities
+Each set has six labeled fall occurrences spread across nine feeds. Activities
 cycle between them. Alerts are actual per-source-clip detector outputs, replayed
 at each occurrence's offset; classifier state resets at clip boundaries.
 """
@@ -19,7 +19,7 @@ import imageio_ffmpeg
 REPO = Path(__file__).resolve().parents[2]
 FPS = 12
 DURATION = 120
-CAMERA_COUNT = 6
+CAMERA_COUNT = 9
 
 
 def probe(path):
@@ -114,7 +114,7 @@ def timeline(normal, falls, camera_index, set_index):
             offset += length
 
     for event_index in range(6):
-        if event_index % CAMERA_COUNT != camera_index:
+        if (event_index * 2 + set_index) % CAMERA_COUNT != camera_index:
             continue
         clip = falls[(event_index + set_index * 3) % len(falls)]
         onset_frame = round(clip["onset"] * FPS)
@@ -183,7 +183,7 @@ def prepare(args):
             print(f"Assembled {set_id} / {camera}: {DURATION} seconds", flush=True)
         sets.append({"id": set_id, "feeds": feeds, "truth": sorted(truth, key=lambda e: e["time"]), "alerts": sorted(alerts, key=lambda e: e["time"])})
     checksum = hashlib.sha256(args.classifier.read_bytes()).hexdigest()
-    manifest = {"title": "AI rig footage / six-camera study", "mode": "study", "duration": DURATION,
+    manifest = {"title": "AI rig footage / nine-camera study", "mode": "study", "duration": DURATION,
                 "early_tolerance": 1, "late_tolerance": 15, "detector_version": f"Verified saved YOLO26m/RTMPose poses (fallback {args.pose_model.name}); checkpoint SHA256 {checksum}",
                 "alert_source": "Actual per-source-clip fall_pipeline outputs, replayed at clip offsets; classifier state resets on clip changes. AI-generated rig footage.", "sets": sets}
     (work / "provenance.json").write_text(json.dumps(provenance, indent=2), encoding="utf-8")

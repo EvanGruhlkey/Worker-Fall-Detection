@@ -1,4 +1,4 @@
-"""Encode the six existing camera reels onto one perfectly synchronized source."""
+"""Encode the nine existing camera reels onto one perfectly synchronized source."""
 import argparse
 import json
 import subprocess
@@ -10,13 +10,13 @@ def build(directory, set_id):
     path = directory / "rig-wall-manifest.json"
     manifest = json.loads(path.read_text(encoding="utf-8"))
     config = next(s for s in manifest["sets"] if s["id"] == set_id)
-    if len(config["feeds"]) != 6:
-        raise ValueError("A 2x3 source requires six camera feeds")
+    if len(config["feeds"]) != 9:
+        raise ValueError("A 3x3 source requires nine camera feeds")
     output = directory / "media" / f"rig_{set_id}_wall.mp4"
     command = [imageio_ffmpeg.get_ffmpeg_exe(), "-y", "-loglevel", "error"]
     for feed in config["feeds"]:
         command.extend(["-threads", "1", "-i", str(directory / "media" / feed["file"])])
-    command.extend(["-filter_complex", "".join(f"[{i}:v]" for i in range(6)) + "xstack=inputs=6:layout=0_0|640_0|1280_0|0_360|640_360|1280_360[v]",
+    command.extend(["-filter_complex", "".join(f"[{i}:v]" for i in range(9)) + "xstack=inputs=9:layout=0_0|640_0|1280_0|0_360|640_360|1280_360|0_720|640_720|1280_720[v]",
                     "-map", "[v]", "-an", "-t", str(manifest["duration"]), "-r", "12", "-c:v", "libx264", "-preset", "veryfast", "-crf", "25", "-threads", "4", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(output)])
     subprocess.run(command, check=True)
     print(f"Ready: {output}", flush=True)
