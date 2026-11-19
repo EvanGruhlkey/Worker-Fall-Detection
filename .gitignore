@@ -2,6 +2,9 @@
 # External datasets are downloaded, not versioned (see DATA_SOURCES.md); their
 # label CSVs (data/labels/external_*.csv) and pose files (data/output/) are.
 data/external/
+# Raw AI-generated clips before review (scripts/generate_videos_trial2.py);
+# reviewed clips are copied into data/input/
+data/generated/
 .venv/
 .venv-amd/
 data/output/amd_comparison/
