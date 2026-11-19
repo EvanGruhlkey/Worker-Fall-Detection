@@ -1,5 +1,7 @@
 body:has(.study-console) { padding: 0; background: #151719; }
 .study-page:has(.study-console) { max-width: 1680px; margin: 0 auto; padding: 20px 16px; }
+.study-page:has(.study-console-auto) { display: flex; flex-direction: column; min-height: 100dvh; }
+.study-console-auto { margin-block: auto; }
 .study-page > .study-heading.study-heading-hidden { display: none; }
 .study-console { color: #eceeed; }
 .console-header { display: grid; justify-items: center; gap: 10px; padding-bottom: 20px; border-bottom: 1px solid #383c3f; }
@@ -52,14 +54,8 @@ body:has(.study-console) { padding: 0; background: #151719; }
 .automated-tabs button { padding: 12px 6px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #a6adaf; font-size: 14px; cursor: pointer; }
 .automated-tabs button[aria-selected="true"] { color: #eceeed; border-bottom-color: #eceeed; }
 .automated-layout [hidden] { display: none; }
-.arithmetic-task { width: min(100%, 760px); margin: 0 auto; padding: 8px 0; }
-.arithmetic-task form { padding: 12px 0; }
-.arithmetic-task label { display: grid; justify-items: center; gap: 24px; font: 72px Consolas, monospace; }
-.arithmetic-task input { width: 100%; background: #292d30; border: 1px solid #50575c; border-radius: 6px; color: #f4f6f6; padding: 18px 22px; font: 28px Arial, sans-serif; appearance: textfield; text-align: center; }
-.arithmetic-task input::-webkit-inner-spin-button, .arithmetic-task input::-webkit-outer-spin-button { appearance: none; }
-.arithmetic-task input:disabled { opacity: .45; }
-.arithmetic-score { text-align: center; font-size: 20px !important; margin: 12px 0 20px; }
-.arithmetic-status { display: flex; justify-content: space-between; gap: 12px; color: #a6adaf; font-size: 12px; padding-top: 14px; border-top: 1px solid #383c3f; }
+.gameplay-task { width: min(100%, 760px, 73.5dvh); margin: 0 auto; padding: 8px 0; }
+.gameplay-task iframe { display: block; width: 100%; aspect-ratio: 3 / 2; border: 0; }
 .pipeline-monitor .console-wall { width: min(100%, calc((100dvh - 350px) * 2.6667)); }
 .monitoring-status { text-align: center; color: #8ccf9e !important; margin-top: 16px; font-size: 12px; }
 .auto-alert-panel { display: flex; align-items: center; gap: 16px; width: min(100%, 760px); justify-self: center; padding: 10px 14px; border: 1px solid #a54a3a; border-radius: 6px; }
@@ -75,4 +71,45 @@ body:has(.study-console) { padding: 0; background: #151719; }
 .auto-alert-dialog .auto-alert-acknowledge { background: #ac4334; border-color: #c76554; color: white; padding: 13px 18px; font-size: 15px; margin-bottom: 20px; }
 .auto-alert-dialog video { width: 100%; max-height: 340px; display: block; background: #080a0b; }
 .auto-alert-dialog > .study-text-button { display: block; margin-top: 15px; }
-@media(max-width: 800px) { .arithmetic-task label { font-size: 48px; } .auto-alert-panel { flex-wrap: wrap; } }
+@media(max-width: 800px) { .auto-alert-panel { flex-wrap: wrap; } }
+
+.round-tour {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+}
+.round-tour::backdrop { background: transparent; }
+.round-tour-highlight {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 0 200vmax #15223280;
+}
+.round-tour-card {
+  position: absolute;
+  box-sizing: border-box;
+  width: min(340px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  padding: 14px 16px;
+  color: #003b71;
+  background: #fff;
+  border: 1px solid var(--study-line, #d2dce7);
+  border-radius: 4px;
+  text-align: left;
+}
+.round-tour-card h2 { margin: 0 0 6px; font-size: 17px; line-height: 1.25; }
+.round-tour-card h2:focus { outline: none; }
+.round-tour-card p { margin: 0; color: var(--study-muted, #52677e); font-size: 14px; line-height: 1.45; }
+.round-tour-actions { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.round-tour-progress { margin-right: auto; color: var(--study-muted, #52677e); font-size: 12px; }
+.round-tour-actions .btn { padding: 6px 12px; font-size: 14px; }

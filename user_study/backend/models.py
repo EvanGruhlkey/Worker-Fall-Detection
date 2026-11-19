@@ -96,9 +96,14 @@ class Manifest(Model):
 
 class Enrollment(Model):
     code: str | None = Field(default=None, pattern=r"^[a-zA-Z0-9_-]{1,40}$")
-    group: Literal["oxy", "student"]
+    group: Literal["faculty", "student"] = "student"
     age_range: Literal["18-24", "25-34", "35-44", "45-54", "55+"]
     experience: Literal["none", "some", "regular"]
+
+    @field_validator("group")
+    @classmethod
+    def student_group(cls, _group: str) -> Literal["student"]:
+        return "student"
 
 
 class Consent(Model):

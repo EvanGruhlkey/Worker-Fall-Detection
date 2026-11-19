@@ -24,7 +24,7 @@ def prepare(directory):
             events = json.loads(Path(segment['signals']).read_text())['events']
             event = min(events, key=lambda e: abs(e['time'] - time))
             assert abs(event['time'] - time) < .002
-            start, end = max(0, time - .5), min(segment['duration'], time + .5)
+            start, end = max(0, time - 1), min(segment['duration'], time + 1)
             poses = load_pose_json(segment['pose_source']).resample(12)
             metadata = json.loads(Path(segment['pose_source']).read_text())['metadata']
             boxes = [p['bbox'] for t, people in zip(poses.times, poses.people) if start <= t <= end for p in people if p['track_id'] == event['track_id']]

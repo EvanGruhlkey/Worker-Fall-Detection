@@ -28,8 +28,11 @@ def study(tmp_path):
     return client, app.state.study_store, admin, manifest
 
 
-def enroll(client, admin, code="P01", group="student"):
-    response = client.post("/api/study/sessions", headers=admin, json={"code": code, "group": group, "age_range": "18-24", "experience": "none"})
+def enroll(client, admin, code="P01", group=None):
+    payload = {"code": code, "age_range": "18-24", "experience": "none"}
+    if group is not None:
+        payload["group"] = group
+    response = client.post("/api/study/sessions", headers=admin, json=payload)
     assert response.status_code == 201, response.text
     return {"Authorization": "Bearer " + response.json()["token"]}, response.json()["session"]["id"]
 
@@ -108,7 +111,10 @@ def test_balancing_validation_and_pause(study):
     assert sorted(s["sequence"] for s in data["sessions"]) == [0, 0, 2, 2]
     manifest["sets"][0]["feeds"][0]["file"] = "../secret.mp4"
     assert client.put("/api/study/config", headers=admin, json=manifest).status_code == 422
-    headers, sid = enroll(client, admin, code="P5", group="oxy")
+    headers, sid = enroll(client, admin, code="P5", group="faculty")
+    with store.transaction() as db:
+        enrolled = json.loads(db.execute("SELECT body FROM sessions WHERE id=?", (sid,)).fetchone()["body"])
+        assert enrolled["group"] == "student"
     consent_and_start(client, headers)
     advance(store, sid, 2)
     before = client.post("/api/study/session/pause", headers=headers, json={"reason": "hidden"}).json()["elapsed"]

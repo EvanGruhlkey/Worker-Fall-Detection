@@ -1,6 +1,8 @@
 # User study
 
-Participants watch a 3×3 camera wall for two minutes, then solve arithmetic problems while automated alerts monitor the cameras for two minutes. A short survey follows.
+The automated round uses [Samuel Crevier’s Flappy Bird](https://github.com/Samuelcrevier/Flappy-Bird/tree/74f90d44324700b058e1854c10bf9db6d4abfa66) with his permission for this study. The study controls when the game runs and scales the canvas to fit its panel.
+
+Participants watch a 3×3 camera wall for two minutes, then play the Flappy Bird browser replica while automated alerts monitor the cameras for two minutes. A short survey follows.
 
 ## 1. Get ready
 

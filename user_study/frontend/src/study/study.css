@@ -59,10 +59,8 @@ body:has(.study-page) { background: #171819; }
 
 
 .study-intake { max-width: 640px; margin: 32px auto; }
-.study-intake-fields { display: grid; gap: 18px; grid-template-columns: 1fr 1fr; }
-.study-intake-fields label:last-child { grid-column: 1 / -1; }
+.study-intake-fields { display: grid; gap: 18px; width: min(100%, 320px); margin-inline: auto; }
 .study-intake .study-intake-note { margin-top: -8px; font-size: 12px; }
-@media(max-width: 540px) { .study-intake-fields { grid-template-columns: 1fr; } }
 
 .study-page > .study-heading { justify-content: center; border: 0; padding: 24px 0; }
 .study-page > .study-heading h1 { font-size: 48px; margin: 0; text-align: center; }

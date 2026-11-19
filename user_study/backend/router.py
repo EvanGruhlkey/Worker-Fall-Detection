@@ -121,7 +121,8 @@ def enroll(enrollment: Enrollment, request: Request, response: FastAPIResponse, 
              "consent": None, "runs": [], "survey": None, "notes": [], "log": []}
         log(s, "enrolled")
         db.execute("INSERT INTO sessions VALUES (?, ?, ?)", (s["id"], hashlib.sha256(token.encode()).hexdigest(), json.dumps(s)))
-    response.set_cookie("study_token", token, httponly=True, samesite="strict", secure=request.url.scheme == "https", path="/api/study/session")
+    secure_cookie = getattr(request.app.state, "participant_only", False) or request.url.scheme == "https"
+    response.set_cookie("study_token", token, httponly=True, samesite="strict", secure=secure_cookie, path="/api/study/session")
     return {"token": token, "session": public(s)}
 
 
@@ -303,7 +304,7 @@ def export(format: str = "json", data=Depends(store)):
 
 def summarize(sessions):
     summary = []
-    for group in ("combined", "oxy", "student"):
+    for group in ("combined", "faculty", "student", "oxy"):
         for condition in ("manual", "automated"):
             runs = [r for s in sessions if s["stage"] == "completed" and s["mode"] == "study" and (group == "combined" or s["group"] == group)
                     for r in s["runs"] if r["completed"] and r["condition"] == condition]

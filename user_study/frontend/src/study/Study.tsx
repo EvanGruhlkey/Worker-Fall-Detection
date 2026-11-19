@@ -7,15 +7,17 @@ import Survey from "./Survey";
 import "./study.css";
 import "./oxy-theme.css";
 
+const localSetup = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
+
 function Instructions({ session, command, busy }: { session: StudySession; command: (path: string, body?: unknown) => Promise<boolean>; busy: boolean }) {
   const [checks, setChecks] = useState({ adult: false, vision: false, eligible: false, voluntary: false });
   const eligible = Object.values(checks).every(Boolean);
   return <div className="study-stack">
     <section className="study-panel"><h2>Before you begin</h2>
       <p>{session.mode === "study" ? "Two conditions of two minutes each, followed by a short survey. Allow about 6 minutes in total." : "A short trial with recorded footage. It checks the study workflow and is excluded from study results."}</p>
-      <p>You will watch prerecorded footage that may show falls. This can cause discomfort or screen fatigue. You can pause or withdraw at any time without penalty. Participation is voluntary and has no effect on your employment.</p>
-      <p>The project team records your group, age range, monitoring experience, reports, response times, task answers, and survey. We do not ask for your name or share individual results with Oxy.</p>
-      <p>Before agreeing, ask the facilitator about access to your records and how long they are kept. Read the consent form supplied by the team.</p>
+      <p>You will watch prerecorded footage that may show falls. This can cause discomfort or screen fatigue. You can pause or withdraw at any time without penalty. Participation is voluntary and has no effect on your academic or employment standing.</p>
+      <p>The Oxy Capstone Team records your group, age range, monitoring experience, reports, response times, and survey answers. We do not ask for your name or share individual results with Occidental Petroleum.</p>
+      <p>Before agreeing, <a href="/participant-consent-form.pdf" target="_blank" rel="noopener noreferrer">read the participant consent form (PDF, opens in a new tab)</a>. Ask the facilitator about access to your records and how long they are kept.</p>
       <form onSubmit={e => { e.preventDefault(); void command("/consent", checks); }}>
         <label className="study-check"><input type="checkbox" required checked={checks.adult} onChange={e => setChecks(c => ({ ...c, adult: e.target.checked }))} />I am at least 18 years old.</label>
         <label className="study-check"><input type="checkbox" required checked={checks.vision} onChange={e => setChecks(c => ({ ...c, vision: e.target.checked }))} />I have normal or corrected vision and can watch a screen for two minutes.</label>
@@ -141,11 +143,11 @@ export default function Study() {
     {error && <div className="study-error" role="alert">{error}</div>}
     {loading ? <p>Connecting to study server...</p> : !session ? setup ? <Facilitator /> : <ParticipantForm onSession={s => { ++version.current; monitoring.current = true; recovery.current = false; setConnected(true); setSetup(false); setSession(s); }} />
       : session.stage === "instructions" ? <Instructions session={session} command={command} busy={busy || !connected} />
-        : session.stage === "running" || session.stage === "paused" ? <Condition key={`${session.id}-${session.condition_number}`} session={session} command={command} busy={busy || !connected} onWithdraw={() => setWithdrawOpen(true)} onFacilitator={showFacilitator} />
+        : session.stage === "running" || session.stage === "paused" ? <Condition key={`${session.id}-${session.condition_number}`} session={session} command={command} busy={busy || !connected} onWithdraw={() => setWithdrawOpen(true)} onFacilitator={localSetup ? showFacilitator : undefined} />
           : session.stage === "intermission" ? <section className="study-panel"><h2>First condition complete</h2><p>The next condition uses a different set of footage. Continue when you are ready.</p><button className="btn study-primary" disabled={busy} onClick={() => void command("/start")}>Prepare second condition</button></section>
-            : session.stage === "survey" ? <Survey busy={busy} submit={async body => { await command("/survey", body); }} />
+            : session.stage === "survey" && session.condition ? <Survey lastCondition={session.condition} busy={busy} submit={async body => { await command("/survey", body); }} />
               : <section className="study-panel"><h2>Session complete</h2><p>Responses saved. Thank you for participating.</p><button className="btn" onClick={() => { monitoring.current = false; ++version.current; setSession(null); setSetup(false); }}>New participant</button></section>}
-    {!session && <footer className="study-entry-footer"><button className="study-text-button" onClick={toggleSetup}>{setup ? "Back to study" : "Study setup"}</button></footer>}
+    {!session && localSetup && <footer className="study-entry-footer"><button className="study-text-button" onClick={toggleSetup}>{setup ? "Back to study" : "Study setup"}</button></footer>}
     {session && !["running", "paused", "completed"].includes(session.stage) && <footer className="study-entry-footer"><button className="study-text-button" disabled={busy} onClick={() => setWithdrawOpen(true)}>Withdraw</button></footer>}
     {withdrawOpen && <div className="study-modal-backdrop"><section className="study-panel" role="alertdialog" aria-modal="true" aria-labelledby="withdraw-title"><h2 id="withdraw-title">Withdraw from this study?</h2><p>This removes this participant session and its responses from the study database and exports. Previously downloaded copies must be removed by the facilitator.</p><div className="study-actions"><button autoFocus className="btn" disabled={busy} onClick={() => setWithdrawOpen(false)}>Keep participating</button><button className="btn danger" disabled={busy} onClick={() => void withdraw()}>Withdraw and delete records</button></div></section></div>}
   </main>;
