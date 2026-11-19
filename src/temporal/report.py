@@ -100,11 +100,32 @@ def build_metrics(result, data_note):
                       for source in sorted({c.source for c in result.clips})},
         "by_batch": {batch: subset_summary(result, {c.name for c in result.headline_clips if c.batch == batch})
                      for batch in sorted({c.batch for c in result.headline_clips if c.batch})},
+        "by_action": by_action(result),
         "threshold_sweep": result.sweep,
         "drop_sweep": drop_sweep(result),
         "fold_results": fold_summaries(result),
         "final_model_epochs": result.final_epochs,
     }
+
+
+def by_action(result):
+    """False alerts on the rig clips, grouped by the action column; most false alerts first.
+
+    Clips without an action are grouped as Trial 1-2 normal work or fall clips,
+    so every rig false alert lands in exactly one row. Empty when no clip has an
+    action label (runs before Trial 3).
+    """
+    clips = result.headline_clips
+    if not any(c.action for c in clips):
+        return {}
+
+    def key(c):
+        if c.action:
+            return c.action
+        return "fall clips (outside the fall)" if c.has_fall else "normal work, Trials 1-2"
+
+    rows = {k: subset_summary(result, {c.name for c in clips if key(c) == k}) for k in {key(c) for c in clips}}
+    return dict(sorted(rows.items(), key=lambda item: (-item[1]["false_alerts"], item[0])))
 
 
 def per_clip_rows(result):
@@ -240,6 +261,16 @@ def render_markdown(result, metrics, per_clip, images, extra_notes):
         for batch, s in metrics["by_batch"].items():
             lines.append(f"| {batch} | {s['clips']} | {s['caught']:g}/{s['falls']} | {s['false_alerts']:g} | "
                          f"{s['non_fall_minutes']:.1f} |")
+    if metrics.get("by_action"):
+        lines += ["", "## False alerts by action (rig clips, at the chosen threshold)", "",
+                  "Normal-work clips grouped by what they show (the action column of clips.csv). Clips without an "
+                  "action label are the Trial 1-2 normal-work clips; alerts on fall clips are those outside the "
+                  "fall (on coworkers, or before or after it). Per hour = false alerts / non-fall time.", "",
+                  "| Action | Clips | False alerts | Non-fall minutes | Per hour |", "|---|---:|---:|---:|---:|"]
+        for action, s in metrics["by_action"].items():
+            per_hour = s["false_alerts"] / (s["non_fall_minutes"] / 60) if s["non_fall_minutes"] else None
+            lines.append(f"| {action} | {s['clips']} | {s['false_alerts']:g} | {s['non_fall_minutes']:.1f} | "
+                         f"{_fmt(per_hour, 0)} |")
     lines += ["", "## Folds", "",
               "| Seed | Fold | Test clips | Train windows (falls) | Test windows (falls) | Best epoch | Avg precision | F1 @0.5 |",
               "|---:|---:|---:|---:|---:|---:|---:|---:|"]

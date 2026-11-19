@@ -2222,301 +2222,504 @@
       "group": "t3_pipe_rack_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_16_lie_under_pipe_rack.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "lying"
     },
     {
       "name": "normal_t2_18_lie_on_side_drain_valve",
       "group": "t3_wellhead_bay_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_18_lie_on_side_drain_valve.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "lying"
     },
     {
       "name": "normal_t2_19_get_down_and_slide_under",
       "group": "t3_main_deck_wet",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_19_get_down_and_slide_under.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "lying"
     },
     {
       "name": "normal_t2_20_slide_out_and_stand",
       "group": "t3_pump_skid_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_20_slide_out_and_stand.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "lying"
     },
     {
       "name": "normal_t2_21_lie_prone_flashlight",
       "group": "t3_drill_floor_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_21_lie_prone_flashlight.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "lying"
     },
     {
       "name": "normal_t2_22_kneel_one_knee_valve",
       "group": "t3_wellhead_bay_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_22_kneel_one_knee_valve.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "kneeling"
     },
     {
       "name": "normal_t2_23_kneel_both_knees_flange",
       "group": "t3_main_deck_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_23_kneel_both_knees_flange.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "kneeling"
     },
     {
       "name": "normal_t2_25_kneel_check_gauge_rain",
       "group": "t3_pump_skid_night",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_25_kneel_check_gauge_rain.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "kneeling"
     },
     {
       "name": "normal_t2_27_kneel_sit_back_on_heels",
       "group": "t3_drill_floor_wet",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_27_kneel_sit_back_on_heels.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "kneeling"
     },
     {
       "name": "normal_t2_28_crouch_pump_gauge",
       "group": "t3_pump_skid_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_28_crouch_pump_gauge.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "crouching"
     },
     {
       "name": "normal_t2_29_squat_pick_up_tools",
       "group": "t3_main_deck_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_29_squat_pick_up_tools.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "crouching"
     },
     {
       "name": "normal_t2_30_crouch_walk_under_low_pipe",
       "group": "t3_pipe_rack_wet",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_30_crouch_walk_under_low_pipe.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "crouching"
     },
     {
       "name": "normal_t2_31_crouch_group_talk_night",
       "group": "t3_wellhead_bay_night",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_31_crouch_group_talk_night.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "crouching"
     },
     {
       "name": "normal_t2_32_deep_squat_bucket",
       "group": "t3_drill_floor_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_32_deep_squat_bucket.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "crouching"
     },
     {
       "name": "normal_t2_33_fast_drop_to_knee",
       "group": "t3_main_deck_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_33_fast_drop_to_knee.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "fast_getdown"
     },
     {
       "name": "normal_t2_34_fast_sit_on_toolbox",
       "group": "t3_pump_skid_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_34_fast_sit_on_toolbox.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "fast_getdown"
     },
     {
       "name": "normal_t2_35_duck_fast_swinging_load",
       "group": "t3_pipe_rack_wet",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_35_duck_fast_swinging_load.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "fast_getdown"
     },
     {
       "name": "normal_t2_36_quick_down_to_look_under",
       "group": "t3_wellhead_bay_night",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_36_quick_down_to_look_under.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "fast_getdown"
     },
     {
       "name": "normal_t2_37_jump_down_squat_landing",
       "group": "t3_stair_ladder_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_37_jump_down_squat_landing.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "fast_getdown"
     },
     {
       "name": "normal_t2_39_sit_on_stairs",
       "group": "t3_stair_ladder_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_39_sit_on_stairs.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "sitting"
     },
     {
       "name": "normal_t2_40_sit_then_lie_back_rest",
       "group": "t3_pump_skid_wet",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_40_sit_then_lie_back_rest.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "sitting"
     },
     {
       "name": "normal_t2_41_slip_catch_handrail",
       "group": "t3_stair_ladder_wet",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_41_slip_catch_handrail.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "near_miss"
     },
     {
       "name": "normal_t2_42_trip_and_recover",
       "group": "t3_main_deck_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_42_trip_and_recover.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "near_miss"
     },
     {
       "name": "normal_t2_43_slip_coworker_catches_arm",
       "group": "t3_wellhead_bay_night",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_43_slip_coworker_catches_arm.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "near_miss"
     },
     {
       "name": "normal_t2_44_stumble_hand_on_pipe",
       "group": "t3_pipe_rack_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_44_stumble_hand_on_pipe.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "near_miss"
     },
     {
       "name": "normal_t2_45_climb_down_ladder",
       "group": "t3_stair_ladder_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_45_climb_down_ladder.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "climbing"
     },
     {
       "name": "normal_t2_46_walk_down_stairs_group",
       "group": "t3_stair_ladder_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_46_walk_down_stairs_group.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "climbing"
     },
     {
       "name": "normal_t2_47_step_down_off_platform",
       "group": "t3_drill_floor_wet",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_47_step_down_off_platform.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "climbing"
     },
     {
       "name": "normal_t2_48_walk_carry_group",
       "group": "t3_main_deck_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_48_walk_carry_group.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "ordinary"
     },
     {
       "name": "normal_t2_49_turn_valve_wheel",
       "group": "t3_wellhead_bay_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_49_turn_valve_wheel.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "ordinary"
     },
     {
       "name": "normal_t2_51_carry_hose_bottom_edge",
       "group": "t3_main_deck_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_51_carry_hose_bottom_edge.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "frame_edge"
     },
     {
       "name": "normal_t2_52_carry_pipe_out_side_edge",
       "group": "t3_pipe_rack_night",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_52_carry_pipe_out_side_edge.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "frame_edge"
     },
     {
       "name": "normal_t2_53_crouch_at_frame_edge",
       "group": "t3_pump_skid_wet",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_53_crouch_at_frame_edge.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "frame_edge"
     },
     {
       "name": "normal_t2_54_quick_crouch_at_toolbox",
       "group": "t3_drill_floor_night",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_54_quick_crouch_at_toolbox.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "fast_getdown"
     },
     {
       "name": "normal_t2_55_fast_kneel_at_hatch",
       "group": "t3_main_deck_wet",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_55_fast_kneel_at_hatch.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "fast_getdown"
     },
     {
       "name": "normal_t2_56_quick_squat_grab_radio",
       "group": "t3_wellhead_bay_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_56_quick_squat_grab_radio.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "fast_getdown"
     },
     {
       "name": "normal_t2_57_fast_kneel_at_pipes_pair",
       "group": "t3_pipe_rack_night",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_57_fast_kneel_at_pipes_pair.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "fast_getdown"
     },
     {
       "name": "normal_t2_58_drop_to_hands_knees_leak",
       "group": "t3_pump_skid_wet",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_58_drop_to_hands_knees_leak.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "fast_getdown"
     },
     {
       "name": "normal_t2_59_bend_into_hatch",
       "group": "t3_main_deck_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_59_bend_into_hatch.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "bending"
     },
     {
       "name": "normal_t2_60_lift_heavy_bag",
       "group": "t3_drill_floor_day",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_60_lift_heavy_bag.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "bending"
     },
     {
       "name": "normal_t2_61_crawl_under_low_pipe",
       "group": "t3_pipe_rack_wet",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_61_crawl_under_low_pipe.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "lying"
     },
     {
       "name": "normal_t2_62_get_up_fast_from_lying",
       "group": "t3_wellhead_bay_night",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_62_get_up_fast_from_lying.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "lying"
     },
     {
       "name": "normal_t2_65_crouch_hidden_behind_pump",
       "group": "t3_pump_skid_night",
       "source": "rig",
       "pose_json": "../output/normal_rig_work_t3/normal_t2_65_crouch_hidden_behind_pump.json",
-      "batch": "trial3"
+      "batch": "trial3",
+      "action": "crowd"
+    },
+    {
+      "name": "normal_work_1p_1",
+      "group": "evan_1p",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_1p_1.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_1p_2",
+      "group": "evan_1p",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_1p_2.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_1p_4",
+      "group": "evan_1p",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_1p_4.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_1p_5",
+      "group": "evan_1p",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_1p_5.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_2p_1",
+      "group": "evan_2p",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_2p_1.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_2p_2",
+      "group": "evan_2p",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_2p_2.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_2p_3",
+      "group": "evan_2p",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_2p_3.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_2p_4",
+      "group": "evan_2p",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_2p_4.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_2p_5",
+      "group": "evan_2p",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_2p_5.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_2p_6",
+      "group": "evan_2p",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_2p_6.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_3p_1",
+      "group": "evan_3p_a",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_3p_1.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_3p_10",
+      "group": "evan_3p_b",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_3p_10.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_3p_2",
+      "group": "evan_3p_a",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_3p_2.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_3p_3",
+      "group": "evan_3p_a",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_3p_3.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_3p_4",
+      "group": "evan_3p_a",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_3p_4.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_3p_6",
+      "group": "evan_3p_b",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_3p_6.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_3p_7",
+      "group": "evan_3p_b",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_3p_7.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_3p_8",
+      "group": "evan_3p_b",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_3p_8.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_3p_9",
+      "group": "evan_3p_b",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_3p_9.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
+    },
+    {
+      "name": "normal_work_4p_1",
+      "group": "evan_3p_b",
+      "source": "rig",
+      "pose_json": "../output/trial3_normal_rig_work_evan/normal_work_4p_1.json",
+      "batch": "trial3",
+      "action": "kneel_then_lie"
     },
     {
       "name": "oO8L7gEH7O6hbAxYdXVHD_output",

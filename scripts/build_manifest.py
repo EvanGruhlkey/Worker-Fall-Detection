@@ -8,7 +8,9 @@ clip_id. Clips without a fall have one row with empty fall times. Rows marked
 quality=drop are left out; quality=test_only keeps a clip for testing but out
 of every training set (e.g. slow, controlled "falls" that teach the model the
 wrong thing). An optional batch column (e.g. trial1, trial2) is passed through
-so reports can compare the same clips across trials. Pose JSON is looked for at
+so reports can compare the same clips across trials, and an optional action
+column (what a normal-work clip shows, e.g. kneeling, fast_getdown) so reports
+can break false alerts down by action. Pose JSON is looked for at
 data/output/<folder>/<clip_id>.json (the RTMPose batch layout), then
 data/output/<clip_id>.json (yolo_pose.py); clips without one are reported and
 skipped. Each pose file is also checked: that it covers the whole clip, that
@@ -86,7 +88,7 @@ def read_clips(path):
             clip = clips.setdefault(clip_id, {
                 "has_fall": has_fall, "quality": quality, "group": row.get("group") or clip_id,
                 "folder": row.get("folder", ""), "source": row.get("source") or "rig",
-                "batch": row.get("batch", ""), "file": row.get("file", ""),
+                "batch": row.get("batch", ""), "action": row.get("action") or "", "file": row.get("file", ""),
                 "duration": _number(row.get("duration_s") or "0", "duration_s", where, errors),
                 "falls": [], "track_ids": set(), "lines": [],
             })
@@ -165,6 +167,8 @@ def main(argv=None):
             entry["train"] = False
         if clip["batch"]:
             entry["batch"] = clip["batch"]
+        if clip["action"]:
+            entry["action"] = clip["action"]
         if clip["has_fall"] == "1":
             entry["falls_seconds"] = sorted(clip["falls"])
             if clip["track_ids"]:

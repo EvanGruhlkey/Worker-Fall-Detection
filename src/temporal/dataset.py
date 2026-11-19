@@ -177,6 +177,7 @@ class Clip:
     source: str = "rig"  # which label sheet / dataset the clip comes from
     train: bool = True  # False: tested, never trained on (quality=test_only)
     batch: str = ""  # which labeling batch the clip came in (e.g. trial1), for reports
+    action: str = ""  # what a normal-work clip shows (e.g. kneeling), for reports
 
     @property
     def has_fall(self):
@@ -221,6 +222,7 @@ def load_clips(path):
                 source=video.get("source") or "rig",
                 train=video.get("train", True),
                 batch=video.get("batch", ""),
+                action=video.get("action", ""),
             )
         )
     if not clips:
