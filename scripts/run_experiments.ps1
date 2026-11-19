@@ -3,6 +3,7 @@
 #   powershell -ExecutionPolicy Bypass -File scripts\run_experiments.ps1            # batch 1
 #   powershell -ExecutionPolicy Bypass -File scripts\run_experiments.ps1 -Batch 2
 #   powershell -ExecutionPolicy Bypass -File scripts\run_experiments.ps1 -Batch 3 -Parallel 3   # Trial 2
+#   powershell -ExecutionPolicy Bypass -File scripts\run_experiments.ps1 -Batch 5 -Parallel 3   # Trial 3
 #
 # Each window shows its run's progress live and stays open when the run ends.
 # Logs are also written to runs\logs\<date>_<name>.log and reports to
@@ -57,6 +58,20 @@ $batches = @{
     4 = [ordered]@{
         "t2-best"          = "--external train --ignore-partial --augment-mode mirror --min-drop 0.15 --merge-duplicates"
     }
+    # Batch 5 (Trial 3): the new baseline is Trial 2's best setup on all the
+    # data plus the 13 new AI falls and 43 new normal-work clips (batch trial3
+    # in clips.csv). Goal: keep the catches, cut false alarms. Every other run
+    # changes exactly one thing, aimed at false alarms. Stricter fast-drop
+    # settings need no runs of their own: every report already lists what
+    # --min-drop 0.20-0.30 would give. Compare on the "Honest" column, and on
+    # the trial1/trial2 rows to see what the new clips changed.
+    5 = [ordered]@{
+        "t3-base"          = "--external train --ignore-partial --augment-mode mirror --min-drop 0.15 --merge-duplicates"
+        "t3-smooth005"     = "--external train --ignore-partial --augment-mode mirror --min-drop 0.15 --merge-duplicates --label-smoothing 0.05"
+        "t3-smooth01"      = "--external train --ignore-partial --augment-mode mirror --min-drop 0.15 --merge-duplicates --label-smoothing 0.1"
+        "t3-low-x2"        = "--external train --ignore-partial --augment-mode mirror --min-drop 0.15 --merge-duplicates --hard-negative-weight 2"
+        "t3-low-x3"        = "--external train --ignore-partial --augment-mode mirror --min-drop 0.15 --merge-duplicates --hard-negative-weight 3"
+    }
 }
 
 if (-not $batches.ContainsKey($Batch)) {
@@ -80,12 +95,20 @@ function Count-RunningRuns {
       Sort-Object -Unique).Count
 }
 
+# Sync the environment once, here, and start every run with --no-sync. A plain
+# `uv run` in each window would reinstall torch (CPU build) whenever the GPU
+# build is in place (pose extraction uses it), and several windows doing that at
+# once break the install. Training runs on the CPU build, as in Trials 1 and 2.
+Set-Location $root
+uv sync
+if ($LASTEXITCODE -ne 0) { Write-Host "uv sync failed; no runs started" -ForegroundColor Red; exit 1 }
+
 foreach ($name in $batches[$Batch].Keys) {
     while ($Parallel -gt 0 -and (Count-RunningRuns) -ge $Parallel) { Start-Sleep -Seconds 30 }
     $options = $batches[$Batch][$name]
     $command = "`$Host.UI.RawUI.WindowTitle = 'train: $name'; " +
                "Set-Location '$root'; `$env:PYTHONUNBUFFERED = '1'; " +
-               "uv run scripts/train_cv.py --name $name $options $common; " +
+               "uv run --no-sync scripts/train_cv.py --name $name $options $common; " +
                "Write-Host ''; Write-Host 'Run $name finished. This window can be closed.' -ForegroundColor Green"
     Start-Process powershell -ArgumentList "-NoExit", "-Command", $command
     Write-Host "Started $name ($options)"
