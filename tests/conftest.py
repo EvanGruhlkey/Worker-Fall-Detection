@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -28,6 +29,11 @@ def test_database_url():
     url = os.environ.get("FALL_TEST_DATABASE_URL")
     server = None
     if not url:
+        # Windows' temp-folder cleanup can delete part of the kept database,
+        # which leaves a folder PostgreSQL refuses to start or recreate. It only
+        # holds test data, so start over.
+        if TEST_PGDATA.exists() and not (TEST_PGDATA / "PG_VERSION").exists():
+            shutil.rmtree(TEST_PGDATA, ignore_errors=True)
         server = pixeltable_pgserver.get_server(TEST_PGDATA, cleanup_mode="stop")
         url = make_url(server.get_uri()).set(drivername="postgresql+psycopg")
         url = url.render_as_string(hide_password=False)

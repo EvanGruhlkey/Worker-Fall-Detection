@@ -52,7 +52,7 @@ def test_pose_json_keeps_only_body_points(tmp_path, keypoint_format, count):
     if keypoint_format:
         metadata["keypoint_format"] = keypoint_format
     path = tmp_path / "pose.json"
-    path.write_text(json.dumps({"metadata":metadata, "frames":[{"frame_index":i,"people":[person]} for i in range(35)]}))
+    path.write_text(json.dumps({"metadata":metadata, "frames":[{"frame_index":i,"people":[person]} for i in range(45)]}))  # 3 s: enough for a 30-frame window at 12 fps
     data = load_pose_json(path)
     assert data.people[0][0]["keypoints"] == body_person()["keypoints"]
     samples, _ = samples_from_pose_json(path)
