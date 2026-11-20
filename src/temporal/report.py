@@ -64,7 +64,7 @@ def write_run(run_dir, result, *, plots="all", data_note="", extra_notes=()):
         save_checkpoint(
             run_dir / "model.pt", result.final_model, fps=result.fps,
             window_size=result.config.window_size, threshold=result.threshold,
-            min_drop=result.config.min_drop, max_gap=result.config.max_gap,
+            min_drop=result.config.min_drop, max_gap=result.config.max_gap, debounce=result.config.debounce,
             merge_duplicates=result.config.merge_duplicates, metrics=metrics, notes=f"{result.config.name}: {data_note}",
         )
     (run_dir / "report.md").write_text(
@@ -170,7 +170,7 @@ def render_markdown(result, metrics, per_clip, images, extra_notes):
         "",
         "## Headline",
         "",
-        f"At the chosen gate threshold **{result.threshold:.2f}**{seeds_note}, held out by "
+        f"At the chosen gate threshold **{result.threshold:g}**{seeds_note}, held out by "
         f"{c.folds}-fold grouped cross-validation (every clip tested once, by a model that never saw its scene):",
         "",
         f"- **Falls caught: {chosen['caught']:g} of {falls}** "
@@ -188,7 +188,7 @@ def render_markdown(result, metrics, per_clip, images, extra_notes):
         lines += [
             f"- **Honest estimate (threshold chosen without the tested fold): {nested['caught']:g} of "
             f"{nested['falls']} caught, {nested['false_alerts']:g} false alerts.** Each fold's threshold "
-            f"({', '.join(f'{t:.2f}' for t in thresholds)}) was picked from the other folds only, so these "
+            f"({', '.join(f'{t:g}' for t in thresholds)}) was picked from the other folds only, so these "
             "are the numbers to compare between runs.",
         ]
     if len(c.seeds) > 1:
@@ -225,7 +225,7 @@ def render_markdown(result, metrics, per_clip, images, extra_notes):
     ]
     if result.final_model is not None:
         lines += [f"- Final model: trained on all clips for {result.final_epochs} epochs, saved as `model.pt` "
-                  f"with threshold {result.threshold:.2f}"]
+                  f"with threshold {result.threshold:g}"]
 
     lines += ["", "## Threshold trade-off", "",
               "| Threshold | Falls caught | False alerts | Per hour | Normal-clip false | Median alert time | Window precision | Window recall |",
@@ -233,7 +233,7 @@ def render_markdown(result, metrics, per_clip, images, extra_notes):
     for p in result.sweep:
         mark = " **(chosen)**" if p["threshold"] == result.threshold else ""
         lines.append(
-            f"| {p['threshold']:.2f}{mark} | {p['caught']:g}/{p['falls']} | {p['false_alerts']:g} | "
+            f"| {p['threshold']:g}{mark} | {p['caught']:g}/{p['falls']} | {p['false_alerts']:g} | "
             f"{_fmt(p['false_alerts_per_hour'], 0)} | {p['normal_clip_false_alerts']:g} | {_delay(p['median_delay'])} | "
             f"{p['window']['precision']:.2f} | {p['window']['recall']:.2f} |"
         )
@@ -364,7 +364,7 @@ def plot_precision_recall(result, path):
     point = next(p for p in result.sweep if p["threshold"] == result.threshold)["window"]
     ax.plot([point["recall"]], [point["precision"]], marker="o", markersize=8, color=SERIES_1,
             markeredgecolor=SURFACE, markeredgewidth=2)
-    ax.annotate(f"threshold {result.threshold:.2f}", (point["recall"], point["precision"]),
+    ax.annotate(f"threshold {result.threshold:g}", (point["recall"], point["precision"]),
                 textcoords="offset points", xytext=(-8, -16), ha="right", fontsize=8, color=INK_SECONDARY)
     ax.set_xlim(0, 1.02)
     ax.set_ylim(0, 1.02)
@@ -436,7 +436,7 @@ def plot_timelines(result, path, falls):
     axes[0].legend(fontsize=7, frameon=False, labelcolor=INK_SECONDARY, loc="upper left")
     title = "Fall clips" if falls else "Normal-work clips"
     figure.suptitle(f"{title}: held-out fall probability over time (s); dashed = threshold "
-                    f"{result.threshold:.2f}, triangles = alerts", color=INK, fontsize=10)
+                    f"{result.threshold:g}, triangles = alerts", color=INK, fontsize=10)
     figure.tight_layout()
     figure.savefig(path, facecolor=SURFACE)
     return path

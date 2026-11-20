@@ -239,7 +239,7 @@ def test_label_smoothing_and_weights_still_train():
 
 
 def _fake_result(seeds=(0,)):
-    """Two folds: fold 1 holds a fall clip (faller scores 0.97 during the fall), fold 2 a normal
+    """Two folds: fold 1 holds a fall clip (faller scores 0.99 during the fall), fold 2 a normal
     clip where a coworker scores 0.93 for 2 s (a false alert at any threshold up to 0.93)."""
     from temporal.crossval import CVResult, RunConfig
 
@@ -251,7 +251,7 @@ def _fake_result(seeds=(0,)):
     result = CVResult(RunConfig(seeds=tuple(seeds)), FPS, [fall, normal], [["g_fall"], ["g_normal"]])
     for seed in seeds:
         result.scores[(seed, "fall")] = ClipScores(
-            fall, probabilities=[{1: 0.97 if 60 <= i <= 72 else 0.01} for i in range(frames)],
+            fall, probabilities=[{1: 0.99 if 60 <= i <= 72 else 0.01} for i in range(frames)],
             renames=[[] for _ in range(frames)], alive=[{1} for _ in range(frames)],
             faller=[{1} for _ in range(frames)], drops=[{1: 0.5} for _ in range(frames)])
         result.scores[(seed, "normal")] = ClipScores(

@@ -79,7 +79,33 @@ def parse_args(argv=None):
     parser.add_argument("--copy-model-to", help="With --final, also copy model.pt here (e.g. models/fall_rig.pt)")
     parser.add_argument("--note", action="append", default=[], help="Extra note for the report")
     parser.add_argument("--threads", type=int, help="CPU threads for PyTorch (to run several runs side by side)")
+    parser.add_argument("--save-scores", action="store_true",
+                        help="Also save every held-out rig clip's per-frame scores (scores.pkl.gz), so alert rules "
+                             "can be tried afterwards without retraining (scripts/gate_sweep.py)")
     return parser.parse_args(argv)
+
+
+def save_scores(run_dir, result):
+    """Per-frame held-out scores of the rig clips, for every seed (see scripts/gate_sweep.py)."""
+    import gzip
+    import pickle
+
+    payload = {
+        "fps": result.fps,
+        "threshold": result.threshold,
+        "seeds": list(result.config.seeds),
+        "folds": result.folds,
+        "config": {"debounce": result.config.debounce, "cooldown": result.config.cooldown,
+                   "min_drop": result.config.min_drop, "catch_after": result.config.catch_after},
+        "scores": {
+            (seed, clip.name): {"probabilities": s.probabilities, "renames": s.renames, "alive": s.alive,
+                                "faller": s.faller, "drops": s.drops}
+            for seed in result.config.seeds for clip in result.headline_clips
+            for s in [result.scores[(seed, clip.name)]]
+        },
+    }
+    with gzip.open(run_dir / "scores.pkl.gz", "wb") as handle:
+        pickle.dump(payload, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 class _Tee:
@@ -133,6 +159,9 @@ def main(argv=None):
         shutil.rmtree(run_dir)
     data_note = f"{Path(args.manifest).name}: {len(clips)} clips, {falls} falls"
     metrics = write_run(run_dir, result, plots=args.plots, data_note=data_note, extra_notes=args.note)
+    if args.save_scores:
+        save_scores(run_dir, result)
+        print(f"Saved per-frame scores to {run_dir / 'scores.pkl.gz'}")
     if args.final and args.copy_model_to:
         target = ROOT / args.copy_model_to
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -141,7 +170,7 @@ def main(argv=None):
     write_index()
 
     chosen = metrics["at_chosen_threshold"]
-    print(f"\nThreshold {metrics['chosen_threshold']:.2f}: caught {chosen['caught']:g}/{chosen['falls']} falls, "
+    print(f"\nThreshold {metrics['chosen_threshold']:g}: caught {chosen['caught']:g}/{chosen['falls']} falls, "
           f"{chosen['false_alerts']:g} false alerts in {chosen['non_fall_minutes']:.1f} min, "
           f"window AP {metrics['window_average_precision'] or 0:.3f}")
     nested = metrics.get("nested")
@@ -197,7 +226,7 @@ def write_index():
         on_trial1 = f"{trial1['caught']:g}/{trial1['falls']}, {trial1['false_alerts']:g}" if trial1 else ""
         rows.append(
             f"| [{metrics_path.parent.name}]({metrics_path.parent.name}/report.md) | {', '.join(changes)} | "
-            f"{m['chosen_threshold']:.2f} | {chosen['caught']:g}/{chosen['falls']} | {chosen['false_alerts']:g} | "
+            f"{m['chosen_threshold']:g} | {chosen['caught']:g}/{chosen['falls']} | {chosen['false_alerts']:g} | "
             f"{honest} | {on_trial1} | "
             f"{'' if ap is None else f'{ap:.3f}'} | {'yes' if m.get('final_model_epochs') else ''} |"
         )

@@ -139,7 +139,7 @@ def _draw_panels(fig, axes, signals, threshold, start, end, rolling):
             ax.set_ylim(-peak, peak)
         if title == "Fall probability":
             ax.axhline(threshold, color=INK_MUTED, linewidth=1)
-            ax.text(end, threshold, f" {threshold:.2f} threshold", fontsize=7, color=INK_MUTED,
+            ax.text(end, threshold, f" {threshold:g} threshold", fontsize=7, color=INK_MUTED,
                     va="bottom", ha="right")
             if signals is not None and len(t):
                 p = signals.series("probability")

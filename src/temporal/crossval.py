@@ -34,7 +34,7 @@ from .train import metrics_at, predict, train_model
 
 # Coarse steps, then fine ones near 1: trained models are often very sure, so
 # the useful thresholds bunch up at the top.
-THRESHOLDS = tuple(round(t, 2) for t in np.arange(0.05, 0.951, 0.05)) + (0.96, 0.97, 0.98, 0.99)
+THRESHOLDS = tuple(round(t, 2) for t in np.arange(0.05, 0.951, 0.05)) + (0.96, 0.97, 0.98, 0.99, 0.995, 0.999)
 
 
 @dataclass

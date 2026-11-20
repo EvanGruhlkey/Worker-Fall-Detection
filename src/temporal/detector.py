@@ -153,7 +153,7 @@ class TemporalFallDetector:
         checkpoint,
         *,
         threshold=None,
-        debounce=5,
+        debounce=None,
         cooldown_seconds=30.0,
         target_fps=None,
         min_drop=None,
@@ -170,6 +170,8 @@ class TemporalFallDetector:
         self.max_gap = int(self.meta.get("max_gap", 5))
         self.merge_duplicates = bool(self.meta.get("merge_duplicates", False))
         self.windows = TrackWindows(window_size=self.window_size, max_gap=self.max_gap)
+        # Frames above the threshold before an alert: from the checkpoint (5 for older ones).
+        debounce = int(self.meta.get("debounce", 5) if debounce is None else debounce)
         self.gate = ThresholdGate(self.threshold, debounce, cooldown_seconds)
         self.sampler = TimeSampler(self.target_fps)
         self.probabilities = {}  # latest probability per track, for overlays

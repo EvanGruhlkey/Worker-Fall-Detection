@@ -27,6 +27,7 @@ import numpy as np
 from utils.sliding_window import TrackWindows
 
 from .detector import drop_checked, handoff_lost_tracks, score_tracks, track_drops
+from .features import LEFT_HIP, LEFT_SHOULDER, RIGHT_HIP, RIGHT_SHOULDER
 from .gate import ThresholdGate
 
 
@@ -108,6 +109,77 @@ def alerts_for(scores, threshold, debounce=5, cooldown_seconds=30.0, min_drop=0.
             gate.forget(track_id)
         known &= scores.alive[index]
     return alerts
+
+
+UPRIGHT_TORSO = 1 / 3  # torso within 30 degrees of vertical
+UPRIGHT_HIP = 0.4  # hips at least 0.4 standing heights above the box bottom
+
+
+def _posture(person, standing_height):
+    """(torso angle 0-1 from vertical, hip height in standing heights) of one detection, or None."""
+    kp = person["keypoints"]
+
+    def mid(a, b):
+        pts = [kp[i] for i in (a, b) if kp[i]["confidence"] >= 0.3]
+        return (np.mean([p["x"] for p in pts]), np.mean([p["y"] for p in pts])) if pts else None
+
+    shoulder, hip = mid(LEFT_SHOULDER, RIGHT_SHOULDER), mid(LEFT_HIP, RIGHT_HIP)  # the 12 body joints
+    if shoulder is None or hip is None or standing_height <= 0:
+        return None
+    dx, dy = shoulder[0] - hip[0], hip[1] - shoulder[1]
+    torso = float(np.degrees(np.arctan2(abs(dx), dy)) / 90.0)
+    return torso, float((person["bbox"][3] - hip[1]) / standing_height)
+
+
+def stays_down(scores, alerts, seconds, upright_share=0.5, lookback=4.0):
+    """Keep only alerts after which the person is not back on their feet within ``seconds``.
+
+    A fall ends with the worker down; most false alerts are workers who drop
+    fast and get straight back up (a quick crouch, a jump down, ducking under a
+    pipe). Each alert is held for ``seconds`` and dropped when, over that time,
+    at least ``upright_share`` of the frames the person is seen in show them
+    upright (torso near vertical and hips at standing height, measured against
+    their own box height over the ``lookback`` seconds before the alert). A
+    person the detector loses during the check counts as down, so a fall the
+    tracker drops is not filtered out. Kept alerts move to the end of the check,
+    as they would in live use. Approximation: the gate's cooldown still starts
+    at the original alert, so a dropped alert can hide a second one on the same
+    person within the cooldown (rare in 10-15 s clips; errs towards fewer alerts).
+    """
+    if seconds <= 0:
+        return alerts
+    clip = scores.clip
+    times = clip.times
+    kept = []
+    for alert in alerts:
+        ids = {alert.track_id}
+        before = [p["bbox"][3] - p["bbox"][1]
+                  for i in range(len(times)) if alert.time - lookback <= times[i] <= alert.time
+                  for p in clip.frames[i] if p["track_id"] in ids]
+        standing = float(np.percentile(before, 90)) if before else 0.0
+        upright = seen = 0
+        end_index = alert.frame
+        for i in range(alert.frame, len(times)):
+            if times[i] > alert.time + seconds:
+                break
+            end_index = i
+            for old_id, new_id in scores.renames[i]:
+                if old_id in ids:
+                    ids.add(new_id)
+            for person in clip.frames[i]:
+                if person["track_id"] not in ids:
+                    continue
+                posture = _posture(person, standing)
+                if posture is None:
+                    continue
+                seen += 1
+                torso, hip = posture
+                upright += torso < UPRIGHT_TORSO and hip >= UPRIGHT_HIP
+                break
+        if seen and upright / seen >= upright_share:
+            continue
+        kept.append(Alert(times[end_index], end_index, alert.track_id, alert.probability, alert.is_faller))
+    return kept
 
 
 def clip_outcome(scores, alerts, catch_after=1.5, early=0.5):

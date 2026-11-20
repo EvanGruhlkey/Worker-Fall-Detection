@@ -106,7 +106,7 @@ def choose_focus(histories, now, recent_seconds=2.0):
 class TemporalRun:
     """Stages 5 to 7 plus signal bookkeeping for one video."""
 
-    def __init__(self, fps, classifier=None, threshold=None, debounce=5, cooldown_seconds=30.0,
+    def __init__(self, fps, classifier=None, threshold=None, debounce=None, cooldown_seconds=30.0,
                  window_size=30):
         self.fps = fps
         self.model, self.meta = (None, {})
@@ -127,6 +127,7 @@ class TemporalRun:
         self.max_gap = int(self.meta.get("max_gap", 5))
         self.merge_duplicates = bool(self.meta.get("merge_duplicates", False))
         self.windows = TrackWindows(window_size=window_size, max_gap=self.max_gap)
+        debounce = int(self.meta.get("debounce", 5) if debounce is None else debounce)
         self.gate = ThresholdGate(self.threshold, debounce, cooldown_seconds)
         self.histories = {}
         self.events = []
@@ -317,7 +318,7 @@ def parse_args(argv=None):
         help=f"Frame rate after sampling (default: the classifier's training rate, else {DEFAULT_TARGET_FPS:g})",
     )
     parser.add_argument("--threshold", type=float, help="Gate threshold (default: from the checkpoint, else 0.8)")
-    parser.add_argument("--debounce", type=int, default=5, help="Frames above the threshold before an event")
+    parser.add_argument("--debounce", type=int, help="Frames above the threshold before an event (default: from the checkpoint, else 5)")
     parser.add_argument("--cooldown", type=float, default=30.0, help="Seconds between events for one person")
     parser.add_argument(
         "--image-size",

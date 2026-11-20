@@ -169,7 +169,7 @@ def build_model(arch, **config):
         raise ValueError(f"Unknown architecture {arch!r}; choose from {sorted(ARCHITECTURES)}")
 
 
-def save_checkpoint(path, model, *, fps, window_size, threshold=0.8, min_drop=0.0, max_gap=5,
+def save_checkpoint(path, model, *, fps, window_size, threshold=0.8, min_drop=0.0, max_gap=5, debounce=5,
                     merge_duplicates=False, metrics=None, notes=""):
     """Write a self-describing checkpoint that ``load_checkpoint`` can rebuild."""
     torch.save(
@@ -184,6 +184,7 @@ def save_checkpoint(path, model, *, fps, window_size, threshold=0.8, min_drop=0.
             "window_size": int(window_size),
             "threshold": float(threshold),
             "min_drop": float(min_drop),
+            "debounce": int(debounce),
             "max_gap": int(max_gap),
             "merge_duplicates": bool(merge_duplicates),
             "metrics": metrics or {},

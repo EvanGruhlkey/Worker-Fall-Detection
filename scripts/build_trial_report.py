@@ -4,6 +4,8 @@
     uv run scripts/build_trial_report.py --runs-date 2026-11-05 --out reports/2026-11-05_trial1
     # trial 2: runs over two days, best = the combined batch 4 run
     uv run scripts/build_trial_report.py --trial 2 --runs-date 2026-11-15 2026-11-16 --best t2-best
+    # trial 3: also a side-by-side chart with Trial 2's best, and false alarms by action
+    uv run scripts/build_trial_report.py --trial 3 --runs-date 2026-11-19 --best t3-base --compare 2026-11-16_t2-best
 
 What it does:
 
@@ -94,6 +96,9 @@ RUN_NAMES = {
     "t2-low-x3": "Low poses count 3x", "t2-gap12": "Wider ID handoff (1 s)",
     "t2-dedupe": "Duplicate boxes removed", "t2-mirror": "Mirrored copies",
     "t2-best": "Mirror + fast drop + dedupe",
+    # Trial 3
+    "t3-base": "Trial 3 baseline", "t3-smooth005": "Label smoothing 0.05",
+    "t3-smooth01": "Label smoothing 0.1", "t3-low-x2": "Low poses count 2x", "t3-low-x3": "Low poses count 3x",
 }
 # Points labeled on chart 1, per trial: run name -> (dx, dy, alignment).
 SCATTER_LABELS = {
@@ -101,7 +106,11 @@ SCATTER_LABELS = {
         "plus-cauca-aug3": (-10, 10, "right"), "baseline": (10, -4, "left"), "rig-only-win18": (0, -18, "center")},
     2: {"t2-best": (-12, -4, "right"), "t2-mirror": (0, 10, "center"), "t2-base": (10, -4, "left"), "t2-smooth01": (10, -4, "left"),
         "t2-win18": (-10, -4, "right"), "t2-gap12": (0, 10, "center"), "t2-no-gym": (10, -4, "left")},
+    3: {"t3-base": (-10, 10, "right"), "t3-smooth005": (10, 4, "left"), "t3-smooth01": (10, -12, "left"),
+        "t3-low-x2": (0, -18, "center"), "t3-low-x3": (-12, -14, "right")},
 }
+# Chart 1 title per trial (default: the best setup caught the most falls for its false alarms).
+SCATTER_TITLES = {3: "All five Trial 3 setups land close together, within run-to-run noise"}
 
 
 def run_name(name):
@@ -111,6 +120,12 @@ def run_name(name):
 def clip_title(name, normal_index):
     if name in NAMES:
         return NAMES[name]
+    # Trial 3 clips: readable names from the generation slugs.
+    if name.startswith(("fall_t2_", "normal_t2_")):
+        kind, _, number, *words = name.split("_")
+        return f"New {'fall' if kind == 'fall' else 'normal work'} {number}: {' '.join(words)}"
+    if name.startswith("normal_work_"):
+        return f"Evan normal work {name[len('normal_work_'):]}"
     if name in normal_index:
         return f"Normal work {normal_index[name]}"
     return name.replace("_", " ").capitalize()
@@ -139,7 +154,8 @@ def rerun_best(manifest, log, best_config, epochs=40, folds=5):
 
 
 def find_video(name):
-    for folder in ("rig_falls", "normal_rig_work", "rig_falls_night"):
+    for folder in ("rig_falls", "normal_rig_work", "rig_falls_night", "rig_falls_t3", "normal_rig_work_t3",
+                   "trial3_normal_rig_work_evan"):
         for suffix in (".mp4", ".avi"):
             path = ROOT / "data" / "input" / folder / f"{name}{suffix}"
             if path.exists():
@@ -191,7 +207,7 @@ def render_clip(clip, scores, alerts, threshold, out_video, title, subtitle, sti
                         BGR(INK3), 1, cv2.LINE_AA)
         for x in range(plot_left, plot_right, 12):
             cv2.line(canvas, (x, py(threshold)), (min(x + 6, plot_right), py(threshold)), BGR(INK3), 1)
-        cv2.putText(canvas, f"alert threshold {threshold:.2f}", (plot_right - 170, py(threshold) + 15),
+        cv2.putText(canvas, f"alert threshold {threshold:g}", (plot_right - 170, py(threshold) + 15),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.42, BGR(INK3), 1, cv2.LINE_AA)
         for t in range(0, int(duration) + 1, 2):
             cv2.putText(canvas, f"{t}s", (tx(t) - 8, plot_bottom + 18), cv2.FONT_HERSHEY_SIMPLEX, 0.42,
@@ -328,8 +344,8 @@ def chart_scatter(runs, path, best, ctx):
     ax.set_xlabel(f"False alarms in {ctx['minutes']:.1f} min of rig footage with no fall (fewer is better)",
                   color=INK2)
     ax.set_ylabel(f"Rig falls caught (of {falls})", color=INK2)
-    ax.set_title(f"{run_name(best)} caught the most falls for its false alarms", loc="left", color=INK,
-                 fontsize=12, fontweight="bold")
+    title = SCATTER_TITLES.get(ctx["trial"], f"{run_name(best)} caught the most falls for its false alarms")
+    ax.set_title(title, loc="left", color=INK, fontsize=12, fontweight="bold")
     figure.text(0.01, 0.01, f"Grouped 5-fold cross-validation on rig clips, mean of {ctx['seeds']} training runs "
                 "per setup. Unlabeled points are named in chart 2.",
                 fontsize=7.5, color=INK3)
@@ -375,7 +391,7 @@ def chart_threshold(sweep, path, used, ctx, best):
         ax.set_ylim(0, top)
         ax.set_yticks(range(0, int(top) + 1, 3))
         ax.axvline(used, color=INK3, linestyle="--", linewidth=1)
-        ax.text(used - 0.01, top * 0.93, f"used: {used:.2f}", ha="right", fontsize=8.5, color=INK2)
+        ax.text(used - 0.01, top * 0.93, f"used: {used:g}", ha="right", fontsize=8.5, color=INK2)
         ax.annotate(f"{ys[0]:.3g}", (xs[0], ys[0]), textcoords="offset points", xytext=(4, 8), fontsize=8.5, color=INK)
         ax.annotate(f"{ys[-1]:.3g}", (xs[-1], ys[-1]), textcoords="offset points", xytext=(-4, -14), ha="right",
                     fontsize=8.5, color=INK, fontweight="bold")
@@ -383,6 +399,56 @@ def chart_threshold(sweep, path, used, ctx, best):
         ax.set_xlabel("Alert threshold", color=INK2)
     figure.suptitle(f"Falls caught and false alarms at each alert threshold ({run_name(best)})", x=0.01,
                     ha="left", fontsize=12, fontweight="bold", color=INK)
+    figure.tight_layout()
+    figure.savefig(path, facecolor="white")
+
+
+def chart_actions(by_action, path, best):
+    """False alarms per normal-work action (rig clips) for the best run (counts; rates on 2-clip actions mislead)."""
+    items = sorted(by_action.items(), key=lambda kv: (kv[1]["false_alerts"], kv[0]))
+    labels = [f"{k.replace('_', ' ')} ({v['clips']} clips, {v['non_fall_minutes']:.1f} min)" for k, v in items]
+    counts = [v["false_alerts"] for _, v in items]
+    figure = _fig(9, max(4.5, 0.36 * len(items) + 1.4))
+    ax = figure.subplots()
+    _style(ax)
+    ax.barh(range(len(items)), counts, color=[BLUE if c > 0 else GREY for c in counts], height=0.62)
+    top = max(counts + [1])
+    for i, c in enumerate(counts):
+        ax.text(c + top * 0.01, i, f"{c:.2g}", va="center", fontsize=8.5, color=INK)
+    ax.set_yticks(range(len(items)), labels, fontsize=9)
+    ax.set_xlim(0, top * 1.2)
+    ax.grid(axis="y", visible=False)
+    ax.set_xlabel("False alarms (mean of the reported training runs)", color=INK2)
+    figure.suptitle(f"Where the remaining false alarms are ({run_name(best)})", x=0.01, ha="left",
+                    fontsize=12, fontweight="bold", color=INK)
+    figure.tight_layout()
+    figure.savefig(path, facecolor="white")
+
+
+def chart_compare(prev, cur, path, prev_name, cur_name):
+    """Previous trial's best vs this trial's best: same Trial 1 clips, and the full rig set (per hour)."""
+    figure = _fig(10, 3.6)
+    axes = figure.subplots(1, 3)
+    p1, c1 = prev["by_batch"]["trial1"], cur["by_batch"]["trial1"]
+    pa, ca = prev["at_chosen_threshold"], cur["at_chosen_threshold"]
+    panels = [
+        (f"Falls caught, Trial 1 clips (of {p1['falls']})", [p1["caught"], c1["caught"]], p1["falls"]),
+        (f"False alarms, same {p1['non_fall_minutes']:.1f} min", [p1["false_alerts"], c1["false_alerts"]], None),
+        ("False alarms per hour, all rig clips", [pa["false_alerts_per_hour"], ca["false_alerts_per_hour"]], None),
+    ]
+    names = [run_name(prev_name).split(" (")[0], run_name(cur_name).split(" (")[0]]
+    for ax, (title, values, limit) in zip(axes, panels):
+        _style(ax)
+        ax.bar([0, 1], values, color=[GREY, BLUE], width=0.6)
+        top = limit or max(values) * 1.25
+        for i, v in enumerate(values):
+            ax.text(i, v + top * 0.02, f"{v:.3g}", ha="center", fontsize=10, color=INK, fontweight="bold")
+        ax.set_ylim(0, top * 1.12)
+        ax.set_xticks([0, 1], ["Trial 2 best", "Trial 3 best"], fontsize=9)
+        ax.grid(axis="x", visible=False)
+        ax.set_title(title, loc="left", fontsize=9.5, color=INK)
+    figure.suptitle(f"Trial 2 best vs Trial 3 best ({names[1].lower()})", x=0.01, ha="left", fontsize=12,
+                    fontweight="bold", color=INK)
     figure.tight_layout()
     figure.savefig(path, facecolor="white")
 
@@ -425,6 +491,10 @@ def main(argv=None):
     parser.add_argument("--epochs", type=int, default=40, help="Only for a quick test")
     parser.add_argument("--folds", type=int, default=5, help="Only for a quick test")
     parser.add_argument("--limit", type=int, help="Render only this many clips (quick test)")
+    parser.add_argument("--compare", help="Run folder of the previous trial's best (e.g. 2026-11-16_t2-best), "
+                                          "for a side-by-side chart")
+    parser.add_argument("--charts-only", action="store_true",
+                        help="Draw the summary charts and stop (no re-run, no videos)")
     args = parser.parse_args(argv)
     out = Path(args.out or ROOT / "reports" / f"{args.runs_date[-1]}_trial{args.trial}")
     for sub in ("charts", "plots", "videos/caught", "videos/missed", "videos/not_visible", "videos/normal_work",
@@ -451,11 +521,18 @@ def main(argv=None):
     chart_bars(chart_runs, out / "charts" / "2_setups_both_measures.png", args.best, ctx)
     chart_threshold(best["metrics"]["threshold_sweep"], out / "charts" / "3_threshold_tradeoff_best.png",
                     best["threshold"], ctx, args.best)
+    if best["metrics"].get("by_action"):
+        chart_actions(best["metrics"]["by_action"], out / "charts" / "5_false_alarms_by_action.png", args.best)
+    if args.compare:
+        prev = json.loads((ROOT / "runs" / args.compare / "metrics.json").read_text(encoding="utf-8"))
+        chart_compare(prev, best["metrics"], out / "charts" / "6_trial_comparison.png", prev["name"], args.best)
     for plot in (best["dir"] / "plots").glob("*.png"):
         shutil.copyfile(plot, out / "plots" / f"best_{plot.name}")
     shutil.copyfile(best["dir"] / "report.md", out / "data" / "best_run_report.md")
     shutil.copyfile(best["dir"] / "per_clip.csv", out / "data" / "best_run_per_clip.csv")
     log(f"Charts done ({time.perf_counter() - started:.0f}s)")
+    if args.charts_only:
+        return 0
 
     result = rerun_best(args.manifest, log, best["metrics"]["config"], args.epochs, args.folds)
     threshold = result.threshold
