@@ -1,0 +1,21 @@
+{
+  "checkpoint": "fall_gru_trial3.pt",
+  "alert_rule": "score 0.995 or higher for 7 frames (0.58 s), fast-drop check 0.15",
+  "summary": {
+    "falls": 30,
+    "caught": 12,
+    "recall": 0.4,
+    "late": 1,
+    "false_alerts": 1,
+    "non_fall_minutes": 13.23531452471062,
+    "false_alerts_per_hour": 4.533326343546932,
+    "normal_clip_false_alerts": 0,
+    "median_delay": 0.5416666666666665
+  },
+  "by_outcome": {
+    "caught": 12,
+    "brief": 2,
+    "low": 1,
+    "lost": 15
+  }
+}

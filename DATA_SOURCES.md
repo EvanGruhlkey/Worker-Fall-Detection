@@ -20,6 +20,19 @@ attribution its license requires. Raw downloads live in `data/external/`
   pose pipeline and resampled to 12 fps. The original labels mark every frame
   from mid-fall to the end of the clip as "fall".
 
+## YouTube fall clips (Trial 4)
+
+- **What:** 41 publicly posted videos of real falls (security, doorbell and
+  phone cameras), found by the team. Each video's URL, title and uploader is
+  in `data/labels/youtube_sources.csv`.
+- **License:** none granted. The videos belong to their uploaders and are used
+  only for research. They are downloaded (`scripts/download_youtube.py`) into
+  `data/external/youtube/` and never versioned or redistributed; only our
+  labels and extracted poses are versioned.
+- **Changes we made:** video only (no audio), up to 1080 on the short side;
+  fall times and faller IDs set by the team; poses extracted with our pose
+  pipeline.
+
 ## Rig fall clips (internal)
 
 AI-generated clips of oil rig workers in `data/input/rig_falls` and

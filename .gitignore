@@ -25,3 +25,8 @@ backups/
 .env
 .env.localtest
 data/local-test/
+
+# Renders of the YouTube clips show third-party footage (no license; see
+# DATA_SOURCES.md): keep them local, version only charts and data.
+reports/2026-11-23_trial4/**/videos/
+reports/2026-11-23_trial4/**/stills/

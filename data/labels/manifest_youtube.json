@@ -1,0 +1,516 @@
+{
+  "target_fps": 12.0,
+  "sheets": [
+    "external_youtube.csv"
+  ],
+  "videos": [
+    {
+      "name": "yt_2X7wXA1XzqU",
+      "group": "yt_2X7wXA1XzqU",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_2X7wXA1XzqU.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          13.65,
+          14.15
+        ]
+      ],
+      "track_ids": [
+        17,
+        19,
+        22
+      ]
+    },
+    {
+      "name": "yt_4nQuQnaZjy8",
+      "group": "yt_4nQuQnaZjy8",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_4nQuQnaZjy8.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          20.65,
+          21.25
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "yt_B7PqBfWOEl8",
+      "group": "yt_B7PqBfWOEl8",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_B7PqBfWOEl8.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          3.95,
+          4.4
+        ]
+      ],
+      "track_ids": [
+        2,
+        6
+      ]
+    },
+    {
+      "name": "yt_BsiEFbqZ2Ts",
+      "group": "yt_BsiEFbqZ2Ts",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_BsiEFbqZ2Ts.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          2.15,
+          2.9
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "yt_KKH4vwZ6H3M",
+      "group": "yt_KKH4vwZ6H3M",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_KKH4vwZ6H3M.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          6.85,
+          7.4
+        ]
+      ],
+      "track_ids": [
+        1,
+        2,
+        9,
+        11,
+        13,
+        14
+      ]
+    },
+    {
+      "name": "yt_KYtkbH8oKT4",
+      "group": "yt_KYtkbH8oKT4",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_KYtkbH8oKT4.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          3.05,
+          3.75
+        ]
+      ],
+      "track_ids": [
+        2,
+        6
+      ]
+    },
+    {
+      "name": "yt_L85-wRuwiQU",
+      "group": "yt_L85-wRuwiQU",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_L85-wRuwiQU.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          7.65,
+          8.15
+        ]
+      ],
+      "track_ids": [
+        2,
+        3
+      ]
+    },
+    {
+      "name": "yt_NQPNeCWElYU",
+      "group": "yt_NQPNeCWElYU",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_NQPNeCWElYU.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          3.25,
+          4.35
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "yt_QBY1NCreRw",
+      "group": "yt_QBY1NCreRw",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_QBY1NCreRw.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          5.0,
+          6.1
+        ]
+      ],
+      "track_ids": [
+        1,
+        8,
+        10
+      ]
+    },
+    {
+      "name": "yt_RB_agBkBpsk",
+      "group": "yt_RB_agBkBpsk",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_RB_agBkBpsk.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          7.55,
+          8.1
+        ]
+      ],
+      "track_ids": [
+        10
+      ]
+    },
+    {
+      "name": "yt_SiN1voQ1WNI",
+      "group": "yt_SiN1voQ1WNI",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_SiN1voQ1WNI.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          5.4,
+          5.95
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "yt_TYHKysfS2VE",
+      "group": "yt_TYHKysfS2VE",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_TYHKysfS2VE.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          7.75,
+          8.45
+        ]
+      ],
+      "track_ids": [
+        1,
+        5,
+        8,
+        9
+      ]
+    },
+    {
+      "name": "yt_UFf0NMHk0Ec",
+      "group": "yt_UFf0NMHk0Ec",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_UFf0NMHk0Ec.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          52.0,
+          53.75
+        ]
+      ],
+      "track_ids": [
+        35,
+        41,
+        43,
+        44
+      ]
+    },
+    {
+      "name": "yt_aVM1U-RY5A8",
+      "group": "yt_aVM1U-RY5A8",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_aVM1U-RY5A8.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          3.9,
+          4.6
+        ]
+      ],
+      "track_ids": [
+        1,
+        5,
+        8
+      ]
+    },
+    {
+      "name": "yt_asrf4fo3Nhk",
+      "group": "yt_asrf4fo3Nhk",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_asrf4fo3Nhk.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          6.2,
+          6.75
+        ]
+      ],
+      "track_ids": [
+        1,
+        7,
+        8
+      ]
+    },
+    {
+      "name": "yt_at0cr31cjLY",
+      "group": "yt_at0cr31cjLY",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_at0cr31cjLY.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          3.25,
+          3.8
+        ]
+      ],
+      "track_ids": [
+        2
+      ]
+    },
+    {
+      "name": "yt_dC1prm3x788",
+      "group": "yt_dC1prm3x788",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_dC1prm3x788.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          4.1,
+          4.6
+        ]
+      ],
+      "track_ids": [
+        4
+      ]
+    },
+    {
+      "name": "yt_dEIH79bt-pc",
+      "group": "yt_dEIH79bt-pc",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_dEIH79bt-pc.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          3.85,
+          4.45
+        ]
+      ],
+      "track_ids": [
+        1,
+        3
+      ]
+    },
+    {
+      "name": "yt_fFbfT5Hh7ro",
+      "group": "yt_fFbfT5Hh7ro",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_fFbfT5Hh7ro.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          17.65,
+          18.15
+        ]
+      ],
+      "track_ids": [
+        6
+      ]
+    },
+    {
+      "name": "yt_iGnNWB6q-A",
+      "group": "yt_iGnNWB6q-A",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_iGnNWB6q-A.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          7.95,
+          8.65
+        ]
+      ],
+      "track_ids": [
+        1,
+        3,
+        8
+      ]
+    },
+    {
+      "name": "yt_mLj689_axHo",
+      "group": "yt_mLj689_axHo",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_mLj689_axHo.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          2.1,
+          3.0
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "yt_mmbLK9JS4sw",
+      "group": "yt_mmbLK9JS4sw",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_mmbLK9JS4sw.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          24.25,
+          25.1
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "yt_mrwT3kkhw-k",
+      "group": "yt_mrwT3kkhw-k",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_mrwT3kkhw-k.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          17.5,
+          18.55
+        ]
+      ],
+      "track_ids": [
+        6
+      ]
+    },
+    {
+      "name": "yt_odwhsAr2Lc4",
+      "group": "yt_odwhsAr2Lc4",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_odwhsAr2Lc4.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          8.25,
+          8.85
+        ]
+      ],
+      "track_ids": [
+        1,
+        2
+      ]
+    },
+    {
+      "name": "yt_smxB_Vetgbo",
+      "group": "yt_smxB_Vetgbo",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_smxB_Vetgbo.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          19.95,
+          20.55
+        ]
+      ],
+      "track_ids": [
+        5
+      ]
+    },
+    {
+      "name": "yt_tXrBh6eTV8",
+      "group": "yt_tXrBh6eTV8",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_tXrBh6eTV8.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          9.45,
+          10.0
+        ]
+      ],
+      "track_ids": [
+        1
+      ]
+    },
+    {
+      "name": "yt_ucGKsoQu2yk",
+      "group": "yt_ucGKsoQu2yk",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_ucGKsoQu2yk.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          40.35,
+          41.8
+        ]
+      ],
+      "track_ids": [
+        2
+      ]
+    },
+    {
+      "name": "yt_vWDzcY0bDIM",
+      "group": "yt_vWDzcY0bDIM",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_vWDzcY0bDIM.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          6.4,
+          7.0
+        ]
+      ],
+      "track_ids": [
+        2
+      ]
+    },
+    {
+      "name": "yt_yTN2G5QfhFE",
+      "group": "yt_yTN2G5QfhFE",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_yTN2G5QfhFE.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          1.35,
+          2.25
+        ]
+      ],
+      "track_ids": [
+        2,
+        8
+      ]
+    },
+    {
+      "name": "yt_zZPht5TJZPE",
+      "group": "yt_zZPht5TJZPE",
+      "source": "youtube",
+      "pose_json": "../output/youtube/yt_zZPht5TJZPE.json",
+      "batch": "trial4",
+      "falls_seconds": [
+        [
+          17.6,
+          18.4
+        ]
+      ],
+      "track_ids": [
+        2,
+        13
+      ]
+    }
+  ]
+}
